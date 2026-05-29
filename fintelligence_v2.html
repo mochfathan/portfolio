@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FINTELLIGENCE v2.0 — AI Financial Analyzer</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050a14;--surface:#0b1220;--panel:#10192a;--elevated:#141e30;
+  --border:rgba(255,255,255,0.07);--border-mid:rgba(255,255,255,0.12);
+  --amber:#e8b840;--amber-dim:rgba(232,184,64,0.12);
+  --teal:#00c896;--teal-dim:rgba(0,200,150,0.1);
+  --red:#ff4455;--red-dim:rgba(255,68,85,0.1);
+  --blue:#3a9bdc;--orange:#ff9944;
+  --green:#29d17a;--green-dim:rgba(41,209,122,0.1);
+  --purple:#9b6dff;
+  --text:#ccd6e0;--text-dim:#5a7090;--text-mid:#8a9bb0;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'IBM Plex Mono',monospace;min-height:100vh;overflow-x:hidden}
+
+/* Grid overlay */
+body::before{content:'';position:fixed;inset:0;background-image:
+  linear-gradient(rgba(255,255,255,0.016)1px,transparent 1px),
+  linear-gradient(90deg,rgba(255,255,255,0.016)1px,transparent 1px);
+  background-size:52px 52px;pointer-events:none;z-index:0}
+
+/* Ambient glow */
+body::after{content:'';position:fixed;top:-20%;left:50%;transform:translateX(-50%);
+  width:700px;height:400px;
+  background:radial-gradient(ellipse,rgba(232,184,64,0.045) 0%,transparent 70%);
+  pointer-events:none;z-index:0}
+
+.z1{position:relative;z-index:1}
+.wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+
+/* ─── STATUS BAR ─── */
+.status-bar{background:var(--panel);border-bottom:1px solid var(--border);padding:5px 0}
+.sb-inner{display:flex;align-items:center;gap:0;overflow:hidden}
+.sb-item{font-size:10px;color:var(--text-dim);padding:0 14px;letter-spacing:0.08em;
+  border-right:1px solid var(--border);white-space:nowrap}
+.sb-item:first-child{border-left:none}
+.sb-dot{display:inline-block;width:5px;height:5px;border-radius:50%;
+  background:var(--teal);margin-right:6px;animation:sbpulse 2s ease infinite}
+@keyframes sbpulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.sb-item.amber{color:var(--amber)}
+.sb-item.teal{color:var(--teal)}
+
+/* ─── HEADER ─── */
+header{border-bottom:1px solid var(--border);padding:18px 0}
+.hdr{display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-mark{width:38px;height:38px;background:var(--amber);border-radius:5px;
+  display:grid;place-items:center;font-family:'Syne',sans-serif;
+  font-weight:800;font-size:13px;color:#050a14;letter-spacing:0.05em}
+.logo-text{font-family:'Syne',sans-serif;font-weight:800;font-size:21px;
+  letter-spacing:0.04em;color:#e8eef5}
+.logo-sub{font-size:9px;color:var(--text-dim);letter-spacing:0.25em;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.badge{font-size:10px;padding:4px 10px;border-radius:3px;letter-spacing:0.1em}
+.badge-ai{color:var(--amber);border:1px solid rgba(232,184,64,0.35)}
+.badge-v2{color:var(--teal);border:1px solid rgba(0,200,150,0.3);background:rgba(0,200,150,0.06)}
+.badge-port{color:var(--text-dim);border:1px solid var(--border)}
+
+/* ─── HERO ─── */
+.hero{padding:48px 0 40px;text-align:center}
+.hero-eyebrow{font-size:10px;color:var(--amber);letter-spacing:0.3em;
+  text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;
+  justify-content:center;gap:10px}
+.hero-eyebrow::before,.hero-eyebrow::after{content:'';width:40px;height:1px;background:rgba(232,184,64,0.3)}
+.hero h1{font-family:'Syne',sans-serif;font-weight:800;font-size:40px;
+  line-height:1.1;margin-bottom:16px;color:#e8eef5}
+.hero h1 em{color:var(--amber);font-style:normal}
+.hero-desc{color:var(--text-dim);font-size:13px;max-width:560px;margin:0 auto 28px;line-height:1.85}
+.hero-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+.hero-tag{font-size:10px;padding:5px 12px;border:1px solid var(--border);
+  border-radius:2px;color:var(--text-dim);letter-spacing:0.12em;text-transform:uppercase}
+
+/* ─── DISCLAIMER STRIP ─── */
+.disclaimer-strip{background:rgba(232,184,64,0.04);border-top:1px solid rgba(232,184,64,0.14);
+  border-bottom:1px solid rgba(232,184,64,0.14);padding:10px 0;margin-bottom:32px}
+.disclaimer-strip p{text-align:center;font-size:10px;color:var(--text-dim);line-height:1.6;letter-spacing:0.05em}
+.disclaimer-strip strong{color:var(--amber)}
+
+/* ─── LAYOUT ─── */
+.main-grid{display:grid;grid-template-columns:400px 1fr;gap:28px;padding-bottom:60px;align-items:start}
+@media(max-width:900px){.main-grid{grid-template-columns:1fr}}
+
+/* ─── PANEL ─── */
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.panel-hdr{background:var(--panel);border-bottom:1px solid var(--border);
+  padding:11px 16px;display:flex;align-items:center;gap:10px}
+.dot{width:7px;height:7px;border-radius:50%}
+.dot-amber{background:var(--amber)}
+.dot-teal{background:var(--teal)}
+.dot-red{background:var(--red)}
+.dot-blue{background:var(--blue)}
+.dot-green{background:var(--green)}
+.dot-orange{background:var(--orange)}
+.dot-purple{background:var(--purple)}
+.panel-hdr h3{font-size:10px;letter-spacing:0.18em;text-transform:uppercase;color:var(--text-dim)}
+.panel-hdr-right{margin-left:auto;font-size:10px;color:var(--text-dim)}
+
+/* ─── FORM ─── */
+.form-body{padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+.form-field{display:flex;flex-direction:column;gap:5px}
+.form-field label{font-size:10px;color:var(--text-dim);letter-spacing:0.14em;text-transform:uppercase}
+.form-field input,.form-field select,.form-field textarea{
+  background:var(--panel);border:1px solid var(--border);border-radius:4px;
+  color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12.5px;
+  padding:8px 11px;outline:none;width:100%;transition:border-color .2s,background .2s}
+.form-field input:focus,.form-field select:focus,.form-field textarea:focus{
+  border-color:rgba(232,184,64,0.5);background:var(--elevated)}
+.form-field input::placeholder,.form-field textarea::placeholder{color:var(--text-dim);opacity:0.55}
+.form-field textarea{resize:vertical;min-height:64px;line-height:1.55}
+select option{background:var(--panel);color:var(--text)}
+.field-hint{font-size:10px;color:var(--text-dim);opacity:0.65;line-height:1.5}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+
+.sec-divider{border-top:1px solid var(--border);margin:2px 0}
+.sec-label{font-size:9px;color:var(--amber);letter-spacing:0.22em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px}
+.sec-label::after{content:'';flex:1;height:1px;background:rgba(232,184,64,0.15)}
+
+/* ─── DEMO FILL BUTTON ─── */
+.btn-demo{width:100%;background:var(--elevated);color:var(--teal);border:1px solid rgba(0,200,150,0.25);
+  border-radius:5px;padding:9px 16px;font-family:'IBM Plex Mono',monospace;font-size:11px;
+  letter-spacing:0.12em;cursor:pointer;transition:all .2s;display:flex;align-items:center;
+  justify-content:center;gap:8px}
+.btn-demo:hover{background:rgba(0,200,150,0.06);border-color:rgba(0,200,150,0.45)}
+.btn-demo-sub{font-size:9px;color:var(--text-dim);letter-spacing:0.08em}
+
+/* ─── ANALYZE BUTTON ─── */
+.btn-analyze{width:100%;background:var(--amber);color:#050a14;border:none;border-radius:5px;
+  padding:13px 16px;font-family:'IBM Plex Mono',monospace;font-weight:600;
+  font-size:12px;letter-spacing:0.14em;cursor:pointer;transition:all .2s;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-analyze:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);box-shadow:0 4px 20px rgba(232,184,64,0.2)}
+.btn-analyze:disabled{opacity:0.38;cursor:not-allowed;transform:none}
+.btn-analyze .btn-icon{font-size:14px}
+.shortcut-hint{text-align:center;font-size:9px;color:var(--text-dim);opacity:0.5;letter-spacing:0.1em;margin-top:5px}
+
+/* ─── AUTHOR CARD ─── */
+.author-card{background:var(--elevated);border:1px solid var(--border);border-radius:7px;
+  padding:14px 16px;margin-top:12px;display:flex;align-items:center;gap:12px}
+.author-avatar{width:36px;height:36px;border-radius:50%;background:var(--amber-dim);
+  border:1px solid rgba(232,184,64,0.3);display:grid;place-items:center;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;color:var(--amber);flex-shrink:0}
+.author-info{flex:1}
+.author-name{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.author-role{font-size:10px;color:var(--text-dim);line-height:1.4}
+.author-badge{font-size:9px;background:var(--amber-dim);color:var(--amber);
+  padding:3px 8px;border-radius:2px;border:1px solid rgba(232,184,64,0.2);
+  letter-spacing:0.1em;text-transform:uppercase}
+
+/* ─── RESULTS ─── */
+.results-col{display:flex;flex-direction:column;gap:18px}
+
+/* Placeholder */
+.placeholder{background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  padding:52px 28px;text-align:center}
+.ph-graphic{font-size:28px;opacity:0.18;margin-bottom:14px;letter-spacing:-4px}
+.ph-title{font-family:'Syne',sans-serif;font-size:14px;color:var(--text-dim);margin-bottom:8px;font-weight:600}
+.ph-desc{font-size:11px;color:var(--text-dim);opacity:0.7;line-height:1.85;max-width:320px;margin:0 auto}
+.ph-steps{margin-top:20px;display:flex;flex-direction:column;gap:6px;text-align:left;max-width:260px;margin-left:auto;margin-right:auto}
+.ph-step{font-size:11px;color:var(--text-dim);opacity:0.65;display:flex;align-items:center;gap:8px}
+.ph-step-n{width:18px;height:18px;border-radius:50%;border:1px solid var(--border);
+  display:grid;place-items:center;font-size:9px;flex-shrink:0;color:var(--text-dim)}
+
+/* Loading */
+.loading-box{background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  padding:52px;text-align:center}
+.spinner{width:28px;height:28px;border:2px solid var(--border);
+  border-top-color:var(--amber);border-radius:50%;animation:spin .75s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-stages{display:flex;flex-direction:column;gap:7px;margin-top:16px}
+.loading-stage{font-size:10px;color:var(--text-dim);opacity:0.4;letter-spacing:0.1em;
+  display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.4s ease}
+.loading-stage.active{opacity:1;color:var(--amber)}
+.loading-stage.done{opacity:0.65;color:var(--teal)}
+.pulse{width:6px;height:6px;border-radius:50%;background:var(--amber);
+  animation:pulse 1s ease infinite;flex-shrink:0}
+.check{width:6px;height:6px;border-radius:50%;background:var(--teal);flex-shrink:0}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+
+/* Error */
+.error-box{background:var(--red-dim);border:1px solid rgba(255,68,85,0.2);
+  border-radius:7px;padding:16px 18px;font-size:12px;color:var(--red);line-height:1.7}
+.error-box strong{display:block;margin-bottom:4px;font-size:13px}
+
+/* ─── SCORE CARD v2 ─── */
+.score-card{background:var(--surface);border:1px solid var(--border);border-radius:7px;
+  padding:24px;animation:fadeUp 0.4s ease both}
+.score-inner{display:grid;grid-template-columns:110px 1fr;gap:24px;align-items:center}
+.score-ring-wrap{position:relative;width:100px;height:100px}
+.score-ring-wrap svg{transform:rotate(-90deg)}
+.score-ring-bg{fill:none;stroke:var(--panel);stroke-width:6}
+.score-ring-fill{fill:none;stroke-width:6;stroke-linecap:round;
+  transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1),stroke 0.3s}
+.score-ring-label{position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center}
+.grade-letter{font-family:'Syne',sans-serif;font-weight:800;font-size:30px;line-height:1}
+.grade-suffix{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;line-height:1}
+.score-right h2{font-family:'Syne',sans-serif;font-weight:700;font-size:16px;
+  color:#e8eef5;margin-bottom:4px}
+.score-meta{font-size:11px;color:var(--text-dim);margin-bottom:10px}
+.score-bar-wrap{background:var(--panel);border-radius:3px;height:4px;overflow:hidden;margin-bottom:6px}
+.score-bar-fill{height:100%;border-radius:3px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.score-bottom{display:flex;align-items:center;justify-content:space-between}
+.score-num{font-size:11px;color:var(--text-dim)}
+.verdict-badge{font-size:10px;padding:3px 10px;border-radius:2px;letter-spacing:0.1em;font-weight:500}
+
+/* ─── RESULT CARD ANIMATIONS ─── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.anim-1{animation:fadeUp 0.4s ease 0.05s both}
+.anim-2{animation:fadeUp 0.4s ease 0.10s both}
+.anim-3{animation:fadeUp 0.4s ease 0.15s both}
+.anim-4{animation:fadeUp 0.4s ease 0.20s both}
+.anim-5{animation:fadeUp 0.4s ease 0.25s both}
+.anim-6{animation:fadeUp 0.4s ease 0.30s both}
+.anim-7{animation:fadeUp 0.4s ease 0.35s both}
+.anim-8{animation:fadeUp 0.4s ease 0.40s both}
+
+/* Summary */
+.summary-panel .panel-body{padding:18px}
+.summary-text{font-size:12.5px;line-height:1.9;color:var(--text);
+  border-left:3px solid var(--amber);padding-left:16px}
+
+/* Ratio section */
+.ratio-section .panel-body{padding:18px}
+.ratio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px}
+.ratio-card{background:var(--panel);border:1px solid var(--border);border-radius:5px;
+  padding:13px 12px;transition:border-color .2s}
+.ratio-card:hover{border-color:var(--border-mid)}
+.ratio-name{font-size:9px;color:var(--text-dim);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:8px}
+.ratio-val{font-family:'Syne',sans-serif;font-weight:700;font-size:22px;margin-bottom:3px;line-height:1}
+.ratio-bench{font-size:10px;color:var(--text-dim);margin-bottom:6px}
+.ratio-note{font-size:10px;color:var(--text-mid);line-height:1.5;margin-top:6px;opacity:0.8}
+.ratio-badge{font-size:9px;padding:3px 7px;border-radius:2px;letter-spacing:0.08em;display:inline-block}
+.rb-strong{background:var(--green-dim);color:var(--green);border:1px solid rgba(41,209,122,0.2)}
+.rb-adequate{background:rgba(232,184,64,0.08);color:var(--amber);border:1px solid rgba(232,184,64,0.2)}
+.rb-weak{background:var(--red-dim);color:var(--red);border:1px solid rgba(255,68,85,0.2)}
+.rb-na{background:rgba(90,112,144,0.1);color:var(--text-dim);border:1px solid var(--border)}
+
+/* DuPont */
+.dupont-grid{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 1fr;
+  gap:0;align-items:center;padding:18px}
+.dp-box{background:var(--panel);border:1px solid var(--border);border-radius:5px;padding:12px;text-align:center}
+.dp-label{font-size:9px;color:var(--text-dim);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:6px}
+.dp-val{font-family:'Syne',sans-serif;font-weight:700;font-size:18px}
+.dp-op{font-size:16px;color:var(--text-dim);text-align:center;padding:0 6px}
+.dp-insight{padding:0 18px 16px;font-size:11px;color:var(--text-dim);line-height:1.7;
+  border-top:1px solid var(--border);padding-top:14px;margin-top:0}
+.dp-insight strong{color:var(--amber)}
+@media(max-width:700px){.dupont-grid{grid-template-columns:1fr 1fr;gap:8px}.dp-op{display:none}}
+
+/* Risk Flags */
+.flag-list{display:flex;flex-direction:column;gap:8px}
+.flag-item{border-radius:0 5px 5px 0;padding:11px 14px;border-left:3px solid}
+.flag-item.HIGH{background:rgba(255,68,85,0.05);border-color:var(--red);border-top:1px solid rgba(255,68,85,0.1);border-right:1px solid rgba(255,68,85,0.1);border-bottom:1px solid rgba(255,68,85,0.1)}
+.flag-item.MEDIUM{background:rgba(232,184,64,0.04);border-color:var(--amber);border-top:1px solid rgba(232,184,64,0.12);border-right:1px solid rgba(232,184,64,0.12);border-bottom:1px solid rgba(232,184,64,0.12)}
+.flag-item.LOW{background:rgba(0,200,150,0.03);border-color:var(--teal);border-top:1px solid rgba(0,200,150,0.1);border-right:1px solid rgba(0,200,150,0.1);border-bottom:1px solid rgba(0,200,150,0.1)}
+.flag-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.flag-title{font-size:12px;font-weight:500;color:var(--text)}
+.flag-sev{font-size:9px;padding:2px 8px;border-radius:2px;letter-spacing:0.1em}
+.sev-high{background:rgba(255,68,85,0.15);color:var(--red)}
+.sev-medium{background:rgba(232,184,64,0.12);color:var(--amber)}
+.sev-low{background:rgba(0,200,150,0.1);color:var(--teal)}
+.flag-desc{font-size:11px;color:var(--text-dim);line-height:1.65}
+
+/* Opportunities */
+.opp-list{display:flex;flex-direction:column;gap:8px}
+.opp-item{background:rgba(0,200,150,0.04);border:1px solid rgba(0,200,150,0.12);
+  border-radius:4px;padding:11px 14px;font-size:12px;color:var(--teal);line-height:1.65;
+  display:flex;gap:10px;align-items:flex-start}
+.opp-item::before{content:'▸';flex-shrink:0;margin-top:1px}
+
+/* Recommendations */
+.rec-list{display:flex;flex-direction:column;gap:8px}
+.rec-item{background:var(--panel);border:1px solid var(--border);border-radius:5px;
+  padding:13px 14px;display:grid;grid-template-columns:30px 1fr;gap:12px;align-items:start}
+.rec-num{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--amber);padding-top:1px}
+.rec-action{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px}
+.rec-rationale{font-size:11px;color:var(--text-dim);line-height:1.65}
+.rec-prio{font-size:9px;padding:2px 7px;border-radius:2px;display:inline-block;margin-left:6px;
+  background:rgba(232,184,64,0.1);color:var(--amber);border:1px solid rgba(232,184,64,0.2);letter-spacing:0.08em}
+
+/* Action Row */
+.action-row{display:flex;gap:8px;margin-top:-8px}
+.btn-action{flex:1;background:var(--elevated);color:var(--text-dim);border:1px solid var(--border);
+  border-radius:4px;padding:8px 12px;font-family:'IBM Plex Mono',monospace;font-size:10px;
+  letter-spacing:0.1em;cursor:pointer;transition:all .2s;display:flex;align-items:center;
+  justify-content:center;gap:6px}
+.btn-action:hover{border-color:var(--border-mid);color:var(--text);background:var(--panel)}
+.btn-print{color:var(--amber);border-color:rgba(232,184,64,0.25)}
+.btn-print:hover{background:rgba(232,184,64,0.06);border-color:rgba(232,184,64,0.45)}
+
+/* Analyst Signature */
+.analyst-sig{background:var(--elevated);border:1px solid var(--border);border-radius:7px;
+  padding:14px 16px;display:flex;align-items:center;gap:12px}
+.sig-avatar{width:32px;height:32px;border-radius:50%;background:var(--amber-dim);
+  border:1px solid rgba(232,184,64,0.3);display:grid;place-items:center;
+  font-family:'Syne',sans-serif;font-weight:700;font-size:11px;color:var(--amber);flex-shrink:0}
+.sig-text{flex:1;font-size:11px;color:var(--text);line-height:1.5}
+.sig-text small{font-size:10px;color:var(--text-dim)}
+.sig-date{font-size:10px;color:var(--text-dim);border:1px solid var(--border);
+  padding:3px 8px;border-radius:3px;white-space:nowrap}
+
+/* Footer */
+.footer-strip{border-top:1px solid var(--border);padding:20px 0}
+.footer-inner{display:flex;align-items:center;justify-content:space-between}
+.footer-text{font-size:10px;color:var(--text-dim);letter-spacing:0.08em}
+.footer-right{font-size:10px;color:var(--text-dim);display:flex;align-items:center;gap:6px}
+.footer-dot{width:4px;height:4px;border-radius:50%;background:var(--text-dim);opacity:0.4}
+
+.pad18{padding:18px}
+.pad16{padding:16px}
+
+/* ─── PRINT STYLES ─── */
+@media print{
+  body{background:#fff !important;color:#111 !important}
+  body::before,body::after{display:none}
+  .status-bar,.btn-analyze,.btn-demo,.btn-action,.author-card,header .hdr-right,
+  .shortcut-hint,.footer-strip{display:none !important}
+  .panel{border:1px solid #ccc !important;background:#fff !important}
+  .panel-hdr{background:#f5f5f5 !important;border-bottom:1px solid #ccc !important}
+  .panel-hdr h3{color:#333 !important}
+  .ratio-card{background:#f9f9f9 !important;border:1px solid #ddd !important}
+  .score-card{border:1px solid #ccc !important;background:#fff !important}
+  .ratio-val,.grade-letter,.dp-val{color:#111 !important}
+  .summary-text{color:#222 !important;border-left:3px solid #888 !important}
+  .flag-item.HIGH,.flag-item.MEDIUM,.flag-item.LOW{background:#f9f9f9 !important}
+  .flag-title,.rec-action{color:#111 !important}
+  .opp-item{background:#f0f9f5 !important;color:#115533 !important}
+  .analyst-sig{background:#f5f5f5 !important;border:1px solid #ccc !important}
+  .sig-text,.sig-date{color:#333 !important}
+  .rec-item{background:#f9f9f9 !important;border:1px solid #ddd !important}
+  .results-col,.main-grid{display:block !important}
+  .score-ring-wrap{display:none}
+  .score-inner{grid-template-columns:1fr !important}
+  .dupont-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr !important}
+  h2{color:#111 !important}
+  .score-meta,.score-num,.flag-desc,.rec-rationale,.ratio-bench,.ratio-note{color:#555 !important}
+}
+</style>
+</head>
+<body>
+<div class="z1">
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="wrap sb-inner">
+    <span class="sb-item"><span class="sb-dot"></span>SYSTEM ONLINE</span>
+    <span class="sb-item amber">MODEL: Claude Sonnet 4</span>
+    <span class="sb-item teal">ENGINE: v2.0</span>
+    <span class="sb-item">ANALYSIS: CFA-GRADE</span>
+    <span class="sb-item" id="sbTime">—</span>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="wrap hdr">
+    <div class="logo">
+      <div class="logo-mark">FI</div>
+      <div>
+        <div class="logo-text">FINTELLIGENCE</div>
+        <div class="logo-sub">AI Financial Statement Analyzer</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span class="badge badge-ai">Powered by Claude</span>
+      <span class="badge badge-v2">v2.0</span>
+      <span class="badge badge-port">Portfolio Demo</span>
+    </div>
+  </div>
+</header>
+
+<!-- HERO -->
+<div class="wrap">
+  <div class="hero">
+    <div class="hero-eyebrow">Institutional-Grade Financial Intelligence</div>
+    <h1>Financial Intelligence,<br><em>Amplified by AI</em></h1>
+    <p class="hero-desc">Input financial statement data and receive a comprehensive CFA-level analysis — liquidity, profitability, leverage, efficiency, DuPont decomposition, risk identification, and strategic recommendations — in seconds.</p>
+    <div class="hero-tags">
+      <span class="hero-tag">Liquidity Analysis</span>
+      <span class="hero-tag">Profitability Ratios</span>
+      <span class="hero-tag">Leverage & Solvency</span>
+      <span class="hero-tag">DuPont Decomposition</span>
+      <span class="hero-tag">Risk Flagging</span>
+      <span class="hero-tag">Strategic Recommendations</span>
+    </div>
+  </div>
+</div>
+
+<!-- DISCLAIMER -->
+<div class="disclaimer-strip">
+  <div class="wrap">
+    <p><strong>DISCLOSURE:</strong> This tool is a portfolio demonstration. AI-generated analysis is for informational purposes only and does not constitute financial, investment, or accounting advice. Always verify with a qualified professional.</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="wrap">
+  <div class="main-grid">
+
+    <!-- LEFT: INPUT PANEL -->
+    <div>
+      <div class="panel">
+        <div class="panel-hdr">
+          <div class="dot dot-amber"></div>
+          <h3>Financial Data Input</h3>
+          <span class="panel-hdr-right" id="unitLabel">All fields in thousands (000)</span>
+        </div>
+        <div class="form-body">
+
+          <!-- Demo Fill -->
+          <button class="btn-demo" onclick="loadDemo()">
+            <span>⬇</span>
+            <span>
+              LOAD DEMO DATA — PT Arkanatama Industri Tbk (ARKA)
+              <div class="btn-demo-sub">FY2024 · IDR Billions · Manufacturing & Industrial</div>
+            </span>
+          </button>
+
+          <!-- API Key -->
+          <div class="form-field">
+            <label>Anthropic API Key</label>
+            <input type="password" id="apiKey" placeholder="sk-ant-api03-...">
+            <div class="field-hint">Processed locally in your browser. Never stored or transmitted beyond Anthropic's API.</div>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">Company Information</div>
+
+          <div class="form-field">
+            <label>Company Name</label>
+            <input type="text" id="company" placeholder="PT. Maju Bersama Tbk">
+          </div>
+          <div class="row3">
+            <div class="form-field">
+              <label>Fiscal Year</label>
+              <select id="year">
+                <option>2025</option><option>2024</option><option>2023</option>
+                <option>2022</option><option>2021</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Currency</label>
+              <select id="currency">
+                <option>IDR (Rp)</option><option>USD ($)</option>
+                <option>EUR (€)</option><option>SGD (S$)</option>
+                <option>MYR (RM)</option>
+              </select>
+            </div>
+            <div class="form-field">
+              <label>Unit Scale</label>
+              <select id="units" onchange="updateUnitLabel()">
+                <option value="thousands">Thousands</option>
+                <option value="millions">Millions</option>
+                <option value="billions" selected>Billions</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label>Industry Sector</label>
+            <select id="industry">
+              <option>General / Mixed</option>
+              <option>Manufacturing &amp; Industrial</option>
+              <option>Retail &amp; Consumer Goods</option>
+              <option>Technology / SaaS</option>
+              <option>Financial Services &amp; Banking</option>
+              <option>Real Estate &amp; Property</option>
+              <option>Healthcare &amp; Pharmaceuticals</option>
+              <option>Energy, Mining &amp; Resources</option>
+              <option>Commodity &amp; Agriculture</option>
+              <option>Transportation &amp; Logistics</option>
+              <option>Telecommunications</option>
+              <option>Infrastructure &amp; Utilities</option>
+            </select>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">Income Statement</div>
+
+          <div class="row2">
+            <div class="form-field">
+              <label>Revenue</label>
+              <input type="number" id="revenue" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>Cost of Goods Sold</label>
+              <input type="number" id="cogs" placeholder="0" min="0">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="form-field">
+              <label>Operating Expenses</label>
+              <input type="number" id="opex" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>EBITDA</label>
+              <input type="number" id="ebitda" placeholder="0">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="form-field">
+              <label>Interest Expense</label>
+              <input type="number" id="interest" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>Net Income / (Loss)</label>
+              <input type="number" id="netIncome" placeholder="0">
+            </div>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">Balance Sheet</div>
+
+          <div class="row2">
+            <div class="form-field">
+              <label>Cash &amp; Equivalents</label>
+              <input type="number" id="cash" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>Current Assets</label>
+              <input type="number" id="currentAssets" placeholder="0" min="0">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="form-field">
+              <label>Total Assets</label>
+              <input type="number" id="totalAssets" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>Current Liabilities</label>
+              <input type="number" id="currentLiabilities" placeholder="0" min="0">
+            </div>
+          </div>
+          <div class="row2">
+            <div class="form-field">
+              <label>Total Liabilities</label>
+              <input type="number" id="totalLiabilities" placeholder="0" min="0">
+            </div>
+            <div class="form-field">
+              <label>Total Equity</label>
+              <input type="number" id="equity" placeholder="0">
+            </div>
+          </div>
+
+          <div class="sec-divider"></div>
+          <div class="sec-label">Additional Context</div>
+
+          <div class="form-field">
+            <label>Analyst Notes (optional)</label>
+            <textarea id="context" placeholder="e.g. Post-acquisition year, heavy CAPEX cycle, restructuring costs, seasonal industry, expansion phase, YoY comparison context..."></textarea>
+          </div>
+
+          <button class="btn-analyze" id="analyzeBtn" onclick="runAnalysis()">
+            <span class="btn-icon">▶</span> RUN AI ANALYSIS
+          </button>
+          <div class="shortcut-hint">KEYBOARD SHORTCUT: CTRL + ENTER</div>
+        </div>
+      </div>
+
+      <!-- Author Card -->
+      <div class="author-card">
+        <div class="author-avatar">MF</div>
+        <div class="author-info">
+          <div class="author-name">Mochammad Fathan</div>
+          <div class="author-role">Finance & Accounting · AI Integration Specialist<br>FX Technical Analyst · Accounting Student</div>
+        </div>
+        <span class="author-badge">Portfolio</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS PANEL -->
+    <div class="results-col" id="results">
+      <div class="placeholder">
+        <div class="ph-graphic">◎ ◈ ◉</div>
+        <div class="ph-title">Awaiting Financial Data</div>
+        <p class="ph-desc">Enter financial statement data on the left — or load the demo dataset — then run AI analysis to receive a comprehensive institutional-grade report.</p>
+        <div class="ph-steps">
+          <div class="ph-step"><div class="ph-step-n">1</div> Enter API key &amp; company info</div>
+          <div class="ph-step"><div class="ph-step-n">2</div> Fill income statement &amp; balance sheet</div>
+          <div class="ph-step"><div class="ph-step-n">3</div> Click Run AI Analysis</div>
+          <div class="ph-step"><div class="ph-step-n">4</div> Receive comprehensive financial report</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer-strip">
+  <div class="wrap footer-inner">
+    <span class="footer-text">FINTELLIGENCE v2.0 · AI-Powered Financial Analysis · Built with Claude API</span>
+    <div class="footer-right">
+      <span>Portfolio Demo</span>
+      <span class="footer-dot"></span>
+      <span>Mochammad Fathan</span>
+      <span class="footer-dot"></span>
+      <span>v2.0</span>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /z1 -->
+
+<script>
+/* ─── UTILITIES ─── */
+const g   = id => document.getElementById(id);
+const gv  = id => parseFloat(g(id).value) || 0;
+const gstr= id => g(id).value.trim();
+
+function fmt(v, dec=2, suf=''){
+  if(v===null||v===undefined||isNaN(v)) return '—';
+  return parseFloat(v).toFixed(dec) + suf;
+}
+function badgeCls(a){
+  if(!a) return 'rb-na';
+  const u = a.toUpperCase();
+  if(u==='STRONG')   return 'rb-strong';
+  if(u==='WEAK')     return 'rb-weak';
+  if(u==='ADEQUATE') return 'rb-adequate';
+  return 'rb-na';
+}
+function gradeColor(gr){
+  if(!gr) return '#5a7090';
+  if(gr.startsWith('A')) return '#29d17a';
+  if(gr.startsWith('B')) return '#e8b840';
+  if(gr.startsWith('C')) return '#ff9944';
+  return '#ff4455';
+}
+function verdictColor(v){
+  const u=(v||'').toUpperCase();
+  if(u==='STRONG')     return '#29d17a';
+  if(u==='STABLE')     return '#e8b840';
+  if(u==='WATCH')      return '#ff9944';
+  if(u==='DISTRESSED') return '#ff4455';
+  return '#5a7090';
+}
+function verdictBg(v){
+  const u=(v||'').toUpperCase();
+  if(u==='STRONG')     return 'rgba(41,209,122,0.12)';
+  if(u==='STABLE')     return 'rgba(232,184,64,0.10)';
+  if(u==='WATCH')      return 'rgba(255,153,68,0.10)';
+  if(u==='DISTRESSED') return 'rgba(255,68,85,0.10)';
+  return 'rgba(90,112,144,0.10)';
+}
+
+/* ─── STATUS BAR CLOCK ─── */
+function updateClock(){
+  const now = new Date();
+  g('sbTime').textContent = now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit',second:'2-digit'}) + ' WIB';
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+/* ─── UNIT LABEL ─── */
+function updateUnitLabel(){
+  const u = gstr('units');
+  g('unitLabel').textContent = `All fields in ${u}`;
+}
+updateUnitLabel();
+
+/* ─── KEYBOARD SHORTCUT ─── */
+document.addEventListener('keydown', e => {
+  if((e.ctrlKey||e.metaKey) && e.key==='Enter') runAnalysis();
+});
+
+/* ─── DEMO DATA FILL ─── */
+function loadDemo(){
+  // ARKA FY2024 data (IDR Billions)
+  const d = {
+    company:'PT Arkanatama Industri Tbk (ARKA)',
+    year:'2024',
+    currency:'IDR (Rp)',
+    units:'billions',
+    industry:'Manufacturing & Industrial',
+    revenue:10350, cogs:7245, opex:1680, ebitda:1905,
+    interest:310, netIncome:870,
+    cash:750, currentAssets:5620, totalAssets:14000,
+    currentLiabilities:2980, totalLiabilities:6870, equity:7130,
+    context:'FY2024 represents a strong recovery year after FY2023 margin compression caused by global raw material cost spikes (steel & aluminum +22% YoY). Commodity costs normalized in FY2024. Revenue grew 12.5% YoY driven by automotive segment expansion and new industrial machinery contracts. Short-term debt reduced (IDR 300B). Management reduced dividend payout to rebuild retained earnings. Assess liquidity, profitability recovery, DuPont decomposition vs prior year, and leverage trajectory.'
+  };
+  g('company').value = d.company;
+  g('year').value    = d.year;
+  g('currency').value= d.currency;
+  g('units').value   = d.units;
+  g('industry').value= d.industry;
+  ['revenue','cogs','opex','ebitda','interest','netIncome',
+   'cash','currentAssets','totalAssets','currentLiabilities','totalLiabilities','equity']
+    .forEach(k => g(k).value = d[k]);
+  g('context').value = d.context;
+  updateUnitLabel();
+  // Flash confirmation
+  const btn = document.querySelector('.btn-demo');
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<span>✓</span><span>DEMO DATA LOADED — ARKA FY2024</span>';
+  btn.style.color = 'var(--teal)';
+  setTimeout(()=>{ btn.innerHTML=orig; btn.style.color=''; }, 2000);
+}
+
+/* ─── LOADING STATE ─── */
+const STAGES = [
+  'Validating financial inputs',
+  'Computing financial ratios',
+  'Benchmarking against industry standards',
+  'Performing DuPont decomposition',
+  'Identifying risk factors & opportunities',
+  'Formulating strategic recommendations'
+];
+let stageTimer;
+
+function showLoading(){
+  g('results').innerHTML = `
+  <div class="loading-box">
+    <div class="spinner"></div>
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:16px;letter-spacing:0.08em">
+      Claude is analyzing your financial statements…
+    </div>
+    <div class="loading-stages" id="loadStages">
+      ${STAGES.map((s,i)=>`<div class="loading-stage" id="ls${i}"><span class="idle-dot" style="width:6px;height:6px;border-radius:50%;background:var(--border);flex-shrink:0;display:inline-block"></span>${s}</div>`).join('')}
+    </div>
+  </div>`;
+  let cur = 0;
+  function advance(){
+    if(cur>0){ const prev=g(`ls${cur-1}`); if(prev){prev.className='loading-stage done'; prev.querySelector('.idle-dot').outerHTML='<span class="check"></span>';} }
+    if(cur<STAGES.length){ const el=g(`ls${cur}`); if(el){el.className='loading-stage active'; el.querySelector('.idle-dot').outerHTML='<span class="pulse"></span>';} cur++; stageTimer=setTimeout(advance,950); }
+  }
+  advance();
+}
+
+function clearStageTimer(){ clearTimeout(stageTimer); }
+
+/* ─── ERROR STATE ─── */
+function showError(msg){
+  clearStageTimer();
+  g('results').innerHTML=`
+  <div class="error-box">
+    <strong>Analysis Error</strong>
+    ${msg}<br><br>
+    <span style="font-size:10px;opacity:0.7">Check your API key, data inputs, and network connection. Ensure your Anthropic account has API access enabled.</span>
+  </div>`;
+}
+
+/* ─── RATIO CARD ─── */
+function ratioCard(name, data, isPercent=false){
+  if(!data) return '';
+  const v = data.value;
+  let disp = '—';
+  if(v!==null && v!==undefined && !isNaN(v)){
+    disp = isPercent ? fmt(v,1,'%') : fmt(v,2);
+  }
+  const col = data.assessment==='STRONG'?'var(--green)':data.assessment==='WEAK'?'var(--red)':'var(--amber)';
+  const note = data.note ? `<div class="ratio-note">${data.note}</div>` : '';
+  return `<div class="ratio-card">
+    <div class="ratio-name">${name}</div>
+    <div class="ratio-val" style="color:${col}">${disp}</div>
+    <div class="ratio-bench">Benchmark: ${data.benchmark||'—'}</div>
+    <span class="ratio-badge ${badgeCls(data.assessment)}">${data.assessment||'N/A'}</span>
+    ${note}
+  </div>`;
+}
+
+/* ─── DUPONT SECTION ─── */
+function renderDuPont(dp, currency){
+  if(!dp) return '';
+  const fmt2 = v => (v===null||v===undefined||isNaN(v)) ? '—' : parseFloat(v).toFixed(2);
+  const fmtPct = v => (v===null||v===undefined||isNaN(v)) ? '—' : parseFloat(v).toFixed(1)+'%';
+  return `
+  <div class="panel anim-5">
+    <div class="panel-hdr">
+      <div class="dot dot-purple"></div>
+      <h3>DuPont Decomposition — ROE Attribution</h3>
+    </div>
+    <div class="dupont-grid">
+      <div class="dp-box">
+        <div class="dp-label">Net Margin</div>
+        <div class="dp-val" style="color:var(--green)">${fmtPct(dp.net_margin_driver)}</div>
+      </div>
+      <div class="dp-op">×</div>
+      <div class="dp-box">
+        <div class="dp-label">Asset Turnover</div>
+        <div class="dp-val" style="color:var(--blue)">${fmt2(dp.asset_turnover_driver)}×</div>
+      </div>
+      <div class="dp-op">×</div>
+      <div class="dp-box">
+        <div class="dp-label">Equity Multiplier</div>
+        <div class="dp-val" style="color:var(--orange)">${fmt2(dp.equity_multiplier_driver)}×</div>
+      </div>
+      <div class="dp-op">=</div>
+      <div class="dp-box" style="border-color:var(--amber);background:var(--amber-dim)">
+        <div class="dp-label">ROE</div>
+        <div class="dp-val" style="color:var(--amber)">${fmtPct(dp.roe_decomposed)}</div>
+      </div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding:14px 18px">
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.75">${dp.key_insight||''}</div>
+    </div>
+  </div>`;
+}
+
+/* ─── COPY SUMMARY ─── */
+function copySummary(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    const btn=g('copyBtn');
+    if(btn){btn.textContent='✓ COPIED';setTimeout(()=>{btn.textContent='⎘ COPY SUMMARY'},2000);}
+  });
+}
+
+/* ─── RENDER RESULTS ─── */
+function renderResults(company, year, currency, a){
+  clearStageTimer();
+  const gc    = gradeColor(a.overall_grade);
+  const vc    = verdictColor(a.overall_verdict);
+  const vbg   = verdictBg(a.overall_verdict);
+  const score = a.overall_score || 0;
+
+  // SVG ring
+  const R  = 44; const C = 2*Math.PI*R;
+  const offset = C - (score/100)*C;
+  const gradeMain   = (a.overall_grade||'?').replace(/[+-]/,'');
+  const gradeSuffix = (a.overall_grade||'').match(/[+-]/)?.[0]||'';
+
+  const flags=(a.risk_flags||[]).map(f=>{
+    const sev=(f.severity||'MEDIUM').toUpperCase();
+    const sevCls=sev==='HIGH'?'sev-high':sev==='MEDIUM'?'sev-medium':'sev-low';
+    return`<div class="flag-item ${sev}">
+      <div class="flag-row">
+        <div class="flag-title">${f.title||'Risk Identified'}</div>
+        <span class="flag-sev ${sevCls}">${sev}</span>
+      </div>
+      <div class="flag-desc">${f.description||''}</div>
+    </div>`;
+  }).join('');
+
+  const opps=(a.opportunities||[]).map(o=>`<div class="opp-item">${o}</div>`).join('');
+
+  const recs=(a.recommendations||[]).map((r,i)=>`
+  <div class="rec-item">
+    <div class="rec-num">#${i+1}</div>
+    <div>
+      <div class="rec-action">${r.action||'Recommendation'}<span class="rec-prio">P${r.priority||i+1}</span></div>
+      <div class="rec-rationale">${r.rationale||''}</div>
+    </div>
+  </div>`).join('');
+
+  const flagPanel = flags?`
+  <div class="panel anim-6">
+    <div class="panel-hdr">
+      <div class="dot dot-red"></div>
+      <h3>Risk Flags</h3>
+      <span class="panel-hdr-right">${(a.risk_flags||[]).length} identified</span>
+    </div>
+    <div class="pad18"><div class="flag-list">${flags}</div></div>
+  </div>`:'';
+
+  const oppPanel = opps?`
+  <div class="panel anim-7">
+    <div class="panel-hdr">
+      <div class="dot dot-teal"></div>
+      <h3>Identified Opportunities</h3>
+    </div>
+    <div class="pad18"><div class="opp-list">${opps}</div></div>
+  </div>`:'';
+
+  const dateStr = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+
+  g('results').innerHTML=`
+
+  <!-- Action Row -->
+  <div class="action-row anim-1">
+    <button class="btn-action btn-print" onclick="window.print()">⎙ PRINT / EXPORT PDF</button>
+    <button class="btn-action" id="copyBtn" onclick="copySummary('${(a.executive_summary||'').replace(/'/g,"\\'")}')">⎘ COPY SUMMARY</button>
+  </div>
+
+  <!-- Score Card -->
+  <div class="score-card anim-1">
+    <div class="score-inner">
+      <div class="score-ring-wrap">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="score-ring-bg" cx="50" cy="50" r="${R}"/>
+          <circle class="score-ring-fill" cx="50" cy="50" r="${R}"
+            stroke="${gc}"
+            stroke-dasharray="${C}"
+            stroke-dashoffset="${C}"
+            id="scoreRingFill"/>
+        </svg>
+        <div class="score-ring-label">
+          <div class="grade-letter" style="color:${gc}">${gradeMain}<span class="grade-suffix" style="color:${gc}">${gradeSuffix}</span></div>
+        </div>
+      </div>
+      <div>
+        <h2>${company} · FY${year}</h2>
+        <div class="score-meta">${currency} · Financial Health Score</div>
+        <div class="score-bar-wrap">
+          <div class="score-bar-fill" id="scoreBarFill" style="width:0%;background:${gc}"></div>
+        </div>
+        <div class="score-bottom">
+          <span class="score-num">${score}/100 points</span>
+          <span class="verdict-badge" style="color:${vc};background:${vbg};border:1px solid ${vc}33">${a.overall_verdict||'ASSESSED'}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Executive Summary -->
+  <div class="panel summary-panel anim-2">
+    <div class="panel-hdr">
+      <div class="dot dot-amber"></div>
+      <h3>Executive Summary</h3>
+    </div>
+    <div class="pad18">
+      <div class="summary-text">${a.executive_summary||'No summary generated.'}</div>
+    </div>
+  </div>
+
+  <!-- Liquidity -->
+  <div class="panel ratio-section anim-3">
+    <div class="panel-hdr">
+      <div class="dot dot-blue"></div>
+      <h3>Liquidity Analysis</h3>
+    </div>
+    <div class="pad18">
+      <div class="ratio-grid">
+        ${ratioCard('Current Ratio',   a.liquidity?.current_ratio)}
+        ${ratioCard('Quick Ratio',     a.liquidity?.quick_ratio)}
+        ${ratioCard('Cash Ratio',      a.liquidity?.cash_ratio)}
+      </div>
+    </div>
+  </div>
+
+  <!-- Profitability -->
+  <div class="panel ratio-section anim-4">
+    <div class="panel-hdr">
+      <div class="dot dot-green"></div>
+      <h3>Profitability Ratios</h3>
+    </div>
+    <div class="pad18">
+      <div class="ratio-grid">
+        ${ratioCard('Gross Margin',      a.profitability?.gross_margin, true)}
+        ${ratioCard('Net Margin',        a.profitability?.net_margin,   true)}
+        ${ratioCard('Return on Equity',  a.profitability?.roe,          true)}
+        ${ratioCard('Return on Assets',  a.profitability?.roa,          true)}
+      </div>
+    </div>
+  </div>
+
+  <!-- Leverage & Efficiency -->
+  <div class="panel ratio-section anim-5">
+    <div class="panel-hdr">
+      <div class="dot dot-orange"></div>
+      <h3>Leverage, Solvency & Efficiency</h3>
+    </div>
+    <div class="pad18">
+      <div class="ratio-grid">
+        ${ratioCard('D/E Ratio',         a.leverage?.de_ratio)}
+        ${ratioCard('Debt Ratio',        a.leverage?.debt_ratio,       true)}
+        ${ratioCard('Interest Coverage', a.leverage?.interest_coverage)}
+        ${ratioCard('Asset Turnover',    a.efficiency?.asset_turnover)}
+      </div>
+    </div>
+  </div>
+
+  <!-- DuPont -->
+  ${renderDuPont(a.dupont, currency)}
+
+  ${flagPanel}
+  ${oppPanel}
+
+  <!-- Recommendations -->
+  <div class="panel anim-8">
+    <div class="panel-hdr">
+      <div class="dot dot-amber"></div>
+      <h3>Strategic Recommendations</h3>
+      <span class="panel-hdr-right">${(a.recommendations||[]).length} priority actions</span>
+    </div>
+    <div class="pad18">
+      <div class="rec-list">${recs||'<div style="font-size:12px;color:var(--text-dim)">No recommendations generated.</div>'}</div>
+    </div>
+  </div>
+
+  <!-- Analyst Signature -->
+  <div class="analyst-sig anim-8">
+    <div class="sig-avatar">MF</div>
+    <div class="sig-text">
+      Analysis generated by <strong>FINTELLIGENCE v2.0</strong> · AI Financial Analyzer<br>
+      <small>Built by Mochammad Fathan · AI + Finance Portfolio · Powered by Claude Sonnet 4</small>
+    </div>
+    <div class="sig-date">${dateStr}</div>
+  </div>`;
+
+  // Animate SVG ring after render
+  requestAnimationFrame(()=>{
+    const ring = g('scoreRingFill');
+    const bar  = g('scoreBarFill');
+    if(ring){
+      const C2 = 2*Math.PI*R;
+      setTimeout(()=>{
+        ring.style.strokeDashoffset = C2 - (score/100)*C2;
+      }, 80);
+    }
+    if(bar){
+      setTimeout(()=>{ bar.style.width = score+'%'; }, 80);
+    }
+  });
+}
+
+/* ─── MAIN ANALYSIS FUNCTION ─── */
+async function runAnalysis(){
+  const apiKey   = gstr('apiKey');
+  const company  = gstr('company') || 'Company';
+  const year     = gstr('year');
+  const currency = gstr('currency');
+  const industry = gstr('industry');
+  const units    = gstr('units');
+  const revenue  = gv('revenue'), cogs = gv('cogs'), opex = gv('opex'), ebitda = gv('ebitda');
+  const interest = gv('interest'), netIncome = gv('netIncome');
+  const cash = gv('cash'), currentAssets = gv('currentAssets'), totalAssets = gv('totalAssets');
+  const currentLiabilities = gv('currentLiabilities');
+  const totalLiabilities   = gv('totalLiabilities'), equity = gv('equity');
+  const context  = gstr('context');
+
+  if(!apiKey){ showError('Please enter your Anthropic API key to proceed.'); return; }
+  if(revenue===0 && totalAssets===0){ showError('Please enter at least Revenue and Total Assets to generate a meaningful analysis.'); return; }
+
+  const btn = g('analyzeBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-icon">⟳</span> ANALYZING…';
+  showLoading();
+
+  const grossProfit    = revenue - cogs;
+  const inventoryEst   = Math.max(0, currentAssets - cash - (currentAssets*0.15));
+  const ebitMarginEst  = totalAssets>0 ? ((ebitda-(ebitda*0.15))/revenue*100).toFixed(1) : 'N/A';
+
+  const prompt = `You are a senior financial analyst with CFA Level III designation and 15 years of institutional analysis experience at a Tier-1 investment bank. Analyze the following financial statements rigorously.
+
+COMPANY: ${company}
+FISCAL YEAR: FY${year}
+INDUSTRY: ${industry}
+CURRENCY: ${currency}
+VALUE UNIT: ${units} (all figures are in ${units})
+
+INCOME STATEMENT:
+- Revenue: ${revenue}
+- Cost of Goods Sold (COGS): ${cogs}
+- Gross Profit: ${grossProfit} [computed: Revenue − COGS]
+- Operating Expenses (SG&A + R&D + D&A): ${opex}
+- EBITDA: ${ebitda}
+- Interest Expense: ${interest}
+- Net Income: ${netIncome}
+
+BALANCE SHEET:
+- Cash & Equivalents: ${cash}
+- Current Assets: ${currentAssets}
+- Total Assets: ${totalAssets}
+- Estimated Inventory: ${inventoryEst} [estimated if not provided]
+- Current Liabilities: ${currentLiabilities}
+- Total Liabilities: ${totalLiabilities}
+- Total Equity: ${equity}
+
+ANALYST CONTEXT: ${context || 'None provided'}
+
+Produce a rigorous financial analysis. Return ONLY a valid JSON object — no markdown fencing, no preamble, no commentary outside the JSON.
+
+{
+  "executive_summary": "3–4 sentence executive summary covering overall financial health, key strengths, and primary concerns for ${company} FY${year}. Be specific, cite calculated values.",
+  "overall_score": <integer 0-100 — weighted composite: Liquidity 25%, Profitability 30%, Leverage 25%, Efficiency 20%>,
+  "overall_grade": "<A+|A|A-|B+|B|B-|C+|C|C-|D+|D|F>",
+  "overall_verdict": "<STRONG|STABLE|WATCH|DISTRESSED>",
+  "liquidity": {
+    "current_ratio":  {"value": <currentAssets/currentLiabilities>, "benchmark": "1.5–2.5x", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "quick_ratio":    {"value": <(currentAssets-inventoryEst)/currentLiabilities>, "benchmark": "1.0–1.5x", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "cash_ratio":     {"value": <cash/currentLiabilities>, "benchmark": "0.5–1.0x", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"}
+  },
+  "profitability": {
+    "gross_margin":   {"value": <(revenue-cogs)/revenue*100>, "benchmark": "industry-specific %", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "net_margin":     {"value": <netIncome/revenue*100>, "benchmark": "industry-specific %", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "roe":            {"value": <netIncome/equity*100>, "benchmark": "15%+", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "roa":            {"value": <netIncome/totalAssets*100>, "benchmark": "5%+", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"}
+  },
+  "leverage": {
+    "de_ratio":           {"value": <totalLiabilities/equity>, "benchmark": "<2.0x", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "debt_ratio":         {"value": <totalLiabilities/totalAssets*100>, "benchmark": "<50%", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"},
+    "interest_coverage":  {"value": <ebitda/interest or null if interest=0>, "benchmark": ">3.0x", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"}
+  },
+  "efficiency": {
+    "asset_turnover": {"value": <revenue/totalAssets>, "benchmark": "industry-specific", "assessment": "<STRONG|ADEQUATE|WEAK>", "note": "one-sentence interpretation"}
+  },
+  "dupont": {
+    "net_margin_driver":      <netIncome/revenue*100 — as decimal percentage, e.g. 8.4 means 8.4%>,
+    "asset_turnover_driver":  <revenue/totalAssets — as ratio>,
+    "equity_multiplier_driver": <totalAssets/equity — as ratio>,
+    "roe_decomposed":         <net_margin_driver/100 * asset_turnover_driver * equity_multiplier_driver * 100 — as percentage>,
+    "key_insight": "2–3 sentence interpretation of what is the primary ROE driver (margin, turnover, or leverage), whether the leverage contribution is healthy or concerning, and what management should focus on to improve ROE sustainably"
+  },
+  "risk_flags": [
+    {"severity": "<HIGH|MEDIUM|LOW>", "title": "concise flag name", "description": "specific, evidence-based explanation citing the calculated ratios and their implications"}
+  ],
+  "opportunities": [
+    "Specific, actionable opportunity statement grounded in the financial data — not generic advice"
+  ],
+  "recommendations": [
+    {"priority": <1|2|3>, "action": "Concise action title", "rationale": "Evidence-based rationale citing specific numbers from the analysis"}
+  ]
+}
+
+Rules:
+- Calculate ALL ratios precisely from provided data
+- Use null only if denominator is 0 or data is completely absent
+- Provide 2–5 risk_flags ordered by severity (highest first)
+- Provide 3–5 opportunities
+- Provide 3–5 recommendations ordered by priority (1=highest)
+- Calibrate ALL benchmarks to the ${industry} industry
+- DuPont: ensure roe_decomposed ≈ roe from profitability section (minor rounding tolerance acceptable)
+- Be analytically rigorous and specific — avoid generic commentary`;
+
+  try{
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:3000,
+        messages:[{role:'user', content:prompt}]
+      })
+    });
+
+    if(!res.ok){
+      const e = await res.json().catch(()=>({}));
+      throw new Error(e.error?.message || `HTTP ${res.status}: ${res.statusText}`);
+    }
+
+    const data = await res.json();
+    const raw  = data.content[0].text.trim();
+    const clean= raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    let analysis;
+    try{ analysis = JSON.parse(clean); }
+    catch{
+      const m = clean.match(/\{[\s\S]*\}/);
+      if(m) analysis = JSON.parse(m[0]);
+      else throw new Error('Could not parse AI response. Please try again.');
+    }
+    renderResults(company, year, currency, analysis);
+
+  }catch(err){
+    showError(err.message);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="btn-icon">▶</span> RUN AI ANALYSIS';
+}
+</script>
+</body>
+</html>

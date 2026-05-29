@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PAJAKPINTAR — AI Accounting & Tax Document Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050d05;--s1:#091409;--s2:#0e1d0e;--s3:#132313;--s4:#182b18;
+  --b1:rgba(16,185,129,0.09);--b2:rgba(16,185,129,0.2);
+  --em:#10b981;--em2:rgba(16,185,129,0.1);--em3:rgba(16,185,129,0.05);
+  --blue:#60a5fa;--bl2:rgba(96,165,250,0.08);
+  --gold:#fbbf24;--go2:rgba(251,191,36,0.08);
+  --red:#f87171;--re2:rgba(248,113,113,0.07);
+  --text:#b8ccb8;--text2:#4e6e4e;--text3:#2b432b;
+  --white:#e8f0e8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:
+    radial-gradient(ellipse 600px 400px at 0% 0%,rgba(16,185,129,0.04) 0%,transparent 60%),
+    radial-gradient(ellipse 400px 300px at 100% 100%,rgba(16,185,129,0.025) 0%,transparent 60%);
+  pointer-events:none;z-index:0}
+.z1{position:relative;z-index:1}
+.wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+/* ─── HEADER ─── */
+header{background:var(--s1);border-bottom:1px solid var(--b2);padding:13px 0;position:sticky;top:0;z-index:100}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px;flex-shrink:0}
+.logo-box{width:38px;height:38px;background:var(--em);border-radius:9px;display:grid;place-items:center;flex-shrink:0}
+.logo-box svg{width:19px;height:19px}
+.logo-name{font-weight:800;font-size:20px;letter-spacing:-0.03em;color:var(--white)}
+.logo-sub{font-size:9px;color:var(--text2);letter-spacing:0.18em;text-transform:uppercase;margin-top:1px}
+.hdr-r{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.lang-sw{display:flex;background:var(--s3);border:1px solid var(--b1);border-radius:5px;overflow:hidden;flex-shrink:0}
+.lb{font-size:11px;font-weight:700;padding:5px 12px;cursor:pointer;border:none;background:none;color:var(--text2);letter-spacing:0.06em;transition:all .2s}
+.lb.on{background:var(--em);color:#050d05}
+.api-strip{display:flex;align-items:center;gap:6px}
+.api-dot{width:7px;height:7px;border-radius:50%;background:var(--red);flex-shrink:0;transition:background .3s}
+.api-dot.on{background:var(--em)}
+#apiIn{background:var(--s3);border:1px solid var(--b2);border-radius:5px;color:var(--text);font-family:inherit;font-size:11px;padding:6px 10px;outline:none;width:196px;transition:border-color .2s}
+#apiIn:focus{border-color:var(--em)}
+.hdr-tag{font-size:9px;color:var(--text2);border:1px solid var(--b1);padding:3px 8px;border-radius:3px;letter-spacing:0.12em;white-space:nowrap}
+
+/* ─── TABS ─── */
+.tabs{background:var(--s1);border-bottom:1px solid var(--b2);padding:0 24px}
+.ti{max-width:1180px;margin:0 auto;display:flex}
+.tb{font-size:12px;font-weight:700;color:var(--text2);padding:10px 16px;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px;letter-spacing:0.01em}
+.tb.on{color:var(--em);border-bottom-color:var(--em)}
+.tb:hover:not(.on){color:var(--text)}
+.tc{display:inline-block;font-size:9px;padding:1px 6px;border-radius:10px;background:var(--em2);color:var(--em);margin-left:4px;font-weight:700}
+
+/* ─── TAB PANELS ─── */
+.tp{display:none;padding:24px 0 64px}
+.tp.on{display:block}
+
+/* ─── TWO-COLUMN LAYOUT ─── */
+.mgrid{display:grid;grid-template-columns:390px 1fr;gap:20px;align-items:start}
+@media(max-width:880px){.mgrid{grid-template-columns:1fr}}
+
+/* ─── PANEL ─── */
+.panel{background:var(--s1);border:1px solid var(--b2);border-radius:8px;overflow:hidden;margin-bottom:14px}
+.phdr{background:var(--s2);border-bottom:1px solid var(--b1);padding:10px 15px;display:flex;align-items:center;gap:8px}
+.phdr h3{font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--text2)}
+.phdr-r{margin-left:auto}
+.ptag{font-size:10px;font-weight:700;padding:2px 9px;border-radius:3px}
+.pt-e{background:var(--em2);color:var(--em);border:1px solid rgba(16,185,129,0.22)}
+.pt-b{background:var(--bl2);color:var(--blue);border:1px solid rgba(96,165,250,0.2)}
+.pt-g{background:var(--go2);color:var(--gold);border:1px solid rgba(251,191,36,0.2)}
+.pt-r{background:var(--re2);color:var(--red);border:1px solid rgba(248,113,113,0.18)}
+.pb{padding:15px 16px}
+
+/* ─── FORM ─── */
+.frow{display:grid;gap:10px;margin-bottom:11px}
+.f2{grid-template-columns:1fr 1fr}
+.fld label{font-size:11px;font-weight:700;color:var(--text2);display:block;margin-bottom:4px;letter-spacing:0.01em}
+.fld input,.fld select,.fld textarea{
+  width:100%;background:var(--s3);border:1px solid var(--b2);border-radius:5px;
+  color:var(--text);font-family:inherit;font-size:13px;padding:8px 11px;
+  outline:none;transition:border-color .2s,background .2s}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--em);background:var(--s4)}
+.fld input::placeholder,.fld textarea::placeholder{color:var(--text2);opacity:0.5}
+.fld select option{background:var(--s2)}
+.fld textarea{resize:vertical;line-height:1.6;font-size:12px}
+.fnote{font-size:11px;color:var(--text2);opacity:0.65;margin-top:4px;line-height:1.5}
+
+/* PKP Toggle */
+.pkp-card{display:flex;align-items:center;justify-content:space-between;
+  background:var(--s3);border:1px solid var(--b2);border-radius:6px;padding:10px 13px;margin-bottom:11px}
+.pkp-info{}
+.pkp-label{font-size:12px;font-weight:700;color:var(--white)}
+.pkp-sub{font-size:11px;color:var(--text2);margin-top:1px}
+.sw{position:relative;width:40px;height:21px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw-tr{position:absolute;inset:0;background:var(--s3);border:1px solid var(--b2);
+  border-radius:11px;cursor:pointer;transition:all .3s}
+.sw input:checked+.sw-tr{background:var(--em2);border-color:rgba(16,185,129,0.4)}
+.sw-tr::after{content:'';position:absolute;width:15px;height:15px;border-radius:50%;
+  background:var(--text2);top:2px;left:2px;transition:.3s}
+.sw input:checked+.sw-tr::after{transform:translateX(19px);background:var(--em)}
+
+/* Mode Tabs */
+.mode-tabs{display:flex;gap:0;background:var(--s3);border:1px solid var(--b2);
+  border-radius:5px;overflow:hidden;margin-bottom:13px}
+.mode-tab{flex:1;font-size:12px;font-weight:700;padding:8px 10px;
+  cursor:pointer;border:none;background:none;color:var(--text2);
+  transition:all .2s;letter-spacing:0.01em}
+.mode-tab.on{background:var(--em2);color:var(--em)}
+
+/* Buttons */
+.btn-main{width:100%;background:var(--em);color:#050d05;border:none;border-radius:6px;
+  padding:12px;font-family:inherit;font-weight:800;font-size:13px;letter-spacing:0.02em;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-main:hover{opacity:0.87;transform:translateY(-1px)}
+.btn-main:disabled{opacity:0.32;cursor:not-allowed;transform:none}
+.btn-sm{font-size:10px;font-weight:700;padding:4px 10px;border-radius:3px;cursor:pointer;
+  border:1px solid var(--b2);background:none;color:var(--text2);font-family:inherit;transition:all .2s}
+.btn-sm:hover{border-color:var(--red);color:var(--red)}
+
+/* ─── PLACEHOLDER ─── */
+.phbox{background:var(--s1);border:1px solid var(--b2);border-radius:8px;padding:52px 24px;text-align:center}
+.ph-emoji{font-size:30px;opacity:0.18;margin-bottom:14px}
+.ph-title{font-size:15px;font-weight:800;color:var(--white);margin-bottom:8px;letter-spacing:-0.02em}
+.ph-desc{font-size:12px;color:var(--text2);line-height:1.85;max-width:280px;margin:0 auto 18px}
+.ph-steps{display:flex;flex-direction:column;gap:6px;max-width:240px;margin:0 auto;text-align:left}
+.ph-step{font-size:11px;color:var(--text2);opacity:0.65;display:flex;align-items:center;gap:8px}
+.ph-n{width:18px;height:18px;border-radius:50%;border:1px solid var(--b2);display:grid;place-items:center;font-size:9px;flex-shrink:0;font-weight:700}
+
+/* Loading */
+.loadbox{background:var(--s1);border:1px solid var(--b2);border-radius:8px;padding:52px;text-align:center}
+.lspin{width:26px;height:26px;border:2px solid var(--b2);border-top-color:var(--em);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lmsg{font-size:12px;color:var(--text2);line-height:1.85}
+
+/* Error */
+.errbox{background:var(--re2);border:1px solid rgba(248,113,113,0.2);border-radius:8px;padding:16px;font-size:12px;color:var(--red);line-height:1.7}
+
+/* ─── RESULT CARDS ─── */
+
+/* Banner */
+.doc-banner{background:var(--s1);border:1px solid var(--b2);border-radius:8px;padding:18px 20px;display:flex;align-items:flex-start;gap:16px}
+.doc-type-pill{font-size:12px;font-weight:800;padding:7px 14px;border-radius:5px;
+  letter-spacing:0.04em;white-space:nowrap;flex-shrink:0}
+.doc-right{flex:1}
+.doc-vendor{font-size:16px;font-weight:800;color:var(--white);margin-bottom:4px;letter-spacing:-0.02em}
+.doc-meta{font-size:12px;color:var(--text2);line-height:1.5}
+.valid-chip{font-size:11px;font-weight:700;padding:5px 11px;border-radius:4px;white-space:nowrap;flex-shrink:0;margin-top:2px}
+
+/* Amounts */
+.amt-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;padding:15px 16px}
+.amt-card{background:var(--s2);border-radius:6px;padding:13px 10px;text-align:center}
+.amt-lbl{font-size:9px;font-weight:700;color:var(--text2);letter-spacing:0.14em;text-transform:uppercase;margin-bottom:7px}
+.amt-val{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;line-height:1;color:var(--text)}
+.amt-note{font-size:10px;color:var(--text2);margin-top:5px}
+
+/* Tax rows */
+.tax-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:11px 16px;border-bottom:1px solid var(--b1)}
+.tax-row:last-child{border-bottom:none}
+.tax-lbl{font-size:12px;font-weight:700;color:var(--white);margin-bottom:3px}
+.tax-sub{font-size:11px;color:var(--text2);line-height:1.55;max-width:260px}
+.tax-right{text-align:right;flex-shrink:0}
+.tax-chip{font-size:10px;font-weight:700;padding:4px 9px;border-radius:3px;display:inline-block;letter-spacing:0.06em;margin-bottom:5px}
+.tc-yes{background:var(--em2);color:var(--em)}
+.tc-no{background:var(--bl2);color:var(--blue)}
+.tc-act{background:var(--go2);color:var(--gold)}
+.tax-amt{font-family:'Space Mono',monospace;font-size:13px;font-weight:700}
+
+/* COA */
+.coa-inner{padding:14px 16px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:center}
+.coa-code{font-family:'Space Mono',monospace;font-size:26px;font-weight:700;color:var(--em);letter-spacing:-0.02em}
+.coa-name{font-size:14px;font-weight:800;color:var(--white);margin-bottom:3px;letter-spacing:-0.02em}
+.coa-cat{font-size:11px;color:var(--text2)}
+.coa-chip{font-size:11px;font-weight:700;padding:6px 14px;border-radius:4px;background:var(--em2);color:var(--em);border:1px solid rgba(16,185,129,0.22)}
+
+/* Journal Entry — the centrepiece */
+.je-wrap{padding:14px 16px}
+.je-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.je-name{font-size:11px;font-weight:700;color:var(--em);letter-spacing:0.12em;text-transform:uppercase}
+.je-date{font-size:11px;color:var(--text2);font-family:'Space Mono',monospace}
+.je-desc{font-size:12px;color:var(--text);padding-bottom:10px;margin-bottom:12px;
+  border-bottom:1px solid var(--b2);font-style:italic;line-height:1.5}
+.je-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.je-tbl th{font-size:9px;font-weight:700;color:var(--text2);padding:5px 8px;
+  text-align:left;border-bottom:1px solid var(--b2);letter-spacing:0.12em;text-transform:uppercase}
+.je-tbl th:nth-child(3),.je-tbl th:nth-child(4){text-align:right}
+.je-tbl td{padding:7px 8px;border-bottom:1px solid rgba(16,185,129,0.04);vertical-align:middle}
+.je-tbl tfoot td{border-top:1px solid var(--b2);border-bottom:none;
+  font-weight:700;font-size:11px;padding-top:8px}
+.je-code{font-family:'Space Mono',monospace;font-size:11px;color:var(--text2)}
+.je-acct-dr{color:var(--white);font-weight:600}
+.je-acct-cr{color:var(--text);padding-left:18px;position:relative}
+.je-acct-cr::before{content:'↳';position:absolute;left:4px;color:var(--text2)}
+.je-dr{font-family:'Space Mono',monospace;text-align:right;color:var(--em);font-weight:600}
+.je-cr{font-family:'Space Mono',monospace;text-align:right;color:var(--blue);font-weight:600}
+.je-dim{font-family:'Space Mono',monospace;text-align:right;color:var(--text3)}
+.je-note{font-size:10px;color:var(--text2);margin-left:6px;font-weight:400;font-style:italic}
+.pph23-block{margin-top:12px;padding-top:12px;border-top:1px dashed rgba(251,191,36,0.2)}
+.pph23-title{font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.14em;
+  text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.pph23-title::after{content:'';flex:1;height:1px;background:rgba(251,191,36,0.15)}
+.je-footnote{margin-top:10px;font-size:10px;color:var(--text2);font-style:italic;line-height:1.6}
+
+/* Compliance flags */
+.flag-stack{display:flex;flex-direction:column;gap:8px}
+.flag-item{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:5px;border:1px solid}
+.fi-info{background:rgba(16,185,129,0.04);border-color:rgba(16,185,129,0.15)}
+.fi-warn{background:rgba(251,191,36,0.04);border-color:rgba(251,191,36,0.15)}
+.fi-action{background:rgba(96,165,250,0.04);border-color:rgba(96,165,250,0.15)}
+.fi-error{background:var(--re2);border-color:rgba(248,113,113,0.18)}
+.fi-icon{font-size:15px;flex-shrink:0;margin-top:1px}
+.fi-body{flex:1}
+.fi-title{font-size:11px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:3px}
+.fi-detail{font-size:11px;color:var(--text2);line-height:1.65}
+
+/* Summary */
+.sum-body{font-size:13px;line-height:1.9;color:var(--text);
+  border-left:3px solid var(--em);padding-left:15px;margin:15px 16px}
+
+/* Author card */
+.author{background:var(--s2);border:1px solid var(--b1);border-radius:7px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;margin-top:12px}
+.av{width:34px;height:34px;border-radius:50%;background:var(--em2);
+  border:1px solid rgba(16,185,129,0.25);display:grid;place-items:center;
+  font-weight:800;font-size:11px;color:var(--em);flex-shrink:0}
+
+/* History table */
+.htbl{width:100%;border-collapse:collapse;font-size:12px}
+.htbl th{font-size:9px;font-weight:700;color:var(--text2);letter-spacing:0.1em;
+  text-align:left;padding:8px 10px;border-bottom:1px solid var(--b2)}
+.htbl td{padding:8px 10px;border-bottom:1px solid var(--b1);vertical-align:top}
+.htbl tr:hover td{background:rgba(16,185,129,0.018)}
+
+/* Disclaimer */
+.disc{background:rgba(251,191,36,0.03);border:1px solid rgba(251,191,36,0.12);
+  border-radius:5px;padding:10px 14px;margin-bottom:16px;font-size:11px;
+  color:var(--text2);line-height:1.7}
+.disc b{color:var(--gold)}
+
+/* Footer */
+footer{border-top:1px solid var(--b1);padding:18px 0}
+.footer-inner{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--text2)}
+</style>
+</head>
+<body>
+<div class="z1">
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="wrap hdr">
+    <div class="logo">
+      <div class="logo-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#050d05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+          <line x1="10" y1="9" x2="8" y2="9"/>
+        </svg>
+      </div>
+      <div>
+        <div class="logo-name">PAJAKPINTAR</div>
+        <div class="logo-sub">AI Accounting & Tax Document Intelligence · Indonesia</div>
+      </div>
+    </div>
+    <div class="hdr-r">
+      <div class="lang-sw">
+        <button class="lb on" id="lb-id" onclick="setLang('id')">ID</button>
+        <button class="lb" id="lb-en" onclick="setLang('en')">EN</button>
+      </div>
+      <div class="api-strip">
+        <span class="api-dot" id="apiDot"></span>
+        <input type="password" id="apiIn" placeholder="sk-ant-api03-..." oninput="chkKey()">
+      </div>
+      <span class="hdr-tag">Portfolio Demo</span>
+    </div>
+  </div>
+</header>
+
+<!-- ─── TABS ─── -->
+<div class="tabs">
+  <div class="ti">
+    <button class="tb on" onclick="swTab(event,'analyze')" id="tab-analyze">Analisis Dokumen</button>
+    <button class="tb" onclick="swTab(event,'history')" id="tab-history">Riwayat <span class="tc" id="hCount">0</span></button>
+  </div>
+</div>
+
+<div class="wrap z1">
+
+<!-- ═══ TAB: ANALYZE ═══ -->
+<div class="tp on" id="tp-analyze">
+  <div class="disc">
+    <b>DISCLAIMER:</b> Output ini dihasilkan oleh AI untuk keperluan informasi saja dan bukan merupakan jasa konsultasi pajak atau akuntansi resmi. Selalu verifikasi dengan konsultan pajak atau akuntan bersertifikat sebelum membukukan. Regulasi perpajakan Indonesia dapat berubah sewaktu-waktu.
+  </div>
+  <div class="mgrid">
+
+    <!-- LEFT: INPUT -->
+    <div>
+      <!-- Business Context -->
+      <div class="panel">
+        <div class="phdr"><h3>Konteks Bisnis</h3></div>
+        <div class="pb">
+          <div class="pkp-card">
+            <div class="pkp-info">
+              <div class="pkp-label">Status PKP (Pengusaha Kena Pajak)</div>
+              <div class="pkp-sub">Aktifkan jika terdaftar sebagai PKP di KPP</div>
+            </div>
+            <label class="sw"><input type="checkbox" id="isPKP" checked><span class="sw-tr"></span></label>
+          </div>
+          <div class="fld">
+            <label>Sektor Industri</label>
+            <select id="industry">
+              <option>Umum / Perdagangan</option>
+              <option>Manufaktur & Industri</option>
+              <option>Jasa Profesional</option>
+              <option>Konstruksi & Infrastruktur</option>
+              <option>Teknologi / SaaS</option>
+              <option>Properti & Real Estat</option>
+              <option>Kesehatan & Farmasi</option>
+              <option>Kuliner & F&B</option>
+              <option>Distribusi & Logistik</option>
+              <option>Pendidikan</option>
+              <option>Keuangan & Perbankan</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Document Input -->
+      <div class="panel">
+        <div class="phdr">
+          <h3>Input Dokumen</h3>
+          <span class="ptag pt-e phdr-r" id="modeTag">Quick Paste</span>
+        </div>
+        <div class="pb">
+          <div class="mode-tabs">
+            <button class="mode-tab on" id="m1" onclick="setMode('quick')">⚡ Quick Paste</button>
+            <button class="mode-tab" id="m2" onclick="setMode('struct')">⊞ Terstruktur</button>
+          </div>
+
+          <!-- QUICK MODE -->
+          <div id="qMode">
+            <div class="fld">
+              <label>Tempel Teks Dokumen</label>
+              <textarea id="docTxt" rows="11"
+                placeholder="Tempel teks dari faktur, kuitansi, nota, invoice PDF, email vendor, atau pesan WhatsApp...
+
+Contoh:
+Faktur No: INV-2026-0512
+Dari: PT. Konsultan Maju Jaya
+NPWP: 12.345.678.9-012.000
+Tanggal: 12 Mei 2026
+Deskripsi: Jasa Konsultasi Manajemen Q2
+DPP: Rp 5.000.000
+PPN 11%: Rp 550.000
+Total: Rp 5.550.000"></textarea>
+              <div class="fnote">Mode ini mengekstrak semua informasi secara otomatis — cocok untuk teks bebas, scan, atau pesan WhatsApp dari vendor.</div>
+            </div>
+            <div class="fld" style="margin-top:10px">
+              <label>Tipe Dokumen (opsional — AI akan mendeteksi otomatis)</label>
+              <select id="dtypeQ">
+                <option value="">🔍 Auto Detect</option>
+                <option>Faktur Pajak</option>
+                <option>Invoice Biasa</option>
+                <option>Kuitansi</option>
+                <option>Nota / Struk</option>
+                <option>Kontrak Jasa</option>
+                <option>Slip Gaji</option>
+                <option>Tagihan Utilitas</option>
+                <option>Nota Kredit</option>
+                <option>Bukti Transfer Bank</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- STRUCTURED MODE -->
+          <div id="sMode" style="display:none">
+            <div class="frow f2">
+              <div class="fld">
+                <label>Tipe Dokumen</label>
+                <select id="dtypeS">
+                  <option>Faktur Pajak</option><option>Invoice Biasa</option>
+                  <option>Kuitansi</option><option>Nota / Struk</option>
+                  <option>Kontrak Jasa</option><option>Slip Gaji</option>
+                  <option>Tagihan Utilitas</option><option>Nota Kredit</option>
+                </select>
+              </div>
+              <div class="fld"><label>Tanggal Dokumen</label><input type="date" id="docDate"></div>
+            </div>
+            <div class="frow f2">
+              <div class="fld"><label>Nama Vendor / Pemasok</label><input type="text" id="vendor" placeholder="PT. Nama Perusahaan"></div>
+              <div class="fld"><label>NPWP Vendor</label><input type="text" id="npwp" placeholder="XX.XXX.XXX.X-XXX.XXX"></div>
+            </div>
+            <div class="frow">
+              <div class="fld">
+                <label>Deskripsi Barang / Jasa</label>
+                <input type="text" id="deskripsi" placeholder="e.g. Jasa Konsultasi Manajemen, Pembelian ATK, Sewa Kantor Bulan Juni...">
+              </div>
+            </div>
+            <div class="frow f2">
+              <div class="fld">
+                <label>Jenis Transaksi</label>
+                <select id="txType">
+                  <option value="jasa">Jasa (Services)</option>
+                  <option value="barang">Barang (Goods)</option>
+                  <option value="sewa">Sewa (Rental)</option>
+                  <option value="gaji">Gaji / Upah (Salary)</option>
+                  <option value="royalti">Royalti / Lisensi</option>
+                </select>
+              </div>
+              <div class="fld">
+                <label>DPP (Dasar Pengenaan Pajak) Rp</label>
+                <input type="number" id="dpp" placeholder="0" oninput="calcPPN()">
+              </div>
+            </div>
+            <div class="frow f2">
+              <div class="fld">
+                <label>PPN 11% (otomatis)</label>
+                <input type="number" id="ppnAmt" placeholder="0 — dihitung otomatis">
+              </div>
+              <div class="fld">
+                <label>Total Rp</label>
+                <input type="number" id="totalAmt" placeholder="0 — dihitung otomatis">
+              </div>
+            </div>
+            <div class="fld">
+              <label>Catatan Tambahan</label>
+              <textarea id="sNotes" rows="3" placeholder="Nomor faktur, kondisi khusus, konteks tambahan..."></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="btn-main" id="analyzeBtn" onclick="runAnalysis()">
+        ✦ Analisis Dokumen
+      </button>
+
+      <div class="author">
+        <div class="av">MF</div>
+        <div style="flex:1">
+          <div style="font-size:12px;font-weight:700;color:var(--white);margin-bottom:2px">Mochammad Fathan</div>
+          <div style="font-size:11px;color:var(--text2)">Finance & Tax Intern · Akuntansi Student · AI Integration Specialist</div>
+        </div>
+        <span class="hdr-tag">Portfolio</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: RESULTS -->
+    <div id="resArea">
+      <div class="phbox">
+        <div class="ph-emoji">📄</div>
+        <div class="ph-title" id="phTitle">Siap Menganalisis Dokumen</div>
+        <p class="ph-desc" id="phDesc">Tempel teks dokumen atau isi form terstruktur, lalu klik Analisis Dokumen untuk laporan akuntansi &amp; pajak lengkap.</p>
+        <div class="ph-steps">
+          <div class="ph-step"><div class="ph-n">1</div><span id="ps1">Masukkan API key Anthropic</span></div>
+          <div class="ph-step"><div class="ph-n">2</div><span id="ps2">Atur status PKP perusahaan</span></div>
+          <div class="ph-step"><div class="ph-n">3</div><span id="ps3">Tempel dokumen atau isi form</span></div>
+          <div class="ph-step"><div class="ph-n">4</div><span id="ps4">Terima laporan COA, pajak &amp; jurnal</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ TAB: HISTORY ═══ -->
+<div class="tp" id="tp-history">
+  <div class="panel">
+    <div class="phdr">
+      <h3>Riwayat Dokumen Dianalisis</h3>
+      <div class="phdr-r"><button class="btn-sm" onclick="clearHist()">Hapus Semua</button></div>
+    </div>
+    <div id="histBody">
+      <div style="padding:40px;text-align:center;color:var(--text2);font-size:12px">Belum ada riwayat analisis.</div>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<footer>
+  <div class="wrap footer-inner">
+    <span>PAJAKPINTAR · AI Accounting & Tax Document Intelligence · Indonesia · Portfolio Demo</span>
+    <span>Mochammad Fathan · Finance & Tax · v1.0</span>
+  </div>
+</footer>
+</div>
+
+<script>
+/* ─── STATE ─────────────────────────────────────────────────────── */
+let lang = 'id';
+const g = id => document.getElementById(id);
+const gs = id => (g(id)?.value || '').trim();
+const gv = id => parseFloat(g(id)?.value) || 0;
+
+/* ─── LANGUAGE ───────────────────────────────────────────────────── */
+const TX = {
+  phTitle:     {id:'Siap Menganalisis Dokumen', en:'Ready to Analyze Document'},
+  phDesc:      {id:'Tempel teks dokumen atau isi form terstruktur, lalu klik Analisis Dokumen untuk laporan akuntansi & pajak lengkap.',
+                en:'Paste document text or fill the structured form, then click Analyze Document for a full accounting & tax report.'},
+  ps1:         {id:'Masukkan API key Anthropic', en:'Enter your Anthropic API key'},
+  ps2:         {id:'Atur status PKP perusahaan', en:'Set company PKP (VAT registered) status'},
+  ps3:         {id:'Tempel dokumen atau isi form', en:'Paste document or fill form'},
+  ps4:         {id:'Terima laporan COA, pajak & jurnal', en:'Receive COA, tax & journal report'},
+  analyzeBtn:  {id:'✦ Analisis Dokumen', en:'✦ Analyze Document'},
+  tabAnalyze:  {id:'Analisis Dokumen', en:'Analyze Document'},
+  tabHistory:  {id:'Riwayat', en:'History'},
+  lmsg:        {id:'AI sedang menganalisis dokumen...', en:'AI is analyzing your document...'},
+  lsub:        {id:'Mengekstrak data · Memeriksa kewajiban pajak · Membuat jurnal akuntansi',
+                en:'Extracting data · Checking tax obligations · Building accounting journal'},
+};
+
+function setLang(l) {
+  lang = l;
+  g('lb-id').className = 'lb' + (l==='id' ? ' on' : '');
+  g('lb-en').className = 'lb' + (l==='en' ? ' on' : '');
+  Object.keys(TX).forEach(k => { if(g(k)) g(k).textContent = TX[k][l]; });
+}
+
+/* ─── API KEY ─────────────────────────────────────────────────────── */
+function chkKey() {
+  const k = gs('apiIn');
+  g('apiDot').className = 'api-dot' + (k.length > 20 ? ' on' : '');
+}
+
+/* ─── TABS ───────────────────────────────────────────────────────── */
+function swTab(e, tab) {
+  document.querySelectorAll('.tb').forEach(b => b.classList.remove('on'));
+  document.querySelectorAll('.tp').forEach(p => p.classList.remove('on'));
+  e.target.classList.add('on');
+  g('tp-' + tab).classList.add('on');
+  if (tab === 'history') loadHist();
+}
+
+/* ─── INPUT MODE ────────────────────────────────────────────────── */
+function setMode(m) {
+  const isQ = m === 'quick';
+  g('qMode').style.display = isQ ? 'block' : 'none';
+  g('sMode').style.display = isQ ? 'none' : 'block';
+  g('m1').className = 'mode-tab' + (isQ ? ' on' : '');
+  g('m2').className = 'mode-tab' + (!isQ ? ' on' : '');
+  g('modeTag').textContent = isQ ? 'Quick Paste' : 'Terstruktur';
+}
+
+function isQuick() { return g('m1').classList.contains('on'); }
+
+/* ─── AUTO-CALCULATE PPN ─────────────────────────────────────────── */
+function calcPPN() {
+  const dpp = gv('dpp');
+  if (dpp) {
+    g('ppnAmt').value = Math.round(dpp * 0.11);
+    g('totalAmt').value = Math.round(dpp * 1.11);
+  }
+}
+
+/* ─── FORMAT RUPIAH ──────────────────────────────────────────────── */
+function fmtRp(n) {
+  if (n === null || n === undefined || isNaN(n)) return '—';
+  return 'Rp\u202f' + Number(n).toLocaleString('id-ID');
+}
+
+/* ─── BUILD DOCUMENT CONTENT ─────────────────────────────────────── */
+function buildDocContent() {
+  if (isQuick()) {
+    const txt = gs('docTxt');
+    const dt = gs('dtypeQ');
+    if (!txt) return null;
+    return dt ? `[Tipe Dokumen yang Diindikasikan: ${dt}]\n\n${txt}` : txt;
+  }
+  const desc = gs('deskripsi'), dpp = gv('dpp');
+  if (!desc && !dpp) return null;
+  return [
+    `Tipe Dokumen: ${gs('dtypeS')}`,
+    `Tanggal: ${gs('docDate') || 'tidak disebutkan'}`,
+    `Vendor / Pemasok: ${gs('vendor') || 'tidak disebutkan'}`,
+    `NPWP Vendor: ${gs('npwp') || 'tidak disebutkan'}`,
+    `Deskripsi: ${desc}`,
+    `Jenis Transaksi: ${gs('txType')}`,
+    `DPP: ${fmtRp(dpp)}`,
+    `PPN: ${fmtRp(gv('ppnAmt'))}`,
+    `Total: ${fmtRp(gv('totalAmt'))}`,
+    `Catatan: ${gs('sNotes') || '—'}`,
+  ].join('\n');
+}
+
+/* ─── BUILD CLAUDE PROMPT ─────────────────────────────────────────── */
+function buildPrompt(docContent) {
+  const isPKP = g('isPKP').checked;
+  const industry = gs('industry');
+  const langInstr = lang === 'id'
+    ? 'Semua teks narasi (verdict, notes, summary, detail flag, tax_sub) HARUS dalam Bahasa Indonesia yang profesional dan mudah dipahami oleh pelaku UKM.'
+    : 'All narrative text (verdict, notes, summary, flag detail, tax_sub) MUST be in professional English.';
+
+  return `Anda adalah akuntan senior dan konsultan pajak berpengalaman di Indonesia dengan keahlian mendalam dalam PSAK, perpajakan Indonesia (UU KUP, UU PPN, UU PPh), dan praktik akuntansi bisnis Indonesia. Analisis dokumen akuntansi berikut dan kembalikan HANYA JSON valid — tanpa markdown, tanpa penjelasan di luar JSON.
+
+KONTEKS BISNIS:
+- Status PKP: ${isPKP ? 'YA — Terdaftar sebagai Pengusaha Kena Pajak' : 'TIDAK — Bukan PKP'}
+- Industri: ${industry}
+- Bahasa Output: ${lang === 'id' ? 'Bahasa Indonesia' : 'English'}
+${langInstr}
+
+DOKUMEN:
+${docContent}
+
+PENGETAHUAN PERPAJAKAN INDONESIA YANG WAJIB DITERAPKAN:
+
+PPN (Pajak Pertambahan Nilai — VAT):
+- Tarif standar: 11% (berlaku 1 April 2022, PP No.55/2022). Tarif ekspor BKP Berwujud: 0%.
+- Objek PPN: BKP (Barang Kena Pajak) dan JKP (Jasa Kena Pajak).
+- Dikecualikan dari PPN (Non-BKP/JKP): bahan makanan pokok (beras, jagung, dll), jasa pendidikan formal, jasa kesehatan medis, jasa keuangan dan asuransi, jasa angkutan umum.
+- Faktur Pajak: wajib diterbitkan PKP penjual. Harus ada kode & nomor seri 16 digit.
+- PPN Masukan: dapat dikreditkan oleh PKP pembeli pada SPT Masa PPN.
+- Jika pembeli bukan PKP: PPN menjadi beban (dibebankan ke akun biaya), tidak dapat dikreditkan.
+
+PPh Pasal 23 (Withholding Tax):
+- Berlaku untuk: jasa (bukan barang), sewa peralatan/mesin/kendaraan, royalti, hadiah atas prestasi.
+- TIDAK berlaku untuk: pembelian barang murni.
+- Tarif dasar jasa & sewa: 2% dari DPP jika vendor ber-NPWP; 4% jika vendor TIDAK ber-NPWP.
+- Khusus untuk sewa tanah dan/atau bangunan: PPh Final Pasal 4 ayat 2 sebesar 10% (bukan PPh 23).
+- Pemotong: perusahaan pembeli/pengguna jasa wajib memotong, menyetorkan, dan melaporkan.
+- Batas setor: tanggal 10 bulan berikutnya. Pelaporan: tanggal 20 bulan berikutnya via SPT Masa PPh 23.
+
+PPh Pasal 21:
+- Berlaku untuk gaji, upah, honorarium kepada orang pribadi/karyawan.
+- Tarif progresif: 5% (s.d. Rp60jt), 15% (Rp60-250jt), 25% (Rp250-500jt), 30% (>Rp500jt), 35% (>Rp5Milyar).
+
+BAGAN AKUN (COA) INDONESIA:
+Aktiva: 1110=Kas & Setara Kas, 1120=Piutang Usaha, 1130=Persediaan Barang, 1141=PPN Masukan, 1150=Biaya Dibayar di Muka, 1210=Aktiva Tetap Berwujud
+Kewajiban: 2100=Hutang Usaha, 2110=Hutang Pajak, 2111=Hutang PPh 21, 2112=Hutang PPh 23, 2113=Hutang PPN Keluaran, 2114=Hutang PPh Final Ps.4(2)
+Pendapatan: 4100=Pendapatan Usaha, 4110=Pendapatan Jasa, 4200=Pendapatan Lain-lain
+Beban: 5100=Beban Pokok Penjualan (HPP), 6110=Beban Gaji & Tunjangan, 6120=Beban Sewa, 6130=Beban Utilitas (Listrik/Air/Telepon), 6140=Beban Transportasi & BBM, 6150=Beban Pemasaran & Promosi, 6160=Beban Perlengkapan & ATK, 6170=Beban Jasa Profesional & Konsultansi, 6180=Beban Pemeliharaan & Perbaikan, 6190=Beban Administrasi & Umum
+
+ATURAN JURNAL UMUM (Double-Entry):
+- Format: Akun yang di-debit dicatat lebih dulu, lalu akun yang di-kredit (diindentasi).
+- PPN Masukan (jika PKP): Debit 1141 PPN Masukan.
+- PPN Masukan (jika bukan PKP): PPN langsung menjadi bagian dari biaya, tidak dipisah ke akun 1141.
+- PPh 23: Debit Hutang Usaha (kurangi hutang), Kredit 2112 Hutang PPh 23 → artinya vendor menerima pembayaran neto.
+- Total Debit HARUS = Total Kredit.
+- Jika ada PPh 23, buat dua blok jurnal: (1) jurnal pengakuan biaya, (2) jurnal pemotongan PPh 23.
+
+Kembalikan JSON dengan struktur PERSIS ini (isi semua field, gunakan null jika tidak tersedia):
+{
+  "doc_type": "string — jenis dokumen terdeteksi",
+  "is_valid": true,
+  "validation_issues": [],
+  "extracted": {
+    "vendor": "string atau null",
+    "npwp_vendor": "string atau null",
+    "date": "DD Bulan YYYY atau null",
+    "invoice_number": "string atau null",
+    "description": "string deskripsi transaksi",
+    "transaction_type": "jasa|barang|sewa|gaji|royalti|lainnya"
+  },
+  "amounts": {
+    "dpp": 5000000,
+    "ppn": 550000,
+    "total": 5550000,
+    "pph23_amount": 100000,
+    "net_payment": 5450000
+  },
+  "tax_analysis": {
+    "ppn_applicable": true,
+    "ppn_rate": 11,
+    "ppn_masukan_eligible": true,
+    "ppn_note": "penjelasan singkat",
+    "pph23_applicable": true,
+    "pph23_rate": 2,
+    "pph23_base_amount": 5000000,
+    "pph23_note": "penjelasan: jasa konsultansi dikenakan PPh 23 2% karena vendor ber-NPWP",
+    "pph21_applicable": false
+  },
+  "coa": {
+    "code": "6170",
+    "name": "Beban Jasa Profesional & Konsultansi",
+    "category": "Beban Operasional"
+  },
+  "journal_entry": {
+    "date": "12 Mei 2026",
+    "description": "Beban jasa konsultansi — PT. Konsultan Maju Jaya",
+    "main_lines": [
+      {"type":"debit","code":"6170","account":"Beban Jasa Profesional & Konsultansi","amount":5000000,"note":null},
+      {"type":"debit","code":"1141","account":"PPN Masukan","amount":550000,"note":"hanya jika PKP"},
+      {"type":"credit","code":"2100","account":"Hutang Usaha","amount":5550000,"note":null}
+    ],
+    "pph23_lines": [
+      {"type":"debit","code":"2100","account":"Hutang Usaha","amount":100000,"note":null},
+      {"type":"credit","code":"2112","account":"Hutang PPh Pasal 23","amount":100000,"note":"Dipotong 2% × DPP Rp5.000.000"}
+    ]
+  },
+  "compliance_flags": [
+    {"severity":"INFO","title":"PPN Masukan Dapat Dikreditkan","detail":"PPN Masukan sebesar Rp 550.000 dapat dikreditkan pada SPT Masa PPN bulan Mei 2026. Pastikan Faktur Pajak memenuhi syarat formal (kode 16 digit valid)."},
+    {"severity":"ACTION","title":"Setor PPh 23","detail":"PPh Pasal 23 sebesar Rp 100.000 harus disetorkan ke kas negara paling lambat 10 Juni 2026 menggunakan Kode Billing (MAP 411124, KJS 101). Laporkan via SPT Masa PPh 23 paling lambat 20 Juni 2026."}
+  ],
+  "summary": "Ringkasan 2-3 kalimat yang jelas dan actionable dalam bahasa yang dipilih."
+}`;
+}
+
+/* ─── RUN ANALYSIS ───────────────────────────────────────────────── */
+async function runAnalysis() {
+  const key = gs('apiIn');
+  if (!key) { alert(lang==='id'?'Masukkan API Key Anthropic terlebih dahulu.':'Please enter your Anthropic API key first.'); return; }
+  const docContent = buildDocContent();
+  if (!docContent) { alert(lang==='id'?'Tempel teks dokumen atau isi form terlebih dahulu.':'Please paste document text or fill the form first.'); return; }
+
+  const btn = g('analyzeBtn');
+  btn.disabled = true;
+  btn.textContent = lang==='id' ? '⟳ Menganalisis...' : '⟳ Analyzing...';
+
+  g('resArea').innerHTML = `<div class="loadbox">
+    <div class="lspin"></div>
+    <div class="lmsg">${TX.lmsg[lang]}<br>
+      <span style="font-size:10px;opacity:0.6">${TX.lsub[lang]}</span>
+    </div>
+  </div>`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2800,
+        messages: [{ role: 'user', content: buildPrompt(docContent) }]
+      })
+    });
+
+    if (!res.ok) {
+      const e = await res.json().catch(() => ({}));
+      throw new Error(e.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw = data.content[0].text.trim().replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    let result;
+    try { result = JSON.parse(raw); }
+    catch {
+      const m = raw.match(/\{[\s\S]*\}/);
+      if (m) result = JSON.parse(m[0]);
+      else throw new Error(lang==='id' ? 'Gagal mem-parse respons AI. Coba lagi.' : 'Failed to parse AI response. Please retry.');
+    }
+
+    renderResult(result);
+    saveHist(result, docContent.slice(0, 120));
+    updateCount();
+
+  } catch (err) {
+    g('resArea').innerHTML = `<div class="errbox">
+      <b style="display:block;margin-bottom:4px">${lang==='id'?'Analisis Gagal':'Analysis Failed'}</b>
+      ${err.message}<br>
+      <span style="font-size:10px;opacity:0.7">${lang==='id'?'Periksa API key dan koneksi internet, lalu coba lagi.':'Check your API key and internet connection, then try again.'}</span>
+    </div>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = TX.analyzeBtn[lang];
+}
+
+/* ─── RENDER RESULT ──────────────────────────────────────────────── */
+function renderResult(r) {
+  const isPKP = g('isPKP').checked;
+  const L = (id, en) => lang==='id' ? id : en;
+
+  /* ── Banner colors ── */
+  const isValid = r.is_valid !== false;
+  const dtPill = r.doc_type?.includes('Faktur')
+    ? {bg:'rgba(16,185,129,0.1)',col:'var(--em)',border:'rgba(16,185,129,0.22)'}
+    : r.doc_type?.includes('Slip') || r.doc_type?.includes('Gaji')
+    ? {bg:'rgba(96,165,250,0.1)',col:'var(--blue)',border:'rgba(96,165,250,0.2)'}
+    : {bg:'rgba(251,191,36,0.08)',col:'var(--gold)',border:'rgba(251,191,36,0.2)'};
+  const validStyle = isValid
+    ? 'background:rgba(16,185,129,0.08);color:var(--em);border:1px solid rgba(16,185,129,0.2)'
+    : 'background:rgba(248,113,113,0.08);color:var(--red);border:1px solid rgba(248,113,113,0.2)';
+
+  /* ── Journal entry lines ── */
+  function jeRow(line) {
+    const isDr = line.type === 'debit';
+    const acctCls = isDr ? 'je-acct-dr' : 'je-acct-cr';
+    const note = line.note ? `<span class="je-note">(${line.note})</span>` : '';
+    return `<tr>
+      <td class="je-code">${line.code || ''}</td>
+      <td class="${acctCls}">${line.account || ''}${note}</td>
+      <td class="${isDr ? 'je-dr' : 'je-dim'}">${isDr ? fmtRp(line.amount) : '—'}</td>
+      <td class="${!isDr ? 'je-cr' : 'je-dim'}">${!isDr ? fmtRp(line.amount) : '—'}</td>
+    </tr>`;
+  }
+
+  const mainLines = r.journal_entry?.main_lines || [];
+  const pph23Lines = r.journal_entry?.pph23_lines || [];
+  const drTotal = mainLines.filter(l=>l.type==='debit').reduce((a,b)=>a+(b.amount||0),0);
+  const crTotal = mainLines.filter(l=>l.type==='credit').reduce((a,b)=>a+(b.amount||0),0);
+
+  const pph23Block = (pph23Lines.length > 0 && r.tax_analysis?.pph23_applicable)
+    ? `<div class="pph23-block">
+        <div class="pph23-title">${L('Jurnal Pemotongan PPh Pasal 23','PPh Article 23 Withholding Journal')}</div>
+        <table class="je-tbl">
+          <thead><tr><th>${L('Kode','Code')}</th><th>${L('Nama Akun','Account')}</th><th style="text-align:right">Debit</th><th style="text-align:right">Kredit</th></tr></thead>
+          <tbody>${pph23Lines.map(jeRow).join('')}</tbody>
+        </table>
+      </div>`
+    : '';
+
+  /* ── Compliance flags ── */
+  const flagMap = {
+    INFO:   {cls:'fi-info',  icon:'ℹ',  col:'var(--em)'},
+    WARN:   {cls:'fi-warn',  icon:'⚠',  col:'var(--gold)'},
+    ACTION: {cls:'fi-action',icon:'✦',  col:'var(--blue)'},
+    ERROR:  {cls:'fi-error', icon:'✗',  col:'var(--red)'},
+  };
+  const flags = (r.compliance_flags || []).map(f => {
+    const fm = flagMap[f.severity] || flagMap.INFO;
+    return `<div class="flag-item ${fm.cls}">
+      <span class="fi-icon" style="color:${fm.col}">${fm.icon}</span>
+      <div class="fi-body">
+        <div class="fi-title" style="color:${fm.col}">${f.title || f.severity}</div>
+        <div class="fi-detail">${f.detail || ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  /* ── Validation issues ── */
+  const issues = (r.validation_issues || []).map(i =>
+    `<div class="flag-item fi-warn">
+      <span class="fi-icon" style="color:var(--gold)">⚠</span>
+      <div class="fi-body"><div class="fi-detail">${i}</div></div>
+    </div>`
+  ).join('');
+
+  /* ── PPN masukan note ── */
+  const ppnMasukanNote = isPKP && r.tax_analysis?.ppn_applicable
+    ? L('PPN Masukan dapat dikreditkan (status PKP)', 'Input tax credit available (PKP status)')
+    : L('Non-PKP: PPN dibebankan ke akun biaya', 'Non-PKP: VAT charged to expense account');
+  const ppnChipCls = r.tax_analysis?.ppn_applicable ? 'tc-yes' : 'tc-no';
+  const ppnChipTxt = r.tax_analysis?.ppn_applicable ? L('DIKENAKAN 11%','APPLICABLE 11%') : L('DIKECUALIKAN','EXEMPT');
+  const pph23ChipCls = r.tax_analysis?.pph23_applicable ? 'tc-act' : 'tc-no';
+  const pph23ChipTxt = r.tax_analysis?.pph23_applicable
+    ? `${L('POTONG','WITHHOLD')} ${r.tax_analysis.pph23_rate || 2}%`
+    : L('TIDAK BERLAKU','NOT APPLICABLE');
+  const pph23Color = r.tax_analysis?.pph23_applicable ? 'var(--gold)' : 'var(--text2)';
+  const ppnAmt = r.tax_analysis?.ppn_applicable ? fmtRp(r.amounts?.ppn) : '—';
+  const pph23AmtDisplay = r.tax_analysis?.pph23_applicable ? fmtRp(r.amounts?.pph23_amount) : '—';
+
+  g('resArea').innerHTML = `
+
+  <!-- Banner -->
+  <div class="doc-banner">
+    <div class="doc-type-pill" style="background:${dtPill.bg};color:${dtPill.col};border:1px solid ${dtPill.border}">${r.doc_type || 'Dokumen'}</div>
+    <div class="doc-right">
+      <div class="doc-vendor">${r.extracted?.vendor || L('Vendor tidak terdeteksi','Vendor not detected')}</div>
+      <div class="doc-meta">${r.extracted?.date ? r.extracted.date + ' · ' : ''}${L('No.','No.')} ${r.extracted?.invoice_number || '—'}</div>
+      <div class="doc-meta" style="font-style:italic;margin-top:3px">${r.extracted?.description || ''}</div>
+      <div class="doc-meta" style="margin-top:4px">NPWP: ${r.extracted?.npwp_vendor || '—'}</div>
+    </div>
+    <div class="valid-chip" style="${validStyle}">${isValid ? '✓ ' + L('Valid','Valid') : '⚠ ' + L('Perhatian','Issues')}</div>
+  </div>
+
+  ${issues ? `<div class="panel"><div class="phdr"><h3>${L('Isu Validasi','Validation Issues')}</h3></div><div class="pb"><div class="flag-stack">${issues}</div></div></div>` : ''}
+
+  <!-- Amounts -->
+  <div class="panel">
+    <div class="phdr"><h3>${L('Rincian Jumlah','Amount Breakdown')}</h3><span class="ptag pt-e phdr-r">IDR · Rupiah</span></div>
+    <div class="amt-row">
+      <div class="amt-card">
+        <div class="amt-lbl">DPP</div>
+        <div class="amt-val">${fmtRp(r.amounts?.dpp)}</div>
+        <div class="amt-note">${L('Dasar Pengenaan Pajak','Tax Base')}</div>
+      </div>
+      <div class="amt-card">
+        <div class="amt-lbl">PPN ${r.tax_analysis?.ppn_rate || 11}%</div>
+        <div class="amt-val" style="color:${r.tax_analysis?.ppn_applicable ? 'var(--gold)' : 'var(--text2)'}">${ppnAmt}</div>
+        <div class="amt-note">${r.tax_analysis?.ppn_applicable ? L('Dikenakan','Applicable') : L('Dikecualikan','Exempt')}</div>
+      </div>
+      <div class="amt-card">
+        <div class="amt-lbl">Total</div>
+        <div class="amt-val" style="color:var(--em);font-size:14px">${fmtRp(r.amounts?.total)}</div>
+        <div class="amt-note">${L('Nilai Tagihan','Invoice Value')}</div>
+      </div>
+    </div>
+    ${r.tax_analysis?.pph23_applicable ? `
+    <div style="background:rgba(251,191,36,0.05);border-top:1px solid rgba(251,191,36,0.15);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;font-weight:700;color:var(--gold)">PPh 23 ${L('Dipotong','Withheld')} (${r.tax_analysis.pph23_rate || 2}%)</div>
+      <div style="font-size:13px;font-family:'Space Mono',monospace;font-weight:700;color:var(--gold)">− ${fmtRp(r.amounts?.pph23_amount)}</div>
+    </div>
+    <div style="background:rgba(16,185,129,0.05);border-top:1px solid rgba(16,185,129,0.12);padding:10px 16px;display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:12px;font-weight:700;color:var(--em)">${L('Pembayaran Neto ke Vendor','Net Payment to Vendor')}</div>
+      <div style="font-size:14px;font-family:'Space Mono',monospace;font-weight:700;color:var(--em)">${fmtRp(r.amounts?.net_payment)}</div>
+    </div>` : ''}
+  </div>
+
+  <!-- Tax Analysis -->
+  <div class="panel">
+    <div class="phdr"><h3>${L('Analisis Pajak','Tax Analysis')}</h3><span class="ptag pt-b phdr-r">PPN · PPh 23</span></div>
+    <div class="tax-row">
+      <div>
+        <div class="tax-lbl">PPN (Pajak Pertambahan Nilai)</div>
+        <div class="tax-sub">${ppnMasukanNote}</div>
+        <div class="tax-sub" style="margin-top:3px">${r.tax_analysis?.ppn_note || ''}</div>
+      </div>
+      <div class="tax-right">
+        <div class="tax-chip ${ppnChipCls}">${ppnChipTxt}</div>
+        <div class="tax-amt" style="color:${r.tax_analysis?.ppn_applicable ? 'var(--gold)' : 'var(--text2)'}">${ppnAmt}</div>
+      </div>
+    </div>
+    <div class="tax-row">
+      <div>
+        <div class="tax-lbl">PPh Pasal 23</div>
+        <div class="tax-sub">${r.tax_analysis?.pph23_note || ''}</div>
+      </div>
+      <div class="tax-right">
+        <div class="tax-chip ${pph23ChipCls}">${pph23ChipTxt}</div>
+        <div class="tax-amt" style="color:${pph23Color}">${pph23AmtDisplay}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COA Classification -->
+  <div class="panel">
+    <div class="phdr"><h3>${L('Klasifikasi Akun (COA)','Account Classification (COA)')}</h3></div>
+    <div class="coa-inner">
+      <div class="coa-code">${r.coa?.code || '—'}</div>
+      <div>
+        <div class="coa-name">${r.coa?.name || '—'}</div>
+        <div class="coa-cat">${r.coa?.category || '—'}</div>
+      </div>
+      <div class="coa-chip">${L('Saran COA','COA Suggestion')}</div>
+    </div>
+  </div>
+
+  <!-- Journal Entry ← THE SHOWSTOPPER -->
+  <div class="panel">
+    <div class="phdr"><h3>${L('Jurnal Akuntansi (Double-Entry)','Accounting Journal (Double-Entry)')}</h3><span class="ptag pt-e phdr-r">Debit · Kredit</span></div>
+    <div class="je-wrap">
+      <div class="je-header">
+        <span class="je-name">${L('Jurnal Umum','General Journal')}</span>
+        <span class="je-date">${r.journal_entry?.date || '—'}</span>
+      </div>
+      <div class="je-desc">${r.journal_entry?.description || '—'}</div>
+      <table class="je-tbl">
+        <thead><tr>
+          <th style="width:12%">${L('Kode','Code')}</th>
+          <th>${L('Nama Akun','Account Name')}</th>
+          <th style="text-align:right;width:22%">Debit (Rp)</th>
+          <th style="text-align:right;width:22%">Kredit (Rp)</th>
+        </tr></thead>
+        <tbody>${mainLines.map(jeRow).join('')}</tbody>
+        <tfoot><tr>
+          <td colspan="2" style="color:var(--text2)">${L('Total','Total')}</td>
+          <td class="je-dr">${fmtRp(drTotal)}</td>
+          <td class="je-cr">${fmtRp(crTotal)}</td>
+        </tr></tfoot>
+      </table>
+      ${pph23Block}
+      <div class="je-footnote">${L('* Jurnal ini merupakan saran berdasarkan data yang tersedia. Verifikasi dengan akuntan Anda sebelum dibukukan ke sistem.','* This journal is a suggestion based on available data. Verify with your accountant before posting to your system.')}</div>
+    </div>
+  </div>
+
+  ${flags ? `<div class="panel">
+    <div class="phdr"><h3>${L('Catatan Kepatuhan Pajak','Tax Compliance Notes')}</h3></div>
+    <div class="pb"><div class="flag-stack">${flags}</div></div>
+  </div>` : ''}
+
+  <!-- Summary -->
+  <div class="panel">
+    <div class="phdr"><h3>${L('Ringkasan','Summary')}</h3></div>
+    <div class="sum-body">${r.summary || '—'}</div>
+  </div>
+
+  <!-- Stamp -->
+  <div style="background:var(--s2);border:1px solid var(--b1);border-radius:6px;padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+    <div style="font-size:11px;color:var(--text2)">
+      ${L('Dianalisis oleh','Analyzed by')} <b style="color:var(--text)">PAJAKPINTAR</b> · Powered by Claude Sonnet
+    </div>
+    <div style="font-size:10px;color:var(--text2)">${new Date().toLocaleDateString(lang==='id'?'id-ID':'en-GB',{day:'2-digit',month:'long',year:'numeric'})}</div>
+  </div>`;
+}
+
+/* ─── HISTORY ─────────────────────────────────────────────────────── */
+function getHist() { try { return JSON.parse(localStorage.getItem('pp_hist') || '[]'); } catch { return []; } }
+
+function saveHist(r, preview) {
+  const h = getHist();
+  h.unshift({
+    id: Date.now(),
+    docType: r.doc_type,
+    vendor: r.extracted?.vendor,
+    total: r.amounts?.total,
+    pph23: r.amounts?.pph23_amount,
+    date: r.journal_entry?.date || new Date().toLocaleDateString('id-ID'),
+    summary: r.summary,
+    ts: new Date().toISOString()
+  });
+  if (h.length > 60) h.pop();
+  localStorage.setItem('pp_hist', JSON.stringify(h));
+}
+
+function updateCount() { g('hCount').textContent = getHist().length; }
+
+function clearHist() {
+  if (confirm(lang==='id'?'Hapus semua riwayat analisis?':'Clear all analysis history?')) {
+    localStorage.removeItem('pp_hist');
+    updateCount();
+    loadHist();
+  }
+}
+
+function delHistItem(id) {
+  const h = getHist().filter(x => x.id !== id);
+  localStorage.setItem('pp_hist', JSON.stringify(h));
+  updateCount();
+  loadHist();
+}
+
+function loadHist() {
+  const h = getHist();
+  if (!h.length) {
+    g('histBody').innerHTML = `<div style="padding:40px;text-align:center;color:var(--text2);font-size:12px">${lang==='id'?'Belum ada riwayat analisis.':'No analysis history yet.'}</div>`;
+    return;
+  }
+  const rows = h.map(x => `<tr>
+    <td><span style="font-size:11px;font-weight:700;color:var(--em);background:var(--em2);padding:2px 8px;border-radius:3px">${x.docType || '—'}</span></td>
+    <td style="font-weight:600;color:var(--white)">${x.vendor || '—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--em)">${x.total ? fmtRp(x.total) : '—'}</td>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;color:${x.pph23 ? 'var(--gold)' : 'var(--text2)'}">${x.pph23 ? fmtRp(x.pph23) : '—'}</td>
+    <td style="font-size:11px;color:var(--text2)">${x.date || '—'}</td>
+    <td style="font-size:11px;color:var(--text2);max-width:200px"><div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${(x.summary || '').slice(0, 80)}${x.summary?.length > 80 ? '…' : ''}</div></td>
+    <td><button class="btn-sm" onclick="delHistItem(${x.id})">${lang==='id'?'Hapus':'Delete'}</button></td>
+  </tr>`).join('');
+
+  g('histBody').innerHTML = `<div style="overflow-x:auto"><table class="htbl">
+    <thead><tr>
+      <th>${lang==='id'?'Tipe':'Type'}</th>
+      <th>Vendor</th>
+      <th>Total</th>
+      <th>PPh 23</th>
+      <th>${lang==='id'?'Tanggal':'Date'}</th>
+      <th>${lang==='id'?'Ringkasan':'Summary'}</th>
+      <th></th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table></div>`;
+}
+
+/* ─── INIT ─────────────────────────────────────────────────────────── */
+const today = new Date();
+if (g('docDate')) g('docDate').value = today.toISOString().split('T')[0];
+updateCount();
+</script>
+</body>
+</html>

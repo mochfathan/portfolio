@@ -1,0 +1,863 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mochammad Fathan — AI & Finance Portfolio</title>
+<meta name="description" content="AI Content Reviewer, Data Annotator & Finance Professional based in Jakarta, Indonesia.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050a14;
+  --s1:#0b1220;
+  --s2:#10192a;
+  --s3:#141e30;
+  --border:rgba(255,255,255,0.07);
+  --border-mid:rgba(255,255,255,0.13);
+  --amber:#e8b840;
+  --amber-dim:rgba(232,184,64,0.1);
+  --amber-border:rgba(232,184,64,0.3);
+  --emerald:#10b981;
+  --emerald-dim:rgba(16,185,129,0.08);
+  --emerald-border:rgba(16,185,129,0.28);
+  --text:#ccd6e0;
+  --text-mid:#8a9bb0;
+  --text-dim:#4a6080;
+  --white:#e8eef5;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.7;
+}
+
+/* ── GRID OVERLAY ── */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.015) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,0.015) 1px,transparent 1px);
+  background-size:54px 54px;
+  pointer-events:none;z-index:0;
+}
+
+/* ── AMBIENT GLOW ── */
+body::after{
+  content:'';position:fixed;top:-15%;left:50%;transform:translateX(-50%);
+  width:900px;height:500px;
+  background:radial-gradient(ellipse,rgba(232,184,64,0.035) 0%,transparent 65%);
+  pointer-events:none;z-index:0;
+}
+
+.z1{position:relative;z-index:1}
+.wrap{max-width:1100px;margin:0 auto;padding:0 32px}
+
+/* ══════════════════════════════════════
+   NAV
+══════════════════════════════════════ */
+nav{
+  position:sticky;top:0;z-index:100;
+  background:rgba(5,10,20,0.85);
+  backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:14px 0;
+}
+.nav-inner{
+  display:flex;align-items:center;
+  justify-content:space-between;gap:16px;
+}
+.nav-name{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:16px;
+  color:var(--white);letter-spacing:0.03em;
+}
+.nav-name span{color:var(--amber)}
+.nav-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.nav-badge{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.12em;
+  padding:5px 12px;border-radius:3px;
+  border:1px solid var(--amber-border);
+  color:var(--amber);
+  text-decoration:none;
+  transition:background .2s,color .2s;
+}
+.nav-badge:hover{background:var(--amber);color:#050a14}
+.nav-link{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.1em;
+  color:var(--text-dim);
+  text-decoration:none;
+  transition:color .2s;
+}
+.nav-link:hover{color:var(--text)}
+
+/* ══════════════════════════════════════
+   HERO
+══════════════════════════════════════ */
+.hero{padding:88px 0 72px}
+.hero-eyebrow{
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:24px;
+}
+.eyebrow-line{width:36px;height:1px;background:rgba(232,184,64,0.35)}
+.eyebrow-text{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--amber);
+  letter-spacing:0.3em;text-transform:uppercase;
+}
+.hero-name{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(36px,6vw,64px);
+  line-height:1.05;
+  color:var(--white);
+  margin-bottom:6px;
+  letter-spacing:-0.01em;
+}
+.hero-name em{color:var(--amber);font-style:normal}
+.hero-title{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:13px;color:var(--text-mid);
+  letter-spacing:0.08em;
+  margin-bottom:32px;
+}
+.hero-title span{color:var(--emerald)}
+.hero-desc{
+  max-width:640px;
+  font-size:16px;
+  color:var(--text-mid);
+  line-height:1.85;
+  margin-bottom:40px;
+}
+.hero-desc strong{color:var(--text);font-weight:500}
+.hero-cta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--amber);color:#050a14;
+  font-family:'Syne',sans-serif;font-weight:700;
+  font-size:13px;letter-spacing:0.06em;
+  padding:13px 28px;border-radius:4px;
+  text-decoration:none;
+  transition:opacity .2s,transform .15s;
+}
+.btn-primary:hover{opacity:.9;transform:translateY(-1px)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  border:1px solid var(--border-mid);
+  color:var(--text-mid);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;letter-spacing:0.1em;
+  padding:12px 24px;border-radius:4px;
+  text-decoration:none;
+  transition:border-color .2s,color .2s;
+}
+.btn-secondary:hover{border-color:var(--text-mid);color:var(--text)}
+.hero-stats{
+  display:flex;align-items:center;gap:32px;
+  margin-top:52px;padding-top:32px;
+  border-top:1px solid var(--border);
+  flex-wrap:wrap;
+}
+.stat-item{text-align:left}
+.stat-num{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:26px;
+  color:var(--white);line-height:1;
+  margin-bottom:4px;
+}
+.stat-num em{color:var(--amber);font-style:normal}
+.stat-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--text-dim);
+  letter-spacing:0.2em;text-transform:uppercase;
+}
+.stat-divider{width:1px;height:36px;background:var(--border)}
+
+/* ══════════════════════════════════════
+   CREDENTIALS STRIP
+══════════════════════════════════════ */
+.creds-section{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  padding:20px 0;
+  background:rgba(11,18,32,0.6);
+}
+.creds-inner{
+  display:flex;align-items:center;gap:12px;
+  flex-wrap:wrap;
+}
+.creds-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--text-dim);
+  letter-spacing:0.25em;text-transform:uppercase;
+  white-space:nowrap;margin-right:4px;
+}
+.cert-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(232,184,64,0.07);
+  border:1px solid var(--amber-border);
+  border-radius:3px;
+  padding:5px 12px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--amber);
+  letter-spacing:0.06em;white-space:nowrap;
+}
+.cert-badge.inprogress{
+  background:rgba(138,155,176,0.06);
+  border-color:rgba(138,155,176,0.2);
+  color:var(--text-mid);
+}
+.cert-dot{width:5px;height:5px;border-radius:50%;background:var(--amber);flex-shrink:0}
+.cert-dot.grey{background:var(--text-dim)}
+
+/* ══════════════════════════════════════
+   SECTION HEADERS
+══════════════════════════════════════ */
+.section{padding:80px 0}
+.section-header{margin-bottom:52px}
+.section-eyebrow{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--amber);
+  letter-spacing:0.3em;text-transform:uppercase;
+  margin-bottom:12px;
+}
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(24px,3.5vw,36px);
+  color:var(--white);line-height:1.15;
+}
+.section-sub{
+  font-size:14px;color:var(--text-mid);
+  margin-top:10px;max-width:520px;
+}
+
+/* ══════════════════════════════════════
+   PROJECT CARDS
+══════════════════════════════════════ */
+.projects-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(460px,1fr));
+  gap:24px;
+}
+@media(max-width:520px){.projects-grid{grid-template-columns:1fr}}
+
+.project-card{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:8px;
+  overflow:hidden;
+  transition:border-color .25s,transform .2s;
+  display:flex;flex-direction:column;
+}
+.project-card:hover{transform:translateY(-3px)}
+.project-card.amber-card:hover{border-color:rgba(232,184,64,0.3)}
+.project-card.emerald-card:hover{border-color:rgba(16,185,129,0.3)}
+
+.card-accent{height:3px}
+.amber-accent{background:linear-gradient(90deg,var(--amber),rgba(232,184,64,0.3))}
+.emerald-accent{background:linear-gradient(90deg,var(--emerald),rgba(16,185,129,0.3))}
+
+.card-body{padding:32px;flex:1;display:flex;flex-direction:column}
+.card-header{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;gap:16px;
+  margin-bottom:16px;
+}
+.card-logo{
+  width:44px;height:44px;
+  border-radius:6px;
+  display:grid;place-items:center;
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:11px;
+  letter-spacing:0.05em;flex-shrink:0;
+}
+.amber-logo{background:var(--amber);color:#050a14}
+.emerald-logo{background:var(--emerald);color:#050d05}
+
+.card-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.18em;
+  text-transform:uppercase;padding:4px 10px;
+  border-radius:2px;
+}
+.amber-tag{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber-border)}
+.emerald-tag{background:var(--emerald-dim);color:var(--emerald);border:1px solid var(--emerald-border)}
+
+.card-name{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:20px;
+  color:var(--white);letter-spacing:0.02em;
+  margin-bottom:4px;
+}
+.card-subtitle{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-dim);
+  letter-spacing:0.15em;text-transform:uppercase;
+  margin-bottom:18px;
+}
+.card-desc{
+  font-size:14px;color:var(--text-mid);
+  line-height:1.8;margin-bottom:24px;flex:1;
+}
+.card-features{
+  display:flex;flex-wrap:wrap;gap:6px;
+  margin-bottom:28px;
+}
+.feature-pill{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:0.1em;
+  padding:4px 10px;border-radius:2px;
+  background:var(--s2);
+  border:1px solid var(--border);
+  color:var(--text-dim);
+  text-transform:uppercase;
+}
+.card-footer{
+  border-top:1px solid var(--border);
+  padding-top:20px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.card-stack{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--text-dim);
+  letter-spacing:0.1em;
+}
+.card-link{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;letter-spacing:0.1em;
+  padding:8px 18px;border-radius:3px;
+  text-decoration:none;
+  transition:all .2s;
+  border:1px solid;
+}
+.amber-link{
+  color:var(--amber);border-color:var(--amber-border);
+}
+.amber-link:hover{background:var(--amber);color:#050a14}
+.emerald-link{
+  color:var(--emerald);border-color:var(--emerald-border);
+}
+.emerald-link:hover{background:var(--emerald);color:#050d05}
+.card-link svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+
+/* ══════════════════════════════════════
+   COMPETENCIES
+══════════════════════════════════════ */
+.comp-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+  gap:2px;
+}
+.comp-cell{
+  background:var(--s1);
+  border:1px solid var(--border);
+  padding:28px;
+  transition:background .2s;
+}
+.comp-cell:hover{background:var(--s2)}
+.comp-icon{
+  width:36px;height:36px;
+  border-radius:4px;
+  display:grid;place-items:center;
+  margin-bottom:16px;
+  font-size:16px;
+}
+.icon-amber{background:var(--amber-dim);color:var(--amber)}
+.icon-emerald{background:var(--emerald-dim);color:var(--emerald)}
+.icon-blue{background:rgba(58,155,220,0.1);color:#3a9bdc}
+.icon-grey{background:rgba(138,155,176,0.08);color:var(--text-mid)}
+.comp-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:13px;
+  color:var(--white);margin-bottom:8px;
+  letter-spacing:0.02em;
+}
+.comp-list{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-dim);
+  line-height:1.9;letter-spacing:0.02em;
+  list-style:none;
+}
+.comp-list li::before{
+  content:'→ ';color:var(--text-dim);
+}
+
+/* ══════════════════════════════════════
+   ABOUT / POSITIONING
+══════════════════════════════════════ */
+.about-grid{
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:60px;align-items:start;
+}
+@media(max-width:860px){.about-grid{grid-template-columns:1fr}}
+
+.about-body{
+  font-size:15px;color:var(--text-mid);
+  line-height:1.9;
+}
+.about-body p{margin-bottom:20px}
+.about-body strong{color:var(--text);font-weight:500}
+
+.about-panel{
+  background:var(--s1);
+  border:1px solid var(--border);
+  border-radius:7px;overflow:hidden;
+}
+.panel-hdr{
+  background:var(--s2);
+  border-bottom:1px solid var(--border);
+  padding:14px 20px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--text-dim);
+  letter-spacing:0.25em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.panel-dot{width:6px;height:6px;border-radius:50%;background:var(--amber)}
+.panel-body{padding:20px}
+.info-row{
+  display:flex;justify-content:space-between;
+  align-items:baseline;gap:12px;
+  padding:9px 0;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.info-row:last-child{border-bottom:none}
+.info-key{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--text-dim);
+  letter-spacing:0.15em;text-transform:uppercase;
+  flex-shrink:0;
+}
+.info-val{
+  color:var(--text);font-size:12px;
+  text-align:right;
+}
+.info-val.amber{color:var(--amber)}
+.info-val.emerald{color:var(--emerald)}
+
+/* ══════════════════════════════════════
+   CONTACT / CTA
+══════════════════════════════════════ */
+.contact-section{
+  border-top:1px solid var(--border);
+  padding:80px 0;
+  text-align:center;
+}
+.contact-tag{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;color:var(--amber);
+  letter-spacing:0.3em;text-transform:uppercase;
+  margin-bottom:20px;
+}
+.contact-title{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(28px,4vw,48px);
+  color:var(--white);margin-bottom:16px;
+  line-height:1.1;
+}
+.contact-sub{
+  font-size:15px;color:var(--text-mid);
+  max-width:480px;margin:0 auto 40px;
+  line-height:1.8;
+}
+.contact-btns{
+  display:flex;align-items:center;
+  justify-content:center;gap:14px;flex-wrap:wrap;
+}
+
+/* ══════════════════════════════════════
+   FOOTER
+══════════════════════════════════════ */
+footer{
+  border-top:1px solid var(--border);
+  padding:24px 0;
+}
+.footer-inner{
+  display:flex;align-items:center;
+  justify-content:space-between;flex-wrap:wrap;gap:12px;
+}
+.footer-copy{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-dim);
+  letter-spacing:0.08em;
+}
+.footer-links{display:flex;gap:20px}
+.footer-link{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-dim);
+  text-decoration:none;letter-spacing:0.08em;
+  transition:color .2s;
+}
+.footer-link:hover{color:var(--amber)}
+
+/* ══════════════════════════════════════
+   ANIMATIONS
+══════════════════════════════════════ */
+.fade-up{
+  opacity:0;transform:translateY(24px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.fade-up.delay-1{transition-delay:.1s}
+.fade-up.delay-2{transition-delay:.2s}
+.fade-up.delay-3{transition-delay:.3s}
+.fade-up.delay-4{transition-delay:.4s}
+
+@media(max-width:680px){
+  .wrap{padding:0 20px}
+  .hero{padding:60px 0 52px}
+  .hero-stats{gap:20px}
+  .stat-divider{display:none}
+  .section{padding:60px 0}
+  .projects-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- ══ NAV ══ -->
+<nav class="z1">
+  <div class="wrap nav-inner">
+    <span class="nav-name">MFATHAN<span>.</span></span>
+    <div class="nav-right">
+      <a href="#projects" class="nav-link">PROJECTS</a>
+      <a href="#about" class="nav-link">ABOUT</a>
+      <a href="https://www.upwork.com/freelancers/~01963a0f1a105a3e1e" target="_blank" class="nav-badge">HIRE ON UPWORK ↗</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ══ HERO ══ -->
+<section class="hero z1">
+  <div class="wrap">
+    <div class="hero-eyebrow fade-up">
+      <span class="eyebrow-line"></span>
+      <span class="eyebrow-text">AI &amp; Finance Portfolio — Jakarta, Indonesia</span>
+      <span class="eyebrow-line"></span>
+    </div>
+
+    <h1 class="hero-name fade-up delay-1">
+      Mochammad<br><em>Fathan.</em>
+    </h1>
+
+    <p class="hero-title fade-up delay-2">
+      AI Content Reviewer &amp; Data Annotator &nbsp;/&nbsp;
+      <span>Finance &amp; Accounting Professional</span>
+    </p>
+
+    <p class="hero-desc fade-up delay-3">
+      Detail-oriented, <strong>English-fluent</strong> operational professional with a background in
+      aviation operations and finance &amp; accounting — fields where
+      <strong>precision, protocol compliance, and documentation discipline</strong>
+      are non-negotiable. I bring that same standard to every AI task.
+    </p>
+
+    <div class="hero-cta fade-up delay-4">
+      <a href="https://www.upwork.com/freelancers/~01963a0f1a105a3e1e" target="_blank" class="btn-primary">
+        View Upwork Profile
+        <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </a>
+      <a href="#projects" class="btn-secondary">See My Work</a>
+    </div>
+
+    <div class="hero-stats fade-up delay-4">
+      <div class="stat-item">
+        <div class="stat-num"><em>4</em></div>
+        <div class="stat-label">Anthropic Certifications</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><em>2</em></div>
+        <div class="stat-label">Live AI Projects</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><em>5+</em></div>
+        <div class="stat-label">Years Operations Experience</div>
+      </div>
+      <div class="stat-divider"></div>
+      <div class="stat-item">
+        <div class="stat-num"><em>EN</em></div>
+        <div class="stat-label">Professional English Fluency</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CREDENTIALS STRIP ══ -->
+<div class="creds-section z1">
+  <div class="wrap creds-inner">
+    <span class="creds-label">Certifications</span>
+    <span class="cert-badge"><span class="cert-dot"></span>Claude 101 — Anthropic</span>
+    <span class="cert-badge"><span class="cert-dot"></span>AI Fluency: Framework &amp; Foundations — Anthropic</span>
+    <span class="cert-badge"><span class="cert-dot"></span>Claude Code 101 — Anthropic</span>
+    <span class="cert-badge inprogress"><span class="cert-dot grey"></span>AI Capabilities &amp; Limitations — In Progress</span>
+    <span class="cert-badge"><span class="cert-dot"></span>Technical Analysis — Forex &amp; Commodities</span>
+  </div>
+</div>
+
+<!-- ══ PROJECTS ══ -->
+<section class="section z1" id="projects">
+  <div class="wrap">
+    <div class="section-header fade-up">
+      <div class="section-eyebrow">Featured Work</div>
+      <h2 class="section-title">AI-Powered<br>Portfolio Projects</h2>
+      <p class="section-sub">Interactive tools built using the Anthropic Claude API, demonstrating AI integration, financial domain knowledge, and structured analytical output.</p>
+    </div>
+
+    <div class="projects-grid">
+
+      <!-- FINTELLIGENCE -->
+      <div class="project-card amber-card fade-up">
+        <div class="card-accent amber-accent"></div>
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-logo amber-logo">FIN</div>
+            <span class="card-tag amber-tag">Finance &amp; AI</span>
+          </div>
+          <div class="card-name">FINTELLIGENCE</div>
+          <div class="card-subtitle">AI Financial Statement Analyzer</div>
+          <p class="card-desc">
+            Input income statement and balance sheet data to receive a full AI-generated analysis. Calculates eight financial ratios across liquidity, profitability, leverage, and efficiency dimensions, then surfaces risk flags, opportunities, and prioritized action recommendations via Claude Sonnet.
+          </p>
+          <div class="card-features">
+            <span class="feature-pill">Ratio Analysis</span>
+            <span class="feature-pill">Risk Flags</span>
+            <span class="feature-pill">Claude Sonnet API</span>
+            <span class="feature-pill">Structured Output</span>
+            <span class="feature-pill">Financial Modeling</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-stack">HTML · CSS · JS · Claude API</span>
+            <a href="fintelligence.html" class="card-link amber-link">
+              Launch App
+              <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAJAKPINTAR -->
+      <div class="project-card emerald-card fade-up delay-2">
+        <div class="card-accent emerald-accent"></div>
+        <div class="card-body">
+          <div class="card-header">
+            <div class="card-logo emerald-logo">PAJ</div>
+            <span class="card-tag emerald-tag">Tax &amp; Accounting</span>
+          </div>
+          <div class="card-name">PAJAKPINTAR</div>
+          <div class="card-subtitle">AI Tax Document Intelligence</div>
+          <p class="card-desc">
+            A bilingual (Indonesian / English) AI tool for analyzing business documents against Indonesian tax regulations. Extracts vendor data, applies PPN and PPh 23 withholding tax logic, classifies by Chart of Accounts, and generates double-entry accounting journal entries automatically.
+          </p>
+          <div class="card-features">
+            <span class="feature-pill">PPN / PPh 23</span>
+            <span class="feature-pill">COA Classification</span>
+            <span class="feature-pill">Journal Entries</span>
+            <span class="feature-pill">Bilingual</span>
+            <span class="feature-pill">Claude Sonnet API</span>
+          </div>
+          <div class="card-footer">
+            <span class="card-stack">HTML · CSS · JS · Claude API</span>
+            <a href="pajakpintar.html" class="card-link emerald-link">
+              Launch App
+              <svg viewBox="0 0 24 24"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ══ ABOUT ══ -->
+<section class="section z1" id="about" style="padding-top:0">
+  <div class="wrap">
+    <div class="about-grid">
+      <div>
+        <div class="section-header fade-up" style="margin-bottom:32px">
+          <div class="section-eyebrow">Background</div>
+          <h2 class="section-title">Why Clients<br>Choose Me</h2>
+        </div>
+        <div class="about-body fade-up delay-1">
+          <p>
+            My professional journey spans <strong>aviation operations management</strong>, where I
+            coordinated time-critical logistics under strict compliance requirements, and
+            <strong>finance &amp; accounting</strong> at an international data centre company —
+            two environments that demand absolute precision, documentation discipline, and
+            the ability to follow complex guidelines without error.
+          </p>
+          <p>
+            I bring these same standards to AI work. Whether evaluating LLM response quality,
+            annotating datasets, or reviewing content for policy compliance, I read every
+            guideline in full, ask one precise clarifying question when ambiguity exists,
+            and never submit work I haven't verified against the original brief.
+          </p>
+          <p>
+            I hold <strong>completed Anthropic Academy certifications</strong> in Claude and AI Fluency,
+            giving me direct, documented knowledge of how LLMs behave, where they fail,
+            and what distinguishes a high-quality AI output from a low-quality one —
+            a meaningful differentiator for evaluation and review tasks.
+          </p>
+        </div>
+      </div>
+
+      <div class="about-panel fade-up delay-2">
+        <div class="panel-hdr">
+          <span class="panel-dot"></span>
+          Professional Profile
+        </div>
+        <div class="panel-body">
+          <div class="info-row">
+            <span class="info-key">Location</span>
+            <span class="info-val">Jakarta Timur, Indonesia</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Availability</span>
+            <span class="info-val emerald">Available Now</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">English Level</span>
+            <span class="info-val amber">Professional Fluency</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Preferred</span>
+            <span class="info-val">Fixed-Price · Short-Term</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Background</span>
+            <span class="info-val">Aviation · Finance · AI</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Education</span>
+            <span class="info-val">Accounting — Univ. Terbuka</span>
+          </div>
+          <div class="info-row">
+            <span class="info-key">Platform</span>
+            <span class="info-val amber">Upwork Freelancer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ COMPETENCIES ══ -->
+<section class="section z1" style="padding-top:0">
+  <div class="wrap">
+    <div class="section-header fade-up">
+      <div class="section-eyebrow">Capabilities</div>
+      <h2 class="section-title">Core Competencies</h2>
+    </div>
+    <div class="comp-grid">
+      <div class="comp-cell fade-up">
+        <div class="comp-icon icon-amber">◈</div>
+        <div class="comp-title">AI Task Execution</div>
+        <ul class="comp-list">
+          <li>Response evaluation &amp; ranking</li>
+          <li>Preference comparison (RLHF)</li>
+          <li>Output quality scoring</li>
+          <li>Hallucination detection</li>
+          <li>Content moderation review</li>
+        </ul>
+      </div>
+      <div class="comp-cell fade-up delay-1">
+        <div class="comp-icon icon-emerald">◈</div>
+        <div class="comp-title">Data Annotation</div>
+        <ul class="comp-list">
+          <li>Text labeling &amp; categorization</li>
+          <li>Sentiment classification</li>
+          <li>Intent tagging</li>
+          <li>Dataset QA &amp; cleanup</li>
+          <li>Taxonomy &amp; schema design</li>
+        </ul>
+      </div>
+      <div class="comp-cell fade-up delay-2">
+        <div class="comp-icon icon-blue">◈</div>
+        <div class="comp-title">Finance &amp; Accounting</div>
+        <ul class="comp-list">
+          <li>Financial ratio analysis</li>
+          <li>Tax document review (ID)</li>
+          <li>Double-entry bookkeeping</li>
+          <li>COA classification</li>
+          <li>Data entry &amp; reconciliation</li>
+        </ul>
+      </div>
+      <div class="comp-cell fade-up delay-3">
+        <div class="comp-icon icon-grey">◈</div>
+        <div class="comp-title">Operations &amp; VA</div>
+        <ul class="comp-list">
+          <li>Structured research briefs</li>
+          <li>Document review &amp; summary</li>
+          <li>Administrative support</li>
+          <li>Workflow documentation</li>
+          <li>Professional communication</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ CONTACT ══ -->
+<div class="contact-section z1">
+  <div class="wrap">
+    <p class="contact-tag fade-up">Open for Work</p>
+    <h2 class="contact-title fade-up delay-1">Ready to Start<br>Your Project</h2>
+    <p class="contact-sub fade-up delay-2">
+      I respond within 24 hours on all active projects. Let's discuss what you need.
+    </p>
+    <div class="contact-btns fade-up delay-3">
+      <a href="https://www.upwork.com/freelancers/~01963a0f1a105a3e1e" target="_blank" class="btn-primary">
+        Hire Me on Upwork
+        <svg viewBox="0 0 24 24" style="width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+      </a>
+      <a href="mailto:mochfathanhasibuan@gmail.com" class="btn-secondary">
+        Direct Email
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- ══ FOOTER ══ -->
+<footer class="z1">
+  <div class="wrap footer-inner">
+    <span class="footer-copy">© 2025 Mochammad Fathan Hasibuan · Jakarta, Indonesia</span>
+    <div class="footer-links">
+      <a href="https://github.com/mochfathan" target="_blank" class="footer-link">GitHub</a>
+      <a href="https://www.upwork.com/freelancers/~01963a0f1a105a3e1e" target="_blank" class="footer-link">Upwork</a>
+      <a href="mailto:mochfathanhasibuan@gmail.com" class="footer-link">Email</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, {threshold: 0.1, rootMargin: '0px 0px -40px 0px'});
+
+document.querySelectorAll('.fade-up').forEach(el => {
+  observer.observe(el);
+  if(el.getBoundingClientRect().top < window.innerHeight) {
+    el.classList.add('visible');
+  }
+});
+</script>
+</body>
+</html>
