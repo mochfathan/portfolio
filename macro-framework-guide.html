@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Macro Intelligence Framework — Correlations & Interdependencies Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#fdf9f0;--paper:#fffcf5;--s1:#fff8ec;
+  --orange:#c2520a;--or2:rgba(194,82,10,0.07);--or3:rgba(194,82,10,0.14);
+  --violet:#6d28d9;--green:#15803d;--red:#b91c1c;--blue:#1d4ed8;
+  --text:#1a1000;--text2:#7a5832;--text3:#b89060;
+  --border:rgba(194,82,10,0.12);--border2:rgba(194,82,10,0.22);
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Lora',serif;line-height:1.8;overflow-x:hidden}
+::selection{background:rgba(194,82,10,0.15)}
+.page{max-width:820px;margin:0 auto;padding:0 32px 80px}
+
+/* Document Header */
+.doc-header{border-bottom:3px solid var(--orange);padding:44px 0 34px;margin-bottom:48px}
+.doc-eyebrow{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:0.28em;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.doc-eyebrow::after{content:'';flex:1;height:1px;background:var(--border)}
+h1.doc-title{font-family:'Playfair Display',serif;font-size:38px;font-weight:800;color:var(--text);line-height:1.12;margin-bottom:14px;letter-spacing:-0.015em}
+.doc-subtitle{font-family:'Playfair Display',serif;font-size:18px;font-style:italic;color:var(--text2);margin-bottom:20px;line-height:1.45}
+.doc-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.back-link{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange);text-decoration:none;border:1px solid var(--border2);padding:5px 13px;border-radius:3px;letter-spacing:0.08em;display:inline-flex;align-items:center;gap:6px;margin-top:18px;transition:all .2s}
+.back-link:hover{background:var(--or2)}
+
+/* Table of Contents */
+.toc{background:var(--s1);border:1px solid var(--border);border-left:4px solid var(--orange);padding:24px 28px;margin-bottom:52px}
+.toc-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--text);margin-bottom:14px;letter-spacing:0.06em;text-transform:uppercase}
+.toc-list{list-style:none;display:flex;flex-direction:column;gap:7px}
+.toc-list li{display:flex;align-items:baseline;gap:8px}
+.toc-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--orange);flex-shrink:0;width:22px}
+.toc-list a{font-size:14px;color:var(--text2);text-decoration:none;transition:color .2s}
+.toc-list a:hover{color:var(--orange)}
+
+/* Sections */
+.section{margin-bottom:60px;scroll-margin-top:24px}
+.sec-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:0.26em;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.sec-eyebrow::before{content:'◆';font-size:8px}
+h2{font-family:'Playfair Display',serif;font-size:30px;font-weight:800;color:var(--text);margin-bottom:22px;letter-spacing:-0.01em;border-bottom:1px solid var(--border);padding-bottom:12px}
+h3{font-family:'Playfair Display',serif;font-size:21px;font-weight:700;color:var(--text);margin:30px 0 12px;letter-spacing:-0.01em}
+h4{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--orange);margin:22px 0 8px;letter-spacing:0.18em;text-transform:uppercase}
+p{margin-bottom:16px;color:var(--text);font-size:15px;line-height:1.82}
+ul,ol{margin:0 0 16px 26px}
+li{margin-bottom:7px;font-size:15px;line-height:1.72}
+strong{font-weight:600;color:var(--text)}
+
+/* Callout boxes */
+.callout{border-left:4px solid var(--orange);padding:15px 20px;margin:22px 0;background:var(--or2)}
+.callout-label{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--orange);letter-spacing:0.22em;text-transform:uppercase;margin-bottom:7px}
+.callout p{font-family:'Playfair Display',serif;font-size:15px;font-style:italic;color:var(--text);margin:0;line-height:1.65}
+.c-rule{background:rgba(21,128,61,0.06);border-color:var(--green)}
+.c-rule .callout-label{color:var(--green)}
+.c-warn{background:rgba(185,28,28,0.05);border-color:var(--red)}
+.c-warn .callout-label{color:var(--red)}
+.c-note{background:rgba(29,78,216,0.05);border-color:var(--blue)}
+.c-note .callout-label{color:var(--blue)}
+
+/* Tables */
+.tbl-wrap{overflow-x:auto;margin:20px 0}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead tr{background:var(--or2);border-bottom:2px solid var(--border2)}
+th{font-family:'JetBrains Mono',monospace;font-size:9.5px;font-weight:600;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange);padding:9px 13px;text-align:left;white-space:nowrap}
+td{padding:9px 13px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.55}
+tbody tr:hover{background:rgba(194,82,10,0.02)}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px}
+.up{color:var(--green);font-weight:700}
+.dn{color:var(--red);font-weight:700}
+.bold{font-weight:600;color:var(--text)}
+.or{color:var(--orange);font-weight:600}
+
+/* Gold/DXY four-scenario grid */
+.scenario-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:22px 0}
+@media(max-width:580px){.scenario-grid{grid-template-columns:1fr}}
+.sc{border:1px solid var(--border);border-radius:4px;padding:16px 18px;background:var(--paper)}
+.sc-header{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;margin-bottom:7px}
+.sc-regime{font-family:'Playfair Display',serif;font-size:15px;font-weight:700;margin-bottom:8px}
+.sc-action{font-size:13px;color:var(--text2);line-height:1.6}
+.sc-lmp{border-top:3px solid var(--orange)}
+.sc-tmp{border-top:3px solid var(--violet)}
+.sc-ron{border-top:3px solid var(--green)}
+.sc-roff{border-top:3px solid var(--red)}
+
+/* Step list */
+.step-list{list-style:none;margin:16px 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.step-item{display:flex;gap:16px;align-items:flex-start;background:var(--paper);border:1px solid var(--border);padding:13px 16px}
+.step-n{font-family:'Playfair Display',serif;font-weight:800;font-size:22px;color:var(--orange);flex-shrink:0;width:26px;line-height:1.15;margin-top:-2px}
+.step-title{font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;font-family:'Playfair Display',serif}
+.step-desc{font-size:13px;color:var(--text2);line-height:1.65}
+
+/* Common mistakes numbered */
+.mistake{background:var(--paper);border:1px solid var(--border);padding:16px 18px;margin-bottom:14px}
+.mistake-num{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--orange);letter-spacing:0.14em;margin-bottom:6px}
+.mistake-title{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:8px}
+.mistake p{font-size:14px;margin-bottom:0;line-height:1.7}
+
+hr{border:none;border-top:1px solid var(--border);margin:44px 0}
+
+/* Footer */
+.doc-footer{border-top:2px solid var(--orange);padding-top:24px;margin-top:56px}
+.footer-disc{font-size:12px;color:var(--text3);line-height:1.8;margin-bottom:16px;font-family:'JetBrains Mono',monospace}
+.footer-meta{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.footer-meta a{color:var(--orange);text-decoration:none}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="doc-header">
+  <div class="doc-eyebrow">Analytical Framework Reference</div>
+  <h1 class="doc-title">Macro Intelligence Framework:<br>Correlations &amp; Interdependencies</h1>
+  <div class="doc-subtitle">A practitioner's guide to cross-asset macro analysis — covering the Two-Question Diagnostic, LMP/TMP monetary policy phases, Risk-On/Risk-Off framework, the Gold/DXY four-scenario diagnostic, and lead indicators by currency pair.</div>
+  <div class="doc-meta">
+    <span>Compiled by Mochammad Fathan</span>
+    <span>·</span>
+    <span>FX Technical Analyst · Amplify Trading Methodology</span>
+    <span>·</span>
+    <span>Companion to MACRO BRIEF Tool</span>
+  </div>
+  <a href="macro-briefing.html" class="back-link">← Open MACRO BRIEF Tool</a>
+</div>
+
+<div class="toc">
+  <div class="toc-title">Contents</div>
+  <ol class="toc-list">
+    <li><span class="toc-num">1</span><a href="#intro">Why Cross-Asset Correlations Matter</a></li>
+    <li><span class="toc-num">2</span><a href="#two-q">The Two-Question Diagnostic</a></li>
+    <li><span class="toc-num">3</span><a href="#lmp-tmp">LMP / TMP Monetary Policy Framework</a></li>
+    <li><span class="toc-num">4</span><a href="#roro">Risk-On / Risk-Off Framework</a></li>
+    <li><span class="toc-num">5</span><a href="#gold-dxy">The Gold / DXY Four-Scenario Diagnostic</a></li>
+    <li><span class="toc-num">6</span><a href="#leads">Lead Indicators by Currency Pair</a></li>
+    <li><span class="toc-num">7</span><a href="#mistakes">Common Mistakes &amp; How to Avoid Them</a></li>
+    <li><span class="toc-num">8</span><a href="#workflow">Daily Workflow with MACRO BRIEF</a></li>
+  </ol>
+</div>
+
+<!-- SECTION 1 -->
+<div class="section" id="intro">
+  <div class="sec-eyebrow">Section 1</div>
+  <h2>Why Cross-Asset Correlations Matter</h2>
+  <p>Currency markets do not move in isolation. Every meaningful FX move is the downstream expression of something happening upstream — in monetary policy, in global risk appetite, in commodity flows, or in relative growth expectations between economies. Trading FX without understanding these upstream drivers is equivalent to reading only the last page of a detective novel.</p>
+  <p>The <strong>Amplify Trading Correlations &amp; Interdependencies framework</strong> provides a structured methodology for identifying <em>why</em> markets are moving and which direction they are likely to continue. Rather than reacting to price, this framework reads the cross-asset fingerprint — the pattern of DXY, yields, equities, commodities, and safe-haven flows — and identifies the macro regime in force.</p>
+
+  <h3>The Hierarchy of Information</h3>
+  <p>Not all cross-asset signals carry equal weight. The framework places them in a reliability hierarchy applied in sequence:</p>
+  <ol>
+    <li><strong>Monetary Policy Stance</strong> (Fed, ECB, BOJ) — the highest-order driver. Everything flows from this.</li>
+    <li><strong>Dollar direction (DXY)</strong> — the primary transmission mechanism of monetary policy into FX.</li>
+    <li><strong>Risk appetite</strong> — the secondary filter, captured most reliably by S&amp;P 500 and AUD/JPY together.</li>
+    <li><strong>Commodity prices</strong> — lead indicators for commodity-linked currencies (AUD, CAD, NZD).</li>
+    <li><strong>Yield differentials</strong> — drive carry trade positioning and USD/JPY dynamics specifically.</li>
+  </ol>
+  <div class="callout">
+    <div class="callout-label">Core Principle</div>
+    <p>Understanding the macro regime tells you the direction of the river. Supply &amp; demand zones tell you where to get in the boat. Both are necessary — neither alone is sufficient.</p>
+  </div>
+</div>
+
+<!-- SECTION 2 -->
+<div class="section" id="two-q">
+  <div class="sec-eyebrow">Section 2</div>
+  <h2>The Two-Question Diagnostic</h2>
+  <p>Before analysing any chart or zone, answer these two questions in strict order. The sequence is not arbitrary: the first question defines the macro environment; the second confirms risk appetite within it. Reversing the order leads to misclassification.</p>
+
+  <h3>Question 1 — What is the Dollar doing?</h3>
+  <p>Examine the DXY (Dollar Index). Is it rising, falling, or consolidating? The dollar is the world's reserve currency and the denominator of every USD pair. Its direction sets the primary macro bias.</p>
+  <p><strong>Critical breadth check:</strong> The DXY is 57.6% EUR-weighted. A falling DXY may reflect EUR strength specifically rather than broad dollar weakness. Confirm the dollar thesis by checking USD/JPY and USD/CHF simultaneously. If all three USD pairs are moving in the same direction, the dollar is the driver. If only EUR/USD is moving, something specific is happening in Europe.</p>
+  <div class="callout c-rule">
+    <div class="callout-label">The Breadth Rule</div>
+    <p>A dollar thesis is only valid when confirmed across multiple USD pairs. One pair moving does not make a dollar call. Two or more moving in alignment does.</p>
+  </div>
+
+  <h3>Question 2 — What is Risk Appetite doing?</h3>
+  <p>Use a composite basket of signals. The most reliable combination is:</p>
+  <ul>
+    <li><strong>S&amp;P 500</strong> — the global risk barometer. Rising means risk appetite is healthy.</li>
+    <li><strong>AUD/JPY</strong> — often cleaner than VIX because it removes the dollar from the equation. Rising AUD/JPY means risk-on; falling means risk-off.</li>
+    <li><strong>VIX</strong> — the fear index. Below 15 signals complacency. 15–25 signals caution. Above 25 signals fear.</li>
+    <li><strong>Oil (WTI)</strong> — rising oil typically accompanies risk-on demand optimism; falling oil often signals demand concerns.</li>
+  </ul>
+  <div class="callout c-note">
+    <div class="callout-label">Why AUD/JPY Over VIX Alone</div>
+    <p>AUD/JPY measures the relative appeal of a growth currency (AUD) versus a safe haven (JPY). It is directionally cleaner than VIX because VIX can spike on USD-specific events without reflecting genuine global risk-off. AUD/JPY captures cross-asset risk sentiment with no dollar contamination.</p>
+  </div>
+</div>
+
+<!-- SECTION 3 -->
+<div class="section" id="lmp-tmp">
+  <div class="sec-eyebrow">Section 3</div>
+  <h2>LMP / TMP Monetary Policy Framework</h2>
+  <p>The most powerful macro driver is monetary policy. When the Federal Reserve shifts its stance, everything else follows in a predictable transmission chain. The LMP/TMP framework classifies the current monetary policy environment and derives its expected impact on currency and asset markets.</p>
+
+  <h3>LMP — Loose Monetary Policy</h3>
+  <p>LMP describes an accommodative environment: the Fed is cutting rates, holding at low levels, or signalling an easing bias. The transmission chain runs as follows: Fed eases → US interest rates fall relative to other countries → capital flows out of USD assets into higher-yielding alternatives → dollar weakens → risk assets and commodity currencies outperform.</p>
+
+  <h4>The LMP Fingerprint — The Critical Distinguisher</h4>
+  <div class="callout c-rule">
+    <div class="callout-label">The LMP Fingerprint</div>
+    <p>In LMP, <strong>bonds AND equities rise together</strong>. This is the single most important pattern that distinguishes LMP from pure Risk-On. In Risk-On, bond yields rise (prices fall) as capital rotates into equities. In LMP, falling rates mean bond prices rise at the same time equities rise. Bonds and equities moving up simultaneously is the LMP fingerprint.</p>
+  </div>
+  <p><strong>Trade implications under LMP:</strong> Long AUD/USD, EUR/USD, NZD/USD. Short USD broadly. Long Gold (real yields falling). Long equities. Long commodities.</p>
+
+  <h3>TMP — Tight Monetary Policy</h3>
+  <p>TMP describes a restrictive environment: the Fed is hiking rates, holding at high levels, or signalling further tightening. The reverse transmission applies: Fed tightens → US rates rise → capital flows into USD assets → dollar strengthens → risk assets come under pressure → commodity currencies underperform.</p>
+  <p><strong>TMP fingerprint:</strong> DXY rising, Gold falling or flat, bonds selling off (yields rising), commodities under pressure. <strong>Trade:</strong> Long USD pairs. Short commodity currencies. Defensive equity positioning.</p>
+
+  <h3>LMP vs TMP Reference Table</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Indicator</th><th>LMP Signal</th><th>TMP Signal</th><th>Key Insight</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">DXY</td><td class="dn">↓ Falling</td><td class="up">↑ Rising</td><td>Primary transmission mechanism</td></tr>
+        <tr><td class="bold">Gold</td><td class="up">↑ Rising</td><td class="dn">↓ Falling</td><td>Real yield proxy (inverse)</td></tr>
+        <tr><td class="bold">Bonds (price)</td><td class="up">↑ Rallying (yields ↓)</td><td class="dn">↓ Selling (yields ↑)</td><td>Direct policy expression</td></tr>
+        <tr><td class="bold">Equities</td><td class="up">↑ Generally rising</td><td>Mixed early, then falls</td><td>Discounting earnings and liquidity</td></tr>
+        <tr><td class="bold">Bonds + Equities</td><td class="or">BOTH rising together</td><td>Diverge — bonds sell</td><td><strong>THE LMP fingerprint</strong></td></tr>
+        <tr><td class="bold">AUD/USD</td><td class="up">↑ Long bias</td><td class="dn">↓ Short bias</td><td>Dollar + risk sensitivity combined</td></tr>
+        <tr><td class="bold">USD/JPY</td><td class="dn">↓ Falls (USD weak)</td><td class="up">↑ Rises (USD strong)</td><td>Yield differential driven</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 4 -->
+<div class="section" id="roro">
+  <div class="sec-eyebrow">Section 4</div>
+  <h2>Risk-On / Risk-Off Framework</h2>
+  <p>The Risk-On/Risk-Off (RORO) framework captures the dominant tone of global capital flows on a shorter time horizon than LMP/TMP. While monetary policy shifts operate over months, risk sentiment can shift within hours on the back of a data release, geopolitical event, or central bank statement.</p>
+
+  <h3>Risk-On Environment</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Asset</th><th>Risk-On Behaviour</th><th>Explanation</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">S&amp;P 500</td><td class="up">↑ Rising</td><td>Primary risk barometer</td></tr>
+        <tr><td class="bold">VIX</td><td class="dn">↓ Below 15, falling</td><td>Complacency; fear absent</td></tr>
+        <tr><td class="bold">AUD/JPY</td><td class="up">↑ Rising</td><td>AUD bid (growth), JPY sold (safe haven)</td></tr>
+        <tr><td class="bold">Oil (WTI)</td><td class="up">↑ Rising</td><td>Demand optimism bid</td></tr>
+        <tr><td class="bold">Bonds (price)</td><td class="dn">↓ Selling (yields ↑)</td><td><strong>Key differentiator from LMP: bonds SELL in Risk-On</strong></td></tr>
+        <tr><td class="bold">USD</td><td class="dn">↓ Weakening</td><td>Risk appetite reduces safe-haven demand</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Risk-Off Environment</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Asset</th><th>Risk-Off Behaviour</th><th>Explanation</th></tr></thead>
+      <tbody>
+        <tr><td class="bold">S&amp;P 500</td><td class="dn">↓ Falling</td><td>Risk reduction begins here</td></tr>
+        <tr><td class="bold">VIX</td><td class="up">↑ Spiking above 20</td><td>Fear index elevated</td></tr>
+        <tr><td class="bold">AUD/JPY</td><td class="dn">↓ Falling hard</td><td>AUD sold, JPY bid — clearest single Risk-Off signal</td></tr>
+        <tr><td class="bold">Gold</td><td class="up">↑ Rising (safe haven)</td><td>Regardless of DXY direction</td></tr>
+        <tr><td class="bold">JPY</td><td class="up">↑ Strengthening across board</td><td>Carry unwind — JPY is the funding currency</td></tr>
+        <tr><td class="bold">Bonds (price)</td><td class="up">↑ Rallying (yields ↓)</td><td>Flight to quality — also rises in LMP; context determines which</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-label">Critical Distinction</div>
+    <p>Bonds rising is common to both Risk-Off (flight to quality) and LMP (falling rates). The differentiator is equities: in Risk-Off, equities fall and bonds rally. In LMP, equities and bonds rally together. Always check equities before drawing a conclusion from bond behaviour alone.</p>
+  </div>
+</div>
+
+<!-- SECTION 5 -->
+<div class="section" id="gold-dxy">
+  <div class="sec-eyebrow">Section 5</div>
+  <h2>The Gold / DXY Four-Scenario Diagnostic</h2>
+  <p>Gold and the Dollar have a theoretically inverse relationship. However, in practice the relationship breaks down regularly, and those breakdowns carry the most actionable information in the cross-asset toolkit. By observing the simultaneous direction of Gold (XAU/USD) and the Dollar Index (DXY), you can identify the macro regime with high accuracy across four distinct scenarios.</p>
+
+  <div class="scenario-grid">
+    <div class="sc sc-lmp">
+      <div class="sc-header" style="color:var(--orange)">Gold ↑ &nbsp;+&nbsp; DXY ↓</div>
+      <div class="sc-regime" style="color:var(--orange)">LMP Phase — Monetary Driver</div>
+      <div class="sc-action">Loose monetary policy driving both moves. Falling real yields weaken the dollar and boost gold simultaneously. <strong>Buy risk assets, sell USD broadly.</strong> Long AUD/USD, EUR/USD. Long equities. The clearest and most tradeable signal of the four.</div>
+    </div>
+    <div class="sc sc-roff">
+      <div class="sc-header" style="color:var(--red)">Gold ↑ &nbsp;+&nbsp; DXY ↑</div>
+      <div class="sc-regime" style="color:var(--red)">Risk-Off / Fear — Safe-Haven Panic</div>
+      <div class="sc-action">Both assets receiving safe-haven inflows simultaneously. Genuine fear or systemic shock. <strong>Defensive posture.</strong> Long JPY, CHF. Reduce risk exposure. Avoid directional FX bets until the environment stabilises.</div>
+    </div>
+    <div class="sc sc-tmp">
+      <div class="sc-header" style="color:var(--violet)">Gold ↓ &nbsp;+&nbsp; DXY ↑</div>
+      <div class="sc-regime" style="color:var(--violet)">TMP Phase — Tightening Driver</div>
+      <div class="sc-action">Tight monetary policy forcing capital into dollar assets and punishing gold. Rising real yields depress gold's appeal. <strong>Buy USD, reduce risk.</strong> Long USD pairs. Short commodity currencies. Classic TMP environment.</div>
+    </div>
+    <div class="sc sc-ron">
+      <div class="sc-header" style="color:var(--green)">Gold ↓ &nbsp;+&nbsp; DXY ↓</div>
+      <div class="sc-regime" style="color:var(--green)">Pure Risk-On — Equities Leading</div>
+      <div class="sc-action">Risk appetite so strong that safe-haven demand for both gold and dollars is collapsing. Capital rotating aggressively into equities and commodities. <strong>Buy risk assets, sell safe havens.</strong> Long AUD, NZD. Short JPY and CHF.</div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <div class="callout-label">Practitioner's Note</div>
+    <p>The Gold/DXY diagnostic is most reliable on a daily or weekly timeframe. On an intraday basis, noise can create false readings. Always confirm with the Two-Question Diagnostic before acting on a single Gold/DXY signal.</p>
+  </div>
+</div>
+
+<!-- SECTION 6 -->
+<div class="section" id="leads">
+  <div class="sec-eyebrow">Section 6</div>
+  <h2>Lead Indicators by Currency Pair</h2>
+  <p>Each major FX pair has a specific set of lead indicators — assets or indices whose movements tend to precede or confirm directional moves in that pair. Cross-confirming at least two lead indicators before committing to a bias is a minimum standard.</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Pair</th><th>Primary Lead</th><th>Secondary Lead</th><th>Key Relationship &amp; Notes</th></tr></thead>
+      <tbody>
+        <tr>
+          <td class="bold">EUR/USD</td>
+          <td>DXY (inverse, corr –0.95 to –0.99)</td>
+          <td>German Bund vs US Treasury spread</td>
+          <td>EUR/USD is effectively the inverse of DXY. Breadth check essential — falling DXY may be EUR-specific. If USD/JPY and USD/CHF are not falling simultaneously, the move is EUR-driven, not dollar-driven.</td>
+        </tr>
+        <tr>
+          <td class="bold">GBP/USD</td>
+          <td>EUR/USD correlation (0.75–0.85)</td>
+          <td>UK Gilt vs US Treasury spread; risk appetite</td>
+          <td>GBP/USD and EUR/USD move together most of the time. Divergence signals currency-specific event. When both move together, it is a dollar or global event. When GBP diverges, it is BOE or UK data.</td>
+        </tr>
+        <tr>
+          <td class="bold">AUD/USD</td>
+          <td>Gold (dollar component) + S&amp;P 500 (risk component)</td>
+          <td>AUD/JPY (risk barometer); China PMI; Iron Ore</td>
+          <td>AUD/USD requires two aligned leads: dollar direction AND risk appetite. It is a pro-cyclical, commodity currency with high beta to global growth. Confirm 2 of 3 signals (Gold direction, SPX direction, AUD/JPY direction) before establishing a bias.</td>
+        </tr>
+        <tr>
+          <td class="bold">USD/JPY</td>
+          <td>10Y US–JP yield differential</td>
+          <td>Risk appetite (inverse: Risk-Off = JPY bid = USD/JPY falls)</td>
+          <td>USD/JPY rises when US yields rise above JP yields. However, JPY is the world's premier safe-haven currency — any genuine risk-off event brings JPY bid regardless of yield differentials. BOJ intervention risk must be monitored near historical levels.</td>
+        </tr>
+        <tr>
+          <td class="bold">AUD/JPY</td>
+          <td>S&amp;P 500 (primary)</td>
+          <td>VIX (inverse); Oil; China growth data</td>
+          <td>The purest risk barometer in G10 FX. Combines the most growth-sensitive currency (AUD) with the most risk-averse (JPY). Removes dollar ambiguity entirely. Use as a macro confirmation tool rather than a primary trade vehicle.</td>
+        </tr>
+        <tr>
+          <td class="bold">XAU/USD (Gold)</td>
+          <td>US Real Yields / TIPS (inverse)</td>
+          <td>DXY (inverse in LMP/TMP); Risk appetite; Inflation expectations</td>
+          <td>Gold operates in three regimes: (1) Dollar-driven — inverse DXY (LMP/TMP). (2) Safe-haven driven — Gold and DXY both rise (Fear). (3) Inflation-driven — Gold rises despite stable DXY (inflation expectations rising). Identify the current Gold regime before applying a signal.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- SECTION 7 -->
+<div class="section" id="mistakes">
+  <div class="sec-eyebrow">Section 7</div>
+  <h2>Common Mistakes &amp; How to Avoid Them</h2>
+
+  <div class="mistake">
+    <div class="mistake-num">MISTAKE 01</div>
+    <div class="mistake-title">Reversing the Diagnostic Order</div>
+    <p>Answering Q2 (Risk) before Q1 (Dollar) leads to misclassification. A falling AUD/JPY during an LMP regime does not mean risk-off — it may mean the JPY is rallying due to BOJ policy expectations. Always identify the dollar environment first to provide the correct interpretive context for risk signals.</p>
+  </div>
+
+  <div class="mistake">
+    <div class="mistake-num">MISTAKE 02</div>
+    <div class="mistake-title">Using DXY as the Sole Dollar Signal</div>
+    <p>The DXY is 57.6% EUR. A EUR-specific rally will push DXY down, creating the appearance of broad dollar weakness when the dollar may be flat or rising against everything except EUR. Breadth-check every dollar thesis against USD/JPY and USD/CHF before trading it.</p>
+  </div>
+
+  <div class="mistake">
+    <div class="mistake-num">MISTAKE 03</div>
+    <div class="mistake-title">Confusing LMP with Risk-On</div>
+    <p>Both LMP and Risk-On involve rising equities and a broadly weaker dollar. The distinguisher is bonds. In Risk-On, bonds sell (yields rise) as equities rally. In LMP, bonds and equities rise together. Trading a Risk-On framework in an LMP environment causes you to fade equity rallies that have fundamental policy backing.</p>
+  </div>
+
+  <div class="mistake">
+    <div class="mistake-num">MISTAKE 04</div>
+    <div class="mistake-title">Acting on a Single Lead Signal Without Confirmation</div>
+    <p>Gold rising alone does not confirm LMP — DXY must also be falling. AUD/JPY rising alone does not confirm Risk-On — VIX must also be declining and equities rising. The framework requires minimum two confirming signals before a regime call is valid.</p>
+  </div>
+
+  <div class="mistake">
+    <div class="mistake-num">MISTAKE 05</div>
+    <div class="mistake-title">Using the Framework as a Trade Trigger Rather Than a Filter</div>
+    <p>The macro framework identifies the regime in which Supply &amp; Demand zones should be traded. A Demand zone in an LMP environment deserves more weight than the same zone in a TMP environment where structural dollar strength creates headwind. The framework is a filter that raises or lowers the conviction of a zone-based entry — it is not itself the entry signal.</p>
+  </div>
+
+  <div class="callout c-warn">
+    <div class="callout-label">The Most Costly Mistake</div>
+    <p>Applying the macro framework directionally in isolation, without an S&amp;D zone to anchor the entry. Knowing the regime is risk-on does not tell you when or where to buy AUD/USD. The zone tells you where. The regime tells you whether to trust it.</p>
+  </div>
+</div>
+
+<!-- SECTION 8 -->
+<div class="section" id="workflow">
+  <div class="sec-eyebrow">Section 8</div>
+  <h2>Daily Workflow with MACRO BRIEF</h2>
+  <p>The <strong>MACRO BRIEF</strong> tool generates a structured intelligence briefing by applying this framework to live market data you provide from TradingView. The recommended daily workflow takes 10–15 minutes and establishes a clear macro context before any zone analysis begins.</p>
+
+  <ol class="step-list">
+    <li class="step-item">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="step-title">Open TradingView 10 minutes before the session</div>
+        <div class="step-desc">Pull up DXY, US10Y, and US02Y charts. Note current levels and whether they are higher or lower than yesterday's close. This answers the Q1 (Dollar) component before you open the briefing tool.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="step-title">Read risk assets and the AUD/JPY barometer</div>
+        <div class="step-desc">Check S&amp;P 500 (SPX500 on TradingView), VIX, Gold (XAUUSD), WTI Oil (USOIL), and AUD/JPY. Note whether each is higher, flat, or lower. This answers the Q2 (Risk) component.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="step-title">Record FX pair prices</div>
+        <div class="step-desc">Note current prices for EUR/USD, GBP/USD, AUD/USD, and USD/JPY — these are context inputs, not entry levels. They allow Claude to calibrate pair-specific analysis to current market positioning.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="step-title">Input macro context</div>
+        <div class="step-desc">Select the current Fed stance and your read of risk mood. Note any recent key data release (NFP, CPI, FOMC). This context allows the AI to distinguish between data-driven moves and technical positioning moves.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-n">5</div>
+      <div class="step-body">
+        <div class="step-title">Generate and read the brief critically</div>
+        <div class="step-desc">Read the Regime Identification and Dollar Analysis sections first. If they contradict your own read of the market, investigate why — either you missed a signal or the AI is working with incomplete inputs. The brief is a thinking partner, not a replacement for analysis.</div>
+      </div>
+    </li>
+    <li class="step-item">
+      <div class="step-n">6</div>
+      <div class="step-body">
+        <div class="step-title">Apply the Session Directive as a zone filter</div>
+        <div class="step-desc">If the brief says "SELL USD" and you see a fresh Supply zone in EUR/USD on the 1H chart, the macro regime is aligned — add conviction. If the brief says "BUY USD" and the same Supply zone appears, the macro is working against you — reduce size or skip the trade. Alignment between macro and S&amp;D is the highest-probability setup.</div>
+      </div>
+    </li>
+  </ol>
+
+  <div class="callout">
+    <div class="callout-label">Integration Principle</div>
+    <p>The MACRO BRIEF is most valuable as a pre-session ritual, not an intraday lookup. Establishing the macro context before the session starts — before price begins moving — means you are reading the environment rather than reacting to it.</p>
+  </div>
+</div>
+
+<hr>
+
+<div class="doc-footer">
+  <p class="footer-disc">DISCLAIMER: This document is an educational reference compiled for the MACRO BRIEF portfolio project. The framework described represents the analytical methodology practised within the Amplify Trading Correlations &amp; Interdependencies curriculum. All trading involves significant risk of loss. This document does not constitute financial advice or a recommendation to trade any specific instrument. Always consult a qualified financial advisor before making investment decisions. Regulatory and market conditions change — verify any specifics against current authoritative sources.</p>
+  <div class="footer-meta">
+    <span>Compiled by Mochammad Fathan · FX Technical Analyst · AI Integration Portfolio · v1.0</span>
+    <span><a href="macro-briefing.html">← Open MACRO BRIEF Tool</a></span>
+  </div>
+</div>
+
+</div>
+</body>
+</html>
