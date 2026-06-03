@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MACRO BRIEF — Cross-Asset Intelligence Briefing Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0b0804;--s1:#100d05;--s2:#181108;--s3:#201508;--s4:#281a0a;
+  --b1:rgba(249,115,22,0.09);--b2:rgba(249,115,22,0.2);
+  --orange:#f97316;--or2:rgba(249,115,22,0.1);
+  --violet:#a78bfa;--vi2:rgba(167,139,250,0.08);
+  --green:#4ade80;--gr2:rgba(74,222,128,0.08);
+  --red:#f87171;--re2:rgba(248,113,113,0.07);
+  --blue:#93c5fd;--bl2:rgba(147,197,253,0.07);
+  --gold:#fbbf24;--go2:rgba(251,191,36,0.08);
+  --text:#c0a878;--text2:#7a5832;--text3:#3d2810;--white:#ede0c8;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:radial-gradient(ellipse 700px 500px at 100% 0%,rgba(249,115,22,0.04) 0%,transparent 60%),
+             radial-gradient(ellipse 500px 400px at 0% 100%,rgba(167,139,250,0.03) 0%,transparent 60%);
+  pointer-events:none;z-index:0}
+.z1{position:relative;z-index:1}
+.wrap{max-width:1220px;margin:0 auto;padding:0 24px}
+
+/* ─── HEADER ─── */
+header{background:var(--s1);border-bottom:1px solid var(--b2);padding:13px 0;position:sticky;top:0;z-index:100}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:14px}
+.logo-mark{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:var(--orange);letter-spacing:0.06em}
+.logo-pipe{color:var(--b2);margin:0 6px;font-size:18px}
+.logo-sub{font-family:'Playfair Display',serif;font-size:11px;font-style:italic;color:var(--text2)}
+.hdr-r{display:flex;align-items:center;gap:10px}
+.api-strip{display:flex;align-items:center;gap:6px}
+.api-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0}
+.api-dot.on{background:var(--green);box-shadow:0 0 5px var(--green)}
+#apiIn{background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:6px 10px;outline:none;width:200px;transition:border-color .2s}
+#apiIn:focus{border-color:var(--orange)}
+.hdr-link{font-size:10px;color:var(--text2);border:1px solid var(--b1);padding:4px 10px;border-radius:2px;
+  letter-spacing:0.1em;text-decoration:none;transition:all .2s;white-space:nowrap}
+.hdr-link:hover{border-color:var(--orange);color:var(--orange)}
+
+/* ─── LAYOUT ─── */
+.main-grid{display:grid;grid-template-columns:400px 1fr;gap:22px;padding:24px 0 64px;align-items:start}
+@media(max-width:920px){.main-grid{grid-template-columns:1fr}}
+
+/* ─── PANEL ─── */
+.panel{background:var(--s1);border:1px solid var(--b2);border-radius:4px;overflow:hidden;margin-bottom:14px}
+.phdr{background:var(--s2);border-bottom:1px solid var(--b1);padding:9px 14px;display:flex;align-items:center;gap:8px}
+.phdr h3{font-size:9px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2)}
+.phdr-r{margin-left:auto;font-size:9px;color:var(--text2)}
+.ptag{font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:0.08em;font-weight:600}
+.pt-o{background:var(--or2);color:var(--orange);border:1px solid rgba(249,115,22,0.2)}
+.pt-v{background:var(--vi2);color:var(--violet);border:1px solid rgba(167,139,250,0.2)}
+.pt-g{background:var(--gr2);color:var(--green);border:1px solid rgba(74,222,128,0.2)}
+.pb{padding:14px}
+
+/* ─── FORM ELEMENTS ─── */
+.frow{display:grid;gap:10px;margin-bottom:10px}
+.f2{grid-template-columns:1fr 1fr}
+.f3{grid-template-columns:1fr 1fr 1fr}
+.fld label{font-size:9px;color:var(--text2);letter-spacing:0.14em;text-transform:uppercase;display:block;margin-bottom:4px}
+.fld input,.fld select{width:100%;background:var(--s3);border:1px solid var(--b2);border-radius:3px;
+  color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 9px;outline:none;transition:border-color .2s}
+.fld input:focus,.fld select:focus{border-color:var(--orange);background:var(--s4)}
+.fld input::placeholder{color:var(--text2);opacity:0.5}
+.fld select option{background:var(--s2)}
+
+/* Market data row: price + direction */
+.mkt-row{margin-bottom:9px}
+.mkt-row label{font-size:9px;color:var(--text2);letter-spacing:0.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+.mkt-inputs{display:grid;grid-template-columns:1fr 90px;gap:7px}
+.mkt-inputs input{background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 9px;outline:none;width:100%;transition:border-color .2s}
+.mkt-inputs input:focus{border-color:var(--orange)}
+.mkt-inputs select{background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--text);
+  font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 6px;outline:none;width:100%;transition:border-color .2s}
+.mkt-inputs select option{background:var(--s2)}
+.computed{font-family:'JetBrains Mono',monospace;font-size:12px;padding:7px 9px;background:var(--s3);
+  border:1px solid var(--b1);border-radius:3px;min-height:32px;display:flex;align-items:center}
+
+/* ─── GENERATE BUTTON ─── */
+.btn-gen{width:100%;background:var(--orange);color:#0b0804;border:none;border-radius:4px;padding:13px;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:15px;letter-spacing:0.04em;
+  cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-gen:hover{opacity:0.87;transform:translateY(-1px)}
+.btn-gen:disabled{opacity:0.32;cursor:not-allowed;transform:none}
+
+/* ─── PLACEHOLDER ─── */
+.phbox{background:var(--s1);border:1px solid var(--b2);border-radius:4px;padding:52px 28px;text-align:center}
+.ph-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--orange);
+  opacity:0.25;letter-spacing:0.06em;margin-bottom:14px;line-height:1.2}
+.ph-sub{font-family:'Playfair Display',serif;font-size:15px;color:var(--white);margin-bottom:10px}
+.ph-desc{font-size:11px;color:var(--text2);line-height:1.85;max-width:360px;margin:0 auto 22px}
+.ph-steps{display:flex;flex-direction:column;gap:6px;max-width:300px;margin:0 auto;text-align:left}
+.ph-step{font-size:11px;color:var(--text2);opacity:0.6;display:flex;align-items:center;gap:8px}
+.ph-n{width:18px;height:18px;border-radius:50%;border:1px solid var(--b2);display:grid;place-items:center;font-size:9px;flex-shrink:0}
+
+/* ─── LOADING ─── */
+.loadbox{background:var(--s1);border:1px solid var(--b2);border-radius:4px;padding:52px;text-align:center}
+.lspin{width:26px;height:26px;border:2px solid var(--b2);border-top-color:var(--orange);
+  border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lmsg{font-family:'Playfair Display',serif;font-style:italic;font-size:13px;color:var(--text2);line-height:1.7}
+
+/* ─── ERROR ─── */
+.errbox{background:var(--re2);border:1px solid rgba(248,113,113,0.2);border-radius:4px;padding:16px;font-size:12px;color:var(--red);line-height:1.7}
+
+/* ═══════ BRIEFING OUTPUT STYLES ═══════ */
+
+/* Masthead */
+.brief-wrap{background:var(--s1);border:1px solid var(--b2);border-radius:4px;overflow:hidden}
+.brief-mast{background:var(--s2);padding:20px 26px;border-bottom:1px solid var(--b2)}
+.bm-eyebrow{font-size:9px;color:var(--orange);letter-spacing:0.3em;text-transform:uppercase;margin-bottom:8px}
+.bm-row{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;margin-bottom:10px}
+.bm-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:800;color:var(--white);line-height:1.2;letter-spacing:0.01em}
+.bm-regime-badge{font-size:11px;font-weight:700;padding:7px 16px;border-radius:3px;
+  letter-spacing:0.08em;white-space:nowrap;flex-shrink:0;text-transform:uppercase}
+.reg-lmp{background:rgba(249,115,22,0.14);color:var(--orange);border:1px solid rgba(249,115,22,0.28)}
+.reg-tmp{background:rgba(167,139,250,0.12);color:var(--violet);border:1px solid rgba(167,139,250,0.25)}
+.reg-riskOn{background:rgba(74,222,128,0.1);color:var(--green);border:1px solid rgba(74,222,128,0.22)}
+.reg-riskOff{background:rgba(248,113,113,0.1);color:var(--red);border:1px solid rgba(248,113,113,0.22)}
+.reg-mixed{background:rgba(147,197,253,0.08);color:var(--blue);border:1px solid rgba(147,197,253,0.18)}
+.reg-trans{background:rgba(251,191,36,0.08);color:var(--gold);border:1px solid rgba(251,191,36,0.2)}
+.bm-meta{display:flex;align-items:center;gap:14px;font-size:10px;color:var(--text2);letter-spacing:0.06em;flex-wrap:wrap}
+.bm-sep{opacity:0.3}
+.bm-conf{font-size:10px;font-weight:700}
+.conf-h{color:var(--green)}
+.conf-m{color:var(--gold)}
+.conf-l{color:var(--red)}
+.bm-rationale{font-size:12px;color:var(--text);line-height:1.7;font-style:italic;
+  border-left:3px solid var(--orange);padding-left:13px;margin-top:4px}
+
+/* Sections */
+.b-sec{padding:18px 26px;border-bottom:1px solid var(--b1)}
+.b-sec:last-child{border-bottom:none}
+.sec-hdr{display:flex;align-items:baseline;gap:12px;margin-bottom:12px}
+.sec-num{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--orange);flex-shrink:0;line-height:1;width:28px}
+.sec-title{font-family:'Playfair Display',serif;font-size:12px;font-weight:700;color:var(--white);
+  letter-spacing:0.1em;text-transform:uppercase}
+.sec-chip{font-size:10px;font-weight:700;padding:2px 8px;border-radius:2px;margin-left:auto;letter-spacing:0.08em;flex-shrink:0}
+.ch-bull{background:var(--gr2);color:var(--green);border:1px solid rgba(74,222,128,0.2)}
+.ch-bear{background:var(--re2);color:var(--red);border:1px solid rgba(248,113,113,0.2)}
+.ch-neut{background:var(--bl2);color:var(--blue);border:1px solid rgba(147,197,253,0.18)}
+.ch-mixed{background:var(--go2);color:var(--gold);border:1px solid rgba(251,191,36,0.2)}
+.sec-body{font-size:12px;line-height:1.85;color:var(--text)}
+
+/* Dollar / yield data row */
+.data-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:10px}
+.ds-card{background:var(--s2);border-radius:3px;padding:10px 12px;text-align:center}
+.ds-lbl{font-size:9px;color:var(--text2);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px}
+.ds-val{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;line-height:1}
+.ds-dir{font-size:11px;margin-top:3px}
+.dir-up{color:var(--green)}
+.dir-dn{color:var(--red)}
+.dir-fl{color:var(--text2)}
+
+/* Lead signals table */
+.sig-tbl{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:10px}
+.sig-tbl th{font-size:9px;color:var(--text2);letter-spacing:0.12em;text-align:left;padding:5px 8px;border-bottom:1px solid var(--b2);text-transform:uppercase}
+.sig-tbl td{padding:6px 8px;border-bottom:1px solid var(--b1);vertical-align:middle}
+.sig-n{font-weight:600;color:var(--white)}
+.sig-v{font-family:'JetBrains Mono',monospace;color:var(--text)}
+.sig-chip{font-size:9px;font-weight:700;padding:2px 7px;border-radius:2px;letter-spacing:0.08em}
+.s-on{background:var(--gr2);color:var(--green)}
+.s-off{background:var(--re2);color:var(--red)}
+.s-mix{background:var(--bl2);color:var(--blue)}
+.sig-w{font-size:9px;color:var(--text2)}
+
+/* Pairs grid */
+.pairs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.pair-card{background:var(--s2);border-radius:4px;padding:12px;border-top:2px solid}
+.pc-bull{border-color:var(--green)}
+.pc-bear{border-color:var(--red)}
+.pc-neut{border-color:var(--blue)}
+.pc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.pc-name{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--white)}
+.pc-bias-chip{font-size:9px;font-weight:700;padding:2px 8px;border-radius:2px;letter-spacing:0.1em}
+.pb-bull{background:var(--gr2);color:var(--green)}
+.pb-bear{background:var(--re2);color:var(--red)}
+.pb-neut{background:var(--bl2);color:var(--blue)}
+.pc-level{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);margin-bottom:7px}
+.pc-rationale{font-size:11px;color:var(--text);line-height:1.65;margin-bottom:7px}
+.pc-footer{font-size:10px;color:var(--text2);border-top:1px solid var(--b1);padding-top:6px;line-height:1.55}
+.pc-footer span{color:var(--orange);font-family:'JetBrains Mono',monospace}
+.pc-str{font-size:9px;font-weight:700;padding:2px 6px;border-radius:2px;margin-left:6px;letter-spacing:0.06em}
+.str-s{background:rgba(249,115,22,0.12);color:var(--orange)}
+.str-m{background:rgba(251,191,36,0.08);color:var(--gold)}
+.str-w{background:rgba(147,197,253,0.06);color:var(--blue)}
+
+/* Session directive */
+.sess-dir{background:var(--s2);border:1px solid var(--b2);border-radius:4px;padding:16px;margin-bottom:10px;display:flex;align-items:flex-start;gap:16px}
+.sd-main{font-family:'Playfair Display',serif;font-size:26px;font-weight:800;color:var(--orange);line-height:1;flex-shrink:0;min-width:140px}
+.sd-body{flex:1}
+.sd-rationale{font-size:12px;color:var(--text);line-height:1.7;margin-bottom:6px}
+.sd-watch{font-size:11px;color:var(--text2);line-height:1.55}
+
+/* Key risks */
+.risk-list{display:flex;flex-direction:column;gap:8px}
+.risk-item{background:var(--s2);border-radius:3px;padding:10px 12px;border-left:3px solid var(--red)}
+.ri-label{font-size:12px;font-weight:600;color:var(--white);margin-bottom:3px}
+.ri-impact{font-size:11px;color:var(--text2);line-height:1.55}
+
+/* Summary */
+.brief-sum{padding:20px 26px;background:var(--s2);border-top:1px solid var(--b2)}
+.bs-lbl{font-size:9px;color:var(--orange);letter-spacing:0.25em;text-transform:uppercase;margin-bottom:10px}
+.bs-text{font-family:'Playfair Display',serif;font-size:14px;font-style:italic;line-height:1.95;color:var(--white)}
+
+/* Stamp */
+.brief-stamp{display:flex;align-items:center;justify-content:space-between;padding:11px 26px;
+  background:var(--s1);border-top:1px solid var(--b1);font-size:10px;color:var(--text2);letter-spacing:0.06em}
+
+/* Author */
+.author{background:var(--s2);border:1px solid var(--b1);border-radius:4px;
+  padding:12px 14px;display:flex;align-items:center;gap:12px;margin-top:12px}
+.av{width:32px;height:32px;border-radius:50%;background:var(--or2);
+  border:1px solid rgba(249,115,22,0.3);display:grid;place-items:center;
+  font-family:'Playfair Display',serif;font-weight:700;font-size:11px;color:var(--orange);flex-shrink:0}
+
+footer{border-top:1px solid var(--b1);padding:18px 0}
+.fi{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text2);letter-spacing:0.06em}
+</style>
+</head>
+<body>
+<div class="z1">
+
+<!-- ─── HEADER ─── -->
+<header>
+  <div class="wrap hdr">
+    <div class="logo">
+      <span class="logo-mark">MACRO BRIEF</span>
+      <span class="logo-pipe">|</span>
+      <span class="logo-sub">Cross-Asset Intelligence Briefing Generator</span>
+    </div>
+    <div class="hdr-r">
+      <div class="api-strip">
+        <span class="api-dot" id="apiDot"></span>
+        <input type="password" id="apiIn" placeholder="sk-ant-api03-..." oninput="chkKey()">
+      </div>
+      <a href="macro-framework-guide.html" target="_blank" class="hdr-link">📖 Framework Guide</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap z1">
+<div class="main-grid">
+
+  <!-- ─── LEFT: INPUT FORM ─── -->
+  <div>
+
+    <!-- Session Setup -->
+    <div class="panel">
+      <div class="phdr"><h3>Briefing Setup</h3></div>
+      <div class="pb">
+        <div class="frow f2">
+          <div class="fld">
+            <label>Trading Session</label>
+            <select id="session">
+              <option>London (08:00–16:30 GMT)</option>
+              <option>New York (13:00–21:00 GMT)</option>
+              <option>Asian (00:00–08:00 GMT)</option>
+              <option>Sydney (22:00–06:00 GMT)</option>
+              <option>Pre-Market / Overnight</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Date</label>
+            <input type="date" id="briefDate">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dollar & Rates -->
+    <div class="panel">
+      <div class="phdr"><h3>Dollar & Rates</h3><span class="ptag pt-o phdr-r">Q1 Diagnostic</span></div>
+      <div class="pb">
+        <div class="mkt-row">
+          <label>DXY (Dollar Index)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="dxy" step="0.01" placeholder="104.50">
+            <select id="dxy_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>10-Year US Treasury Yield (%)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="y10" step="0.01" placeholder="4.25" oninput="calcSpread()">
+            <select id="y10_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>2-Year US Treasury Yield (%)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="y2" step="0.01" placeholder="4.61" oninput="calcSpread()">
+            <select id="y2_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="fld">
+          <label>2/10 Spread (auto-calculated)</label>
+          <div class="computed"><span id="spreadVal" style="color:var(--orange)">—</span>&nbsp;<span id="spreadLbl" style="font-size:10px;color:var(--text2)"></span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Risk Assets -->
+    <div class="panel">
+      <div class="phdr"><h3>Risk Assets</h3><span class="ptag pt-v phdr-r">Q2 Diagnostic</span></div>
+      <div class="pb">
+        <div class="mkt-row">
+          <label>S&amp;P 500 (SPX)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="spx" step="1" placeholder="5340">
+            <select id="spx_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>VIX (Fear Index)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="vix" step="0.1" placeholder="14.5">
+            <select id="vix_d"><option value="down">↓ Falling</option><option value="flat">↔ Flat</option><option value="up">↑ Rising</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>Gold (XAU/USD)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="gold" step="1" placeholder="3240">
+            <select id="gold_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>WTI Crude Oil (USD)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="oil" step="0.1" placeholder="78.4">
+            <select id="oil_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>AUD/JPY (Risk Barometer)</label>
+          <div class="mkt-inputs">
+            <input type="number" id="audjpy" step="0.001" placeholder="96.450">
+            <select id="audjpy_d"><option value="up">↑ Risk-On</option><option value="flat">↔ Flat</option><option value="down">↓ Risk-Off</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- FX Pairs -->
+    <div class="panel">
+      <div class="phdr"><h3>FX Pair Levels</h3><span class="ptag pt-g phdr-r">Current Prices</span></div>
+      <div class="pb">
+        <div class="mkt-row">
+          <label>EUR/USD</label>
+          <div class="mkt-inputs">
+            <input type="number" id="eurusd" step="0.00001" placeholder="1.08500">
+            <select id="eurusd_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>GBP/USD</label>
+          <div class="mkt-inputs">
+            <input type="number" id="gbpusd" step="0.00001" placeholder="1.29200">
+            <select id="gbpusd_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>AUD/USD</label>
+          <div class="mkt-inputs">
+            <input type="number" id="audusd" step="0.00001" placeholder="0.64800">
+            <select id="audusd_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+        <div class="mkt-row">
+          <label>USD/JPY</label>
+          <div class="mkt-inputs">
+            <input type="number" id="usdjpy" step="0.001" placeholder="155.200">
+            <select id="usdjpy_d"><option value="up">↑ Higher</option><option value="flat">↔ Flat</option><option value="down">↓ Lower</option></select>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Macro Context -->
+    <div class="panel">
+      <div class="phdr"><h3>Macro Context</h3></div>
+      <div class="pb">
+        <div class="frow f2">
+          <div class="fld">
+            <label>Fed Stance</label>
+            <select id="fedStance">
+              <option>Hawkish — Tightening bias</option>
+              <option>Neutral — Data dependent</option>
+              <option>Dovish — Easing bias</option>
+              <option>Pivot — Actively cutting</option>
+              <option>On Hold — Watching</option>
+            </select>
+          </div>
+          <div class="fld">
+            <label>Risk Mood (your read)</label>
+            <select id="riskMood">
+              <option>Risk-On — Appetite strong</option>
+              <option>Mixed — Conflicting signals</option>
+              <option>Risk-Off — Defensive flows</option>
+              <option>Transitioning</option>
+            </select>
+          </div>
+        </div>
+        <div class="fld">
+          <label>Key Recent Event / Data Release</label>
+          <input type="text" id="keyEvent" placeholder="e.g. NFP +215K beat, FOMC hold, CPI miss...">
+        </div>
+        <div class="fld" style="margin-top:10px">
+          <label>Additional Context / Headline Risk</label>
+          <input type="text" id="addCtx" placeholder="e.g. BoJ intervention risk, EU PMI data tonight...">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-gen" id="genBtn" onclick="generate()">
+      ◆ Generate Intelligence Brief
+    </button>
+
+    <div class="author">
+      <div class="av">MF</div>
+      <div style="flex:1">
+        <div style="font-size:12px;font-weight:600;color:var(--white);margin-bottom:2px">Mochammad Fathan</div>
+        <div style="font-size:11px;color:var(--text2)">FX Technical Analyst · Macro Correlations Practitioner · AI Integration</div>
+      </div>
+      <a href="macro-framework-guide.html" target="_blank" style="font-size:9px;color:var(--text2);border:1px solid var(--b1);padding:3px 8px;border-radius:2px;text-decoration:none;letter-spacing:0.08em;white-space:nowrap">Guide →</a>
+    </div>
+  </div>
+
+  <!-- ─── RIGHT: BRIEFING OUTPUT ─── -->
+  <div id="briefArea">
+    <div class="phbox">
+      <div class="ph-title">MACRO BRIEF</div>
+      <div class="ph-sub">Your Intelligence Brief Awaits</div>
+      <p class="ph-desc">Input current market levels, select your session, and generate a structured morning brief based on the Amplify Trading Correlations & Interdependencies framework.</p>
+      <div class="ph-steps">
+        <div class="ph-step"><div class="ph-n">1</div>Enter your Anthropic API key</div>
+        <div class="ph-step"><div class="ph-n">2</div>Fill Dollar, yields, and risk asset levels</div>
+        <div class="ph-step"><div class="ph-n">3</div>Fill FX pair prices from TradingView</div>
+        <div class="ph-step"><div class="ph-n">4</div>Set macro context and generate</div>
+        <div class="ph-step"><div class="ph-n">5</div>Receive structured intelligence brief</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <div class="wrap fi">
+    <span>MACRO BRIEF · Cross-Asset Intelligence Briefing Generator · Portfolio Demo · Amplify Trading Framework</span>
+    <span>Mochammad Fathan · FX Technical Analyst · v1.0</span>
+  </div>
+</footer>
+
+</div>
+
+<script>
+const g = id => document.getElementById(id);
+const gs = id => (g(id)?.value || '').trim();
+const gv = id => parseFloat(g(id)?.value) || 0;
+const dirSym = d => d==='up'?'↑':d==='down'?'↓':'↔';
+const dirWord = d => d==='up'?'Higher':d==='down'?'Lower':'Flat';
+
+function chkKey(){
+  const k=gs('apiIn');
+  const dot=g('apiDot');
+  dot.className='api-dot'+(k.length>20?' on':'');
+}
+
+function calcSpread(){
+  const y10=gv('y10'),y2=gv('y2');
+  if(!y10||!y2){g('spreadVal').textContent='—';g('spreadLbl').textContent='';return;}
+  const spread=((y10-y2)*100).toFixed(0);
+  g('spreadVal').textContent=(spread>0?'+':'')+spread+' bps';
+  const lbl=spread<0?'INVERTED':spread<20?'FLAT':'STEEP';
+  const col=spread<0?'var(--red)':spread<20?'var(--gold)':'var(--green)';
+  g('spreadVal').style.color=col;
+  g('spreadLbl').textContent=lbl;
+}
+
+function buildPayload(){
+  return{
+    session:gs('session'),date:gs('briefDate'),
+    dxy:{level:gv('dxy'),dir:gs('dxy_d')},
+    y10:{level:gv('y10'),dir:gs('y10_d')},
+    y2:{level:gv('y2'),dir:gs('y2_d')},
+    spread_bps:gv('y10')&&gv('y2')?((gv('y10')-gv('y2'))*100).toFixed(0):null,
+    spx:{level:gv('spx'),dir:gs('spx_d')},
+    vix:{level:gv('vix'),dir:gs('vix_d')},
+    gold:{level:gv('gold'),dir:gs('gold_d')},
+    oil:{level:gv('oil'),dir:gs('oil_d')},
+    audjpy:{level:gv('audjpy'),dir:gs('audjpy_d')},
+    eurusd:{level:gv('eurusd'),dir:gs('eurusd_d')},
+    gbpusd:{level:gv('gbpusd'),dir:gs('gbpusd_d')},
+    audusd:{level:gv('audusd'),dir:gs('audusd_d')},
+    usdjpy:{level:gv('usdjpy'),dir:gs('usdjpy_d')},
+    fedStance:gs('fedStance'),riskMood:gs('riskMood'),
+    keyEvent:gs('keyEvent'),addCtx:gs('addCtx')
+  };
+}
+
+function buildPrompt(d){
+  const sd = `${d.dxy.level} ${dirSym(d.dxy.dir)}`,sy10=`${d.y10.level}% ${dirSym(d.y10.dir)}`,sy2=`${d.y2.level}% ${dirSym(d.y2.dir)}`;
+  return `You are a senior cross-asset macro analyst at a proprietary trading desk, trained in the Amplify Trading Correlations & Interdependencies framework. Generate a structured morning intelligence brief for ${d.session} on ${d.date||'today'}.
+
+LIVE MARKET DATA:
+Dollar & Rates: DXY ${sd} | 10Y Yield ${sy10} | 2Y Yield ${sy2} | 2/10 Spread: ${d.spread_bps||'N/A'} bps
+Risk Assets: S&P 500 ${d.spx.level} ${dirSym(d.spx.dir)} | VIX ${d.vix.level} ${dirSym(d.vix.dir)} | Gold $${d.gold.level} ${dirSym(d.gold.dir)} | WTI $${d.oil.level} ${dirSym(d.oil.dir)}
+Risk Barometer: AUD/JPY ${d.audjpy.level} ${dirSym(d.audjpy.dir)}
+FX Pairs: EUR/USD ${d.eurusd.level} ${dirSym(d.eurusd.dir)} | GBP/USD ${d.gbpusd.level} ${dirSym(d.gbpusd.dir)} | AUD/USD ${d.audusd.level} ${dirSym(d.audusd.dir)} | USD/JPY ${d.usdjpy.level} ${dirSym(d.usdjpy.dir)}
+Macro Context: Fed — ${d.fedStance} | Risk mood — ${d.riskMood}
+Key Event: ${d.keyEvent||'None specified'} | Additional: ${d.addCtx||'None'}
+
+APPLY THIS ANALYTICAL FRAMEWORK:
+
+THE TWO-QUESTION DIAGNOSTIC (always in this order):
+Q1 — What is the Dollar (DXY) doing? Check breadth: if DXY falling, confirm across USD/JPY, USD/CHF, USD/CAD. DXY is 57.6% EUR — a falling DXY might be EUR-specific, not a broad dollar move.
+Q2 — What is Risk Appetite? Use S&P 500 (primary barometer), AUD/JPY (risk barometer, long JPY=safe haven, long AUD=risk), VIX, Oil, and EM.
+
+THE GOLD/DXY DIAGNOSTIC:
+Gold ↑ + DXY ↓ = LMP phase (monetary driver) — buy risk, sell dollar
+Gold ↑ + DXY ↑ = Risk-Off/Fear — safe haven demand overwhelming math; defensive posture
+Gold ↓ + DXY ↑ = TMP phase — buy dollar, reduce risk
+Gold ↓ + DXY ↓ = Pure Risk-On — risk assets rallying; DXY bid via carry unwind
+
+LMP/TMP FRAMEWORK:
+LMP (Loose Monetary Policy): Fed loosening → USD falls → Gold ↑ + Equities ↑ + Bonds ↑ (fingerprint: bonds AND equities rising TOGETHER is the LMP fingerprint, NOT pure risk-on). Trade: long AUD/USD, EUR/USD, commodity currencies. Short USD.
+TMP (Tight Monetary Policy): Fed tightening → USD rises → Gold ↓ + Bonds ↓ (yields rise). Trade: long USD, short commodity currencies.
+
+LEAD INDICATORS BY PAIR:
+AUD/USD: Primary drivers: Gold (dollar signal), S&P 500 (risk), AUD/JPY (risk barometer), China PMI (fundamental). Cross-confirm 2+ before bias.
+EUR/USD: Nearly perfect inverse of DXY (-0.95 to -0.99). If EUR/USD and GBP/USD move together → USD-driven. If GBP moves alone → GBP-specific news.
+GBP/USD: Correlated with EUR/USD (+0.75-0.85). Divergence = currency-specific event.
+USD/JPY: JPY is a safe haven. USD/JPY rising = risk-on. USD/JPY falling = risk-off or BOJ intervention. Check yield differentials (10Y US-JP). AUD/JPY is cleaner risk signal (removes dollar ambiguity).
+XAU/USD: Three regimes — (1) Dollar-driven (inverse DXY), (2) Risk-driven (safe haven demand, when Gold and DXY move SAME direction = fear), (3) Real yield driven (inverse of TIPS real yields).
+
+RORO FRAMEWORK:
+Risk-On: Equities ↑, VIX ↓, AUD/JPY ↑, DXY ↓, Oil ↑, Bonds sell off (yields ↑)
+Risk-Off: Equities ↓, VIX ↑, AUD/JPY ↓, JPY ↑, CHF ↑, Gold ↑, Bonds ↑ (yields ↓)
+Warning: In LMP, bonds AND equities rise together. Do not confuse with Risk-On (where bonds fall as equities rise).
+
+REGIME CLASSIFICATION RULES:
+LMP: Gold ↑ + DXY ↓ + Equities ↑ + Bonds ↑ (key: bonds AND equities together)
+TMP: Gold ↓ + DXY ↑ + Bonds ↓ (yields ↑), equities may still hold early-cycle
+RISK-ON: Equities ↑ + AUD/JPY ↑ + VIX ↓ + bonds selling off (yields ↑, not ↓ like LMP)
+RISK-OFF: Equities ↓ + Gold ↑ (with or without DXY rising) + VIX ↑ + JPY ↑
+MIXED: Contradictory signals present — requires explicit explanation
+TRANSITIONAL: Regime in the process of changing — specify direction
+
+Return ONLY this JSON (no markdown, no preamble):
+{
+  "headline": "One-line regime summary (e.g. 'LMP Phase — Dollar Weakness Supporting Risk Assets')",
+  "regime": {
+    "type": "LMP|TMP|RISK_ON|RISK_OFF|MIXED|TRANSITIONAL",
+    "label": "Human-readable label",
+    "confidence": "HIGH|MODERATE|LOW",
+    "rationale": "2-3 sentence rationale citing the specific data points that identify this regime",
+    "fingerprint": ["signal1","signal2","signal3"]
+  },
+  "dollar": {
+    "bias": "BEARISH|BULLISH|NEUTRAL",
+    "breadth": "BROAD|EUR_DRIVEN|MIXED",
+    "analysis": "2-3 sentence analysis of dollar dynamics using DXY data, breadth check, and regime context",
+    "key_level": <number or null>
+  },
+  "yields": {
+    "curve_shape": "INVERTED|FLAT|NORMAL|STEEP",
+    "spread_bps": <number>,
+    "macro_signal": "Recession risk|Normal|Growth optimism",
+    "implication": "1-2 sentence implication for FX and risk assets"
+  },
+  "risk_sentiment": {
+    "classification": "RISK_ON|RISK_OFF|MIXED",
+    "confidence": "HIGH|MODERATE|LOW",
+    "gold_dxy_diagnostic": "Identify which of the 4 Gold/DXY scenarios this matches and what it implies",
+    "lead_signals": [
+      {"indicator": "AUD/JPY", "reading": "96.45 ↑", "signal": "RISK_ON|RISK_OFF|MIXED", "weight": "STRONG|MODERATE|WEAK"}
+    ],
+    "analysis": "2-3 sentence cross-asset risk sentiment reading"
+  },
+  "pairs": [
+    {
+      "pair": "EUR/USD",
+      "level": <number>,
+      "bias": "BULLISH|BEARISH|NEUTRAL",
+      "strength": "STRONG|MODERATE|WEAK",
+      "lead_indicator_reading": "Brief statement of what leads say",
+      "rationale": "2 sentence pair-specific rationale referencing framework",
+      "key_level": <number>,
+      "invalidation": "What would invalidate this bias",
+      "session_note": "Session-specific note for ${d.session}"
+    }
+  ],
+  "session_bias": {
+    "session": "${d.session.split(' ')[0]}",
+    "directive": "SELL USD|BUY USD|BUY RISK|SELL RISK|NEUTRAL|SELECTIVE",
+    "primary_focus": "Which pair/asset offers best risk-reward",
+    "rationale": "Why this session favours this directive",
+    "watch": "Key intraday trigger to watch"
+  },
+  "key_risks": [
+    {"risk": "Risk statement", "impact": "What it would do to the current bias"}
+  ],
+  "summary": "2-3 sentence executive analyst summary tying together regime, dollar, risk sentiment, and session bias"
+}
+Include all 4 FX pairs. Provide 3-4 key risks. Be analytically rigorous — cite specific numbers from the data.`;
+}
+
+async function generate(){
+  const key=gs('apiIn');
+  if(!key){alert('Enter your Anthropic API key in the header.');return;}
+  if(!gv('dxy')&&!gv('y10')&&!gv('spx')){alert('Enter at least DXY, 10Y Yield, and S&P 500 levels.');return;}
+  const btn=g('genBtn');
+  btn.disabled=true;btn.textContent='⟳ Generating Brief...';
+  g('briefArea').innerHTML=`<div class="loadbox"><div class="lspin"></div><div class="lmsg">Applying Amplify Trading macro framework...<br><span style="font-size:10px;opacity:0.6">Running Two-Question Diagnostic · Gold/DXY Diagnostic · Lead Indicator Analysis · Session Bias</span></div></div>`;
+  const payload=buildPayload();
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:3000,messages:[{role:'user',content:buildPrompt(payload)}]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+    const data=await res.json();
+    const raw=data.content[0].text.trim().replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    let brief;
+    try{brief=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);if(m)brief=JSON.parse(m[0]);else throw new Error('Could not parse briefing response.');}
+    renderBrief(brief,payload);
+  }catch(err){
+    g('briefArea').innerHTML=`<div class="errbox"><b style="display:block;margin-bottom:4px">Generation Failed</b>${err.message}</div>`;
+  }
+  btn.disabled=false;btn.innerHTML='◆ Generate Intelligence Brief';
+}
+
+function regimeCls(t){
+  if(!t)return'reg-mixed';
+  if(t==='LMP')return'reg-lmp';
+  if(t==='TMP')return'reg-tmp';
+  if(t==='RISK_ON')return'reg-riskOn';
+  if(t==='RISK_OFF')return'reg-riskOff';
+  if(t==='TRANSITIONAL')return'reg-trans';
+  return'reg-mixed';
+}
+function confCls(c){return c==='HIGH'?'conf-h':c==='MODERATE'?'conf-m':'conf-l';}
+function dirClass(d){return d==='up'?'dir-up':d==='down'?'dir-dn':'dir-fl';}
+function biasCls(b){return b==='BULLISH'?'ch-bull':b==='BEARISH'?'ch-bear':b==='MIXED'?'ch-mixed':'ch-neut';}
+function pairCardCls(b){return b==='BULLISH'?'pc-bull':b==='BEARISH'?'pc-bear':'pc-neut';}
+function pairBiasCls(b){return b==='BULLISH'?'pb-bull':b==='BEARISH'?'pb-bear':'pb-neut';}
+function sigCls(s){return s==='RISK_ON'||s==='BULLISH'?'s-on':s==='RISK_OFF'||s==='BEARISH'?'s-off':'s-mix';}
+function strCls(s){return s==='STRONG'?'str-s':s==='MODERATE'?'str-m':'str-w';}
+
+function renderBrief(b,payload){
+  const regType=(b.regime?.type||'MIXED');
+  const now=new Date();
+
+  // Yield cards
+  const yieldCards=`
+  <div class="data-strip">
+    <div class="ds-card"><div class="ds-lbl">10Y Yield</div><div class="ds-val" style="color:${payload.y10.dir==='up'?'var(--red)':'var(--green)'}">${payload.y10.level}%</div><div class="ds-dir ${dirClass(payload.y10.dir)}">${dirSym(payload.y10.dir)} ${dirWord(payload.y10.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">2Y Yield</div><div class="ds-val" style="color:${payload.y2.dir==='up'?'var(--red)':'var(--green)'}">${payload.y2.level}%</div><div class="ds-dir ${dirClass(payload.y2.dir)}">${dirSym(payload.y2.dir)} ${dirWord(payload.y2.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">2/10 Spread</div><div class="ds-val" style="color:${b.yields?.curve_shape==='INVERTED'?'var(--red)':b.yields?.curve_shape==='FLAT'?'var(--gold)':'var(--green)'}">${b.yields?.spread_bps!==undefined?(b.yields.spread_bps>0?'+':'')+b.yields.spread_bps+' bps':'—'}</div><div class="ds-dir" style="color:var(--text2)">${b.yields?.curve_shape||'—'}</div></div>
+  </div>`;
+
+  // Dollar cards
+  const dollarCards=`
+  <div class="data-strip">
+    <div class="ds-card"><div class="ds-lbl">DXY</div><div class="ds-val" style="color:${payload.dxy.dir==='up'?'var(--blue)':'var(--orange)'}">${payload.dxy.level}</div><div class="ds-dir ${dirClass(payload.dxy.dir)}">${dirSym(payload.dxy.dir)} ${dirWord(payload.dxy.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">Breadth</div><div class="ds-val" style="font-size:13px;color:var(--text)">${b.dollar?.breadth||'—'}</div><div class="ds-dir" style="color:var(--text2)">USD</div></div>
+    <div class="ds-card"><div class="ds-lbl">Dollar Bias</div><div class="ds-val" style="font-size:14px;color:${b.dollar?.bias==='BEARISH'?'var(--red)':b.dollar?.bias==='BULLISH'?'var(--green)':'var(--text2)'}">${b.dollar?.bias||'—'}</div><div class="ds-dir" style="color:var(--text2)">${b.dollar?.key_level?'Key: '+b.dollar.key_level:''}</div></div>
+  </div>`;
+
+  // Lead signals
+  const signals=(b.risk_sentiment?.lead_signals||[]).map(s=>`
+  <tr>
+    <td class="sig-n">${s.indicator}</td>
+    <td class="sig-v">${s.reading||'—'}</td>
+    <td><span class="sig-chip ${sigCls(s.signal)}">${(s.signal||'').replace('_','-')}</span></td>
+    <td class="sig-w">${s.weight||'—'}</td>
+  </tr>`).join('');
+
+  // Risk asset mini-strip
+  const riskStrip=`
+  <div class="data-strip">
+    <div class="ds-card"><div class="ds-lbl">S&amp;P 500</div><div class="ds-val" style="color:${payload.spx.dir==='up'?'var(--green)':'var(--red)'}">${payload.spx.level}</div><div class="ds-dir ${dirClass(payload.spx.dir)}">${dirSym(payload.spx.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">VIX</div><div class="ds-val" style="color:${payload.vix.dir==='up'?'var(--red)':'var(--green)'}">${payload.vix.level}</div><div class="ds-dir ${dirClass(payload.vix.dir)}">${dirSym(payload.vix.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">Gold</div><div class="ds-val" style="color:${payload.gold.dir==='up'?'var(--gold)':'var(--text2)'}">${payload.gold.level}</div><div class="ds-dir ${dirClass(payload.gold.dir)}">${dirSym(payload.gold.dir)}</div></div>
+    <div class="ds-card"><div class="ds-lbl">AUD/JPY</div><div class="ds-val" style="color:${payload.audjpy.dir==='up'?'var(--green)':'var(--red)'}">${payload.audjpy.level}</div><div class="ds-dir ${dirClass(payload.audjpy.dir)}">${payload.audjpy.dir==='up'?'Risk-On':'Risk-Off'}</div></div>
+  </div>`;
+
+  // FX pair cards
+  const pairCards=(b.pairs||[]).map(p=>`
+  <div class="pair-card ${pairCardCls(p.bias)}">
+    <div class="pc-top">
+      <span class="pc-name">${p.pair}</span>
+      <span class="pc-bias-chip ${pairBiasCls(p.bias)}">${p.bias}<span class="pc-str ${strCls(p.strength)}">${p.strength}</span></span>
+    </div>
+    <div class="pc-level">${p.level||'—'}</div>
+    <div class="pc-rationale">${p.rationale||''}</div>
+    <div class="pc-footer">
+      Key Level: <span>${p.key_level||'—'}</span><br>
+      ${p.lead_indicator_reading||''}<br>
+      <span style="color:var(--red);opacity:0.8">Inv: </span>${p.invalidation||'—'}<br>
+      <span style="color:var(--orange)">${payload.session.split('(')[0].trim()}: </span>${p.session_note||''}
+    </div>
+  </div>`).join('');
+
+  // Key risks
+  const risks=(b.key_risks||[]).map(r=>`
+  <div class="risk-item">
+    <div class="ri-label">${r.risk||r}</div>
+    ${r.impact?`<div class="ri-impact">↳ ${r.impact}</div>`:''}
+  </div>`).join('');
+
+  // Fingerprint tags
+  const fp=(b.regime?.fingerprint||[]).map(s=>`<span style="font-size:10px;color:var(--text2);background:var(--s3);padding:2px 7px;border-radius:2px;margin-right:5px">◆ ${s}</span>`).join('');
+
+  g('briefArea').innerHTML=`<div class="brief-wrap">
+
+  <div class="brief-mast">
+    <div class="bm-eyebrow">INTELLIGENCE BRIEF · ${payload.session.split('(')[0].trim().toUpperCase()} SESSION</div>
+    <div class="bm-row">
+      <div class="bm-title">${b.headline||'Cross-Asset Intelligence Brief'}</div>
+      <div class="bm-regime-badge ${regimeCls(regType)}">${b.regime?.label||regType}</div>
+    </div>
+    <div class="bm-meta">
+      <span>${payload.date||now.toISOString().split('T')[0]}</span>
+      <span class="bm-sep">|</span>
+      <span>Fed: ${payload.fedStance.split('—')[0].trim()}</span>
+      <span class="bm-sep">|</span>
+      <span>Confidence: <span class="bm-conf ${confCls(b.regime?.confidence)}">${b.regime?.confidence}</span></span>
+    </div>
+    ${b.regime?.rationale?`<div class="bm-rationale">${b.regime.rationale}</div>`:''}
+    ${fp?`<div style="margin-top:10px">${fp}</div>`:''}
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">I</span>
+      <span class="sec-title">Dollar Analysis</span>
+      <span class="sec-chip ${biasCls(b.dollar?.bias)}">${b.dollar?.bias||'—'}</span>
+    </div>
+    ${dollarCards}
+    <div class="sec-body">${b.dollar?.analysis||''}</div>
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">II</span>
+      <span class="sec-title">Yield Curve Posture</span>
+      <span class="sec-chip ${b.yields?.curve_shape==='INVERTED'?'ch-bear':b.yields?.curve_shape==='STEEP'?'ch-bull':'ch-mixed'}">${b.yields?.curve_shape||'—'}</span>
+    </div>
+    ${yieldCards}
+    <div class="sec-body">${b.yields?.implication||''}</div>
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">III</span>
+      <span class="sec-title">Risk Sentiment</span>
+      <span class="sec-chip ${b.risk_sentiment?.classification==='RISK_ON'?'ch-bull':b.risk_sentiment?.classification==='RISK_OFF'?'ch-bear':'ch-mixed'}">${(b.risk_sentiment?.classification||'—').replace('_','-')}</span>
+    </div>
+    ${riskStrip}
+    ${signals?`<table class="sig-tbl"><thead><tr><th>Lead Indicator</th><th>Reading</th><th>Signal</th><th>Weight</th></tr></thead><tbody>${signals}</tbody></table>`:''}
+    <div class="sec-body" style="margin-bottom:8px"><b style="color:var(--orange)">Gold/DXY Diagnostic:</b> ${b.risk_sentiment?.gold_dxy_diagnostic||'—'}</div>
+    <div class="sec-body">${b.risk_sentiment?.analysis||''}</div>
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">IV</span>
+      <span class="sec-title">FX Pair Analysis</span>
+      <span class="ptag pt-o phdr-r" style="margin-left:auto">${b.pairs?.length||0} Pairs</span>
+    </div>
+    <div class="pairs-grid">${pairCards}</div>
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">V</span>
+      <span class="sec-title">Session Directive — ${b.session_bias?.session||payload.session.split('(')[0].trim()}</span>
+    </div>
+    <div class="sess-dir">
+      <div class="sd-main">${b.session_bias?.directive||'NEUTRAL'}</div>
+      <div class="sd-body">
+        <div class="sd-rationale">${b.session_bias?.rationale||''}</div>
+        <div class="sd-watch"><b style="color:var(--orange)">Primary Focus:</b> ${b.session_bias?.primary_focus||'—'}<br><b style="color:var(--orange)">Watch:</b> ${b.session_bias?.watch||'—'}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="b-sec">
+    <div class="sec-hdr">
+      <span class="sec-num">VI</span>
+      <span class="sec-title">Key Risks &amp; Invalidations</span>
+    </div>
+    <div class="risk-list">${risks}</div>
+  </div>
+
+  <div class="brief-sum">
+    <div class="bs-lbl">Analyst Summary</div>
+    <div class="bs-text">${b.summary||''}</div>
+  </div>
+
+  <div class="brief-stamp">
+    <span>MACRO BRIEF · Amplify Trading Correlations Framework · Powered by Claude Sonnet</span>
+    <span>${now.toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'})} GMT</span>
+  </div>
+</div>`;
+}
+
+// INIT
+const today=new Date();
+g('briefDate').value=today.toISOString().split('T')[0];
+</script>
+</body>
+</html>

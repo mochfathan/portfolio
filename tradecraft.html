@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TRADECRAFT — FX Trade Journal & S&D Coach</title>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,300;0,500;0,600;0,700;1,400&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#030810;--s1:#07101d;--s2:#0b1826;--s3:#0f2030;--s4:#132638;
+  --border:rgba(0,168,210,0.09);--border2:rgba(0,168,210,0.18);
+  --cyan:#00b4d8;--cyan2:rgba(0,180,216,0.12);
+  --green:#00e676;--green2:rgba(0,230,118,0.08);
+  --red:#ff1744;--red2:rgba(255,23,68,0.08);
+  --gold:#ffc107;--gold2:rgba(255,193,7,0.08);
+  --orange:#ff9100;
+  --text:#aabfd4;--text2:#4e6f8a;--text3:#2a4558;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Fira Code',monospace;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,168,210,0.01)3px,rgba(0,168,210,0.01)3px);
+  pointer-events:none;z-index:0}
+body::after{content:'';position:fixed;bottom:0;right:0;
+  width:600px;height:600px;
+  background:radial-gradient(ellipse at bottom right,rgba(0,100,160,0.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0}
+.z1{position:relative;z-index:1}
+.wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+
+/* ─── HEADER ─── */
+header{background:var(--s1);border-bottom:1px solid var(--border2);padding:12px 0;position:sticky;top:0;z-index:100}
+.hdr{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.logo{display:flex;align-items:center;gap:12px}
+.logo-icon{position:relative;width:36px;height:36px;border:1.5px solid var(--cyan);border-radius:3px;display:grid;place-items:center;flex-shrink:0}
+.logo-icon::before,.logo-icon::after{content:'';position:absolute;background:var(--cyan)}
+.logo-icon::before{width:14px;height:1px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.logo-icon::after{width:1px;height:14px;top:50%;left:50%;transform:translate(-50%,-50%)}
+.logo-ring{width:6px;height:6px;border-radius:50%;border:1.5px solid var(--cyan);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:1}
+.logo-name{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:20px;letter-spacing:0.1em;color:#d8eaf8}
+.logo-caption{font-size:9px;color:var(--text2);letter-spacing:0.22em;text-transform:uppercase;margin-top:1px}
+.hdr-right{display:flex;align-items:center;gap:10px}
+.api-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s;flex-shrink:0}
+.api-dot.on{background:var(--green)}
+.api-lbl{font-size:10px;color:var(--text2);letter-spacing:0.1em}
+#apiKeyInput{background:var(--s3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Fira Code',monospace;font-size:11px;padding:6px 10px;outline:none;width:210px;transition:border-color .2s}
+#apiKeyInput:focus{border-color:var(--cyan)}
+.hdr-badge{font-size:9px;color:var(--text2);border:1px solid var(--border);padding:3px 8px;border-radius:2px;letter-spacing:0.1em;white-space:nowrap}
+
+/* ─── TABS ─── */
+.tabs-bar{background:var(--s1);border-bottom:1px solid var(--border2);padding:0 24px}
+.tabs-inner{max-width:1200px;margin:0 auto;display:flex;gap:0}
+.tbtn{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.14em;text-transform:uppercase;color:var(--text2);padding:11px 18px;background:none;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;margin-bottom:-1px}
+.tbtn.on{color:var(--cyan);border-bottom-color:var(--cyan)}
+.tbtn:hover:not(.on){color:var(--text)}
+.tc{display:inline-block;font-size:9px;padding:1px 5px;border-radius:10px;background:var(--cyan2);color:var(--cyan);margin-left:5px}
+
+/* ─── TAB PANELS ─── */
+.tpanel{display:none;padding:24px 0 64px}
+.tpanel.on{display:block}
+
+/* ─── PANEL ─── */
+.panel{background:var(--s1);border:1px solid var(--border2);border-radius:5px;overflow:hidden;margin-bottom:14px}
+.phdr{background:var(--s2);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;gap:8px}
+.phdr h3{font-family:'Chakra Petch',sans-serif;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:var(--text2)}
+.phdr-r{margin-left:auto}
+.ptag{font-size:9px;padding:2px 7px;border-radius:2px;letter-spacing:0.08em}
+.pt-c{background:var(--cyan2);color:var(--cyan);border:1px solid rgba(0,180,216,0.2)}
+.pt-g{background:var(--green2);color:var(--green);border:1px solid rgba(0,230,118,0.15)}
+.pt-r{background:var(--red2);color:var(--red);border:1px solid rgba(255,23,68,0.15)}
+.pt-o{background:var(--gold2);color:var(--gold);border:1px solid rgba(255,193,7,0.15)}
+.pb{padding:14px}
+
+/* ─── ENTRY LAYOUT ─── */
+.entry-grid{display:grid;grid-template-columns:420px 1fr;gap:20px;align-items:start}
+@media(max-width:900px){.entry-grid{grid-template-columns:1fr}}
+
+/* ─── FORM ─── */
+.frow{display:grid;gap:10px;margin-bottom:10px}
+.f2{grid-template-columns:1fr 1fr}
+.f3{grid-template-columns:1fr 1fr 1fr}
+.fld label{font-size:9px;color:var(--text2);letter-spacing:0.15em;text-transform:uppercase;display:block;margin-bottom:4px}
+.fld input,.fld select{width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Fira Code',monospace;font-size:12px;padding:7px 10px;outline:none;transition:border-color .2s,background .2s}
+.fld input:focus,.fld select:focus{border-color:var(--cyan);background:var(--s4)}
+.fld input::placeholder{color:var(--text3);opacity:0.7}
+.fld select option{background:var(--s2);color:var(--text)}
+.computed{font-size:13px;padding:7px 10px;background:var(--s3);border:1px solid var(--border);border-radius:3px;min-height:32px;display:flex;align-items:center;font-family:'Fira Code',monospace}
+.fnote{font-size:10px;color:var(--text3);margin-top:3px;line-height:1.45}
+
+/* ─── ODDS ENHANCERS ─── */
+.oe-tbl{width:100%;border-collapse:collapse}
+.oe-tbl th{font-size:9px;color:var(--text3);letter-spacing:0.12em;text-align:left;padding:6px 8px;border-bottom:1px solid var(--border2)}
+.oe-tbl td{padding:7px 8px;border-bottom:1px solid rgba(0,168,210,0.04);vertical-align:middle}
+.oe-name{font-size:11px;color:var(--text)}
+.oe-sub{font-size:9px;color:var(--text2);margin-top:2px}
+.oe-sel{width:100%;background:var(--s3);border:1px solid var(--border);border-radius:3px;color:var(--cyan);font-family:'Fira Code',monospace;font-size:11px;padding:5px 7px;outline:none;cursor:pointer}
+.oe-sel:focus{border-color:var(--cyan)}
+.oe-sel option{background:var(--s2);color:var(--text)}
+.oe-pts{font-size:13px;font-weight:500;text-align:right;padding-right:4px}
+.oe-max{font-size:10px;color:var(--text2);text-align:center}
+
+/* ─── GAUGE ─── */
+.gauge-area{display:flex;flex-direction:column;align-items:center;padding:20px 16px 14px}
+#gsvg{display:block}
+.g-score{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:40px;line-height:1;text-align:center;margin-top:-4px;transition:color .4s}
+.g-raw{font-size:10px;color:var(--text2);text-align:center;margin:3px 0 12px;letter-spacing:0.08em}
+.dec-badge{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:13px;letter-spacing:0.14em;padding:8px 24px;border-radius:3px;text-align:center;margin-bottom:14px;transition:all .3s}
+.db-prox{background:rgba(0,230,118,0.08);color:var(--green);border:1px solid rgba(0,230,118,0.22)}
+.db-conf{background:rgba(255,193,7,0.08);color:var(--gold);border:1px solid rgba(255,193,7,0.22)}
+.db-nt{background:rgba(255,23,68,0.08);color:var(--red);border:1px solid rgba(255,23,68,0.22)}
+.bdown{width:100%}
+.brow{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--border);font-size:11px}
+.brow:last-child{border-bottom:none}
+.bname{color:var(--text2)}
+.bval{font-weight:500;color:var(--cyan)}
+.btotal{display:flex;justify-content:space-between;padding:8px 0 0;font-size:12px;font-weight:500;border-top:1px solid var(--border2);margin-top:4px}
+.braw{color:var(--text)}
+.bnorm{color:var(--cyan)}
+
+/* ─── COACH ─── */
+.coach-ph{padding:32px 16px;text-align:center;font-size:11px;color:var(--text2);line-height:1.85}
+.coach-loading{padding:32px;text-align:center}
+.cspin{width:22px;height:22px;border:2px solid var(--border2);border-top-color:var(--cyan);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.coach-body{padding:16px}
+.coach-top{display:flex;align-items:baseline;gap:14px;margin-bottom:10px}
+.coach-grade{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:36px;line-height:1}
+.coach-verdict{font-size:12px;line-height:1.85;border-left:3px solid var(--cyan);padding-left:13px;margin-bottom:14px;color:var(--text)}
+.csec-title{font-size:9px;color:var(--text2);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.csec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.csec{margin-bottom:12px}
+.rule-row{display:flex;gap:8px;align-items:flex-start;margin-bottom:5px;font-size:11px;line-height:1.65;color:var(--text)}
+.ri{flex-shrink:0;margin-top:1px;font-size:13px}
+.ri.pass{color:var(--green)}
+.ri.fail{color:var(--red)}
+.ri.warn{color:var(--gold)}
+.cpt{background:var(--s3);border:1px solid var(--border);border-radius:3px;padding:9px 12px;margin-bottom:6px;font-size:11px;line-height:1.7;color:var(--text)}
+.mnote{background:rgba(0,180,216,0.04);border:1px solid var(--border2);border-radius:3px;padding:10px 13px;font-size:11px;line-height:1.7;color:var(--text);margin-top:4px}
+
+/* ─── BUTTONS ─── */
+.btn{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:11px;letter-spacing:0.12em;text-transform:uppercase;padding:10px 16px;border-radius:3px;cursor:pointer;transition:all .2s;border:none;display:inline-flex;align-items:center;justify-content:center;gap:8px}
+.btn-main{background:var(--cyan);color:#030810;width:100%;font-size:12px}
+.btn-main:hover{opacity:0.85;transform:translateY(-1px)}
+.btn-main:disabled{opacity:0.35;cursor:not-allowed;transform:none}
+.btn-sm{font-family:'Chakra Petch',sans-serif;font-size:9px;letter-spacing:0.1em;text-transform:uppercase;padding:4px 10px;border-radius:2px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .2s}
+.btn-sm:hover{border-color:var(--red);color:var(--red)}
+
+/* ─── JOURNAL ─── */
+.jtbl{width:100%;border-collapse:collapse;font-size:11px}
+.jtbl th{font-size:9px;color:var(--text3);letter-spacing:0.1em;text-align:left;padding:8px 10px;border-bottom:1px solid var(--border2)}
+.jtbl td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+.jtbl tr:hover td{background:rgba(0,168,210,0.025)}
+.pname{font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:12px;color:#d8eaf8;letter-spacing:0.05em}
+.d-long{color:var(--green)}
+.d-short{color:var(--red)}
+.o-win{color:var(--green)}
+.o-loss{color:var(--red)}
+.o-be{color:var(--text2)}
+.o-open{color:var(--cyan)}
+.spill{display:inline-block;padding:2px 7px;border-radius:2px;font-size:10px;font-weight:500}
+.sp-px{background:rgba(0,230,118,0.1);color:var(--green)}
+.sp-cf{background:rgba(255,193,7,0.1);color:var(--gold)}
+.sp-nt{background:rgba(255,23,68,0.1);color:var(--red)}
+.empty-st{padding:48px;text-align:center;color:var(--text2);font-size:11px;line-height:1.8}
+
+/* ─── STATS ─── */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:12px;margin-bottom:20px}
+.sc{background:var(--s1);border:1px solid var(--border2);border-radius:5px;padding:15px}
+.sc-lbl{font-size:9px;color:var(--text2);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:8px}
+.sc-val{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;line-height:1}
+.sc-sub{font-size:10px;color:var(--text2);margin-top:4px}
+.dist-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px}
+.dc{background:var(--s1);border:1px solid var(--border2);border-radius:5px;padding:14px;text-align:center}
+.dc-n{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:22px;line-height:1;margin-bottom:4px}
+.dc-l{font-size:10px;color:var(--text2)}
+.ptbl{width:100%;border-collapse:collapse;font-size:11px}
+.ptbl th{font-size:9px;color:var(--text3);letter-spacing:0.1em;padding:6px 10px;border-bottom:1px solid var(--border2);text-align:left}
+.ptbl td{padding:7px 10px;border-bottom:1px solid var(--border)}
+
+/* ─── DISCLAIMER ─── */
+.disc{background:rgba(255,193,7,0.03);border:1px solid rgba(255,193,7,0.12);border-radius:4px;padding:10px 14px;margin-bottom:16px;font-size:10px;color:var(--text2);line-height:1.7}
+.disc b{color:var(--gold)}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid var(--border);padding:18px 0}
+.fi{display:flex;align-items:center;justify-content:space-between;font-size:10px;color:var(--text3);letter-spacing:0.06em}
+</style>
+</head>
+<body>
+<div class="z1">
+
+<!-- HEADER -->
+<header>
+  <div class="wrap hdr">
+    <div class="logo">
+      <div class="logo-icon"><div class="logo-ring"></div></div>
+      <div>
+        <div class="logo-name">TRADECRAFT</div>
+        <div class="logo-caption">FX Trade Journal · OTA S&amp;D Methodology Coach</div>
+      </div>
+    </div>
+    <div class="hdr-right">
+      <span class="api-dot" id="apiDot"></span>
+      <span class="api-lbl">API</span>
+      <input type="password" id="apiKeyInput" placeholder="sk-ant-api03-..." oninput="toggleDot()">
+      <span class="hdr-badge">Portfolio Demo</span>
+    </div>
+  </div>
+</header>
+
+<!-- TABS -->
+<div class="tabs-bar">
+  <div class="tabs-inner">
+    <button class="tbtn on" onclick="sw(event,'entry')">New Entry</button>
+    <button class="tbtn" onclick="sw(event,'journal')">Trade Journal <span class="tc" id="jCount">0</span></button>
+    <button class="tbtn" onclick="sw(event,'stats')">Performance Stats</button>
+  </div>
+</div>
+
+<div class="wrap z1">
+
+<!-- ─────────── TAB: NEW ENTRY ─────────── -->
+<div class="tpanel on" id="tp-entry">
+  <div class="disc">
+    <b>METHODOLOGY REVIEW TOOL:</b> TRADECRAFT is a personal trade journal for systematic self-review using the OTA Supply &amp; Demand framework (Bachir Chaaya methodology). It does not generate trading signals or financial advice. AI coaching reviews your process quality — independent of trade outcome.
+  </div>
+  <div class="entry-grid">
+
+    <!-- LEFT: FORM -->
+    <div>
+      <!-- Trade ID -->
+      <div class="panel">
+        <div class="phdr"><h3>Trade Identification</h3></div>
+        <div class="pb">
+          <div class="frow f3">
+            <div class="fld"><label>Pair</label>
+              <select id="pair"><option>EUR/USD</option><option>GBP/USD</option><option>USD/JPY</option><option>AUD/USD</option><option>NZD/USD</option><option>USD/CAD</option><option>USD/CHF</option><option>EUR/GBP</option><option>EUR/JPY</option><option>GBP/JPY</option><option>AUD/JPY</option><option>XAU/USD</option></select></div>
+            <div class="fld"><label>Direction</label>
+              <select id="dir" onchange="syncZone()"><option value="LONG">LONG ↑</option><option value="SHORT">SHORT ↓</option></select></div>
+            <div class="fld"><label>Session</label>
+              <select id="sess"><option>London</option><option>New York</option><option>Asia</option><option>Sydney</option><option>Overlap</option></select></div>
+          </div>
+          <div class="frow f2">
+            <div class="fld"><label>Date</label><input type="date" id="tdate"></div>
+            <div class="fld"><label>Time</label><input type="time" id="ttime"></div>
+          </div>
+          <div class="fld"><label>Trade Duration</label>
+            <select id="dur"><option>Intraday — Hours</option><option>Swing — Days</option><option>Position — Weeks</option><option>Strategic — Months</option></select></div>
+        </div>
+      </div>
+
+      <!-- S.E.T. -->
+      <div class="panel">
+        <div class="phdr"><h3>S.E.T. Parameters</h3><span class="ptag pt-c phdr-r">Stop · Entry · Target</span></div>
+        <div class="pb">
+          <div class="frow f3">
+            <div class="fld"><label>Entry Price</label><input type="number" id="entry" step="0.00001" placeholder="1.08500" oninput="calcRR()"></div>
+            <div class="fld"><label>Stop Loss</label><input type="number" id="sl" step="0.00001" placeholder="1.08000" oninput="calcRR()"></div>
+            <div class="fld"><label>Target</label><input type="number" id="tp" step="0.00001" placeholder="1.11000" oninput="calcRR()"></div>
+          </div>
+          <div class="frow f2">
+            <div class="fld"><label>Calculated R:R</label>
+              <div class="computed"><span id="rrVal" style="color:var(--text2)">—</span></div></div>
+            <div class="fld"><label>Bachir's Rule (Spread Check)</label>
+              <select id="bachir"><option value="ok">Pass — Spread &lt;10% of zone width</option><option value="fail">Fail — Spread ≥10% of zone width</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Curve Calculator -->
+      <div class="panel">
+        <div class="phdr"><h3>HTF Curve Position Calculator</h3><span class="ptag pt-c phdr-r">52-Week Range</span></div>
+        <div class="pb">
+          <div class="frow f3">
+            <div class="fld"><label>52W High</label><input type="number" id="wkH" step="0.00001" placeholder="0.00000" oninput="calcCurve()"></div>
+            <div class="fld"><label>52W Low</label><input type="number" id="wkL" step="0.00001" placeholder="0.00000" oninput="calcCurve()"></div>
+            <div class="fld"><label>Current Price</label><input type="number" id="wkC" step="0.00001" placeholder="0.00000" oninput="calcCurve()"></div>
+          </div>
+          <div class="frow f2">
+            <div class="fld"><label>Curve % (calculated)</label>
+              <div class="computed"><span id="curveVal" style="color:var(--text2)">—</span></div></div>
+            <div class="fld"><label>Classification</label>
+              <div class="computed"><span id="curveCls" style="color:var(--text2)">Enter 52W data above</span></div></div>
+          </div>
+          <div class="fnote">Formula: (Current − 52W Low) ÷ (52W High − 52W Low) × 100 &nbsp;|&nbsp; <b>&lt;30%</b> = Curve LOW (Demand/Long) &nbsp;|&nbsp; <b>&gt;70%</b> = Curve HIGH (Supply/Short) &nbsp;|&nbsp; <b>30–70%</b> = Equilibrium</div>
+        </div>
+      </div>
+
+      <!-- Macro & Zone Quality -->
+      <div class="panel">
+        <div class="phdr"><h3>Macro Regime &amp; Zone Quality</h3></div>
+        <div class="pb">
+          <div class="frow f2">
+            <div class="fld"><label>Macro Regime</label>
+              <select id="macro"><option>LMP — Dollar Weakness (Long AUD/EUR)</option><option>Risk-Off — Fear Bid (Long JPY/CHF)</option><option>TMP — Goldilocks (Caution on Longs)</option><option>Mixed / Transitional</option></select></div>
+            <div class="fld"><label>Zone Type</label>
+              <select id="ztype"><option value="Demand">Demand Zone (Long)</option><option value="Supply">Supply Zone (Short)</option></select></div>
+          </div>
+          <div class="frow f2">
+            <div class="fld"><label>Zone Formation (OTA)</label>
+              <select id="zform"><option>RBR — Rally-Base-Rally</option><option>DBD — Drop-Base-Drop</option><option>DBR — Drop-Base-Rally</option><option>RBD — Rally-Base-Drop</option></select></div>
+            <div class="fld"><label>Zone Authenticity</label>
+              <select id="zauth"><option value="authentic">Authentic — Institutional order flow</option><option value="non-authentic">Non-Authentic</option><option value="uncertain">Uncertain</option></select></div>
+          </div>
+          <div class="frow f2">
+            <div class="fld"><label>Correlation Confirmation</label>
+              <select id="corr"><option>2+ Lead Indicators Aligned ✓</option><option>1 Lead Indicator Aligned</option><option>Mixed — Divergence Present</option><option>Against Macro (Red Flag)</option></select></div>
+            <div class="fld"><label>Calendar / News Check</label>
+              <select id="news"><option value="clear">Clear — No High-Impact Events</option><option value="flagged">Flagged — Events Within 4H</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Odds Enhancers -->
+      <div class="panel">
+        <div class="phdr"><h3>Odds Enhancers Scoring</h3><span class="ptag pt-c phdr-r">Max 13 pts</span></div>
+        <div class="pb">
+          <table class="oe-tbl">
+            <thead><tr><th style="width:40%">Enhancer</th><th style="width:11%;text-align:center">Max</th><th style="width:35%">Rating</th><th style="width:14%;text-align:right">Pts</th></tr></thead>
+            <tbody>
+              <tr>
+                <td><div class="oe-name">1 · Freshness</div><div class="oe-sub">Has price touched this zone before?</div></td>
+                <td class="oe-max">3</td>
+                <td><select class="oe-sel" id="oe1" onchange="calcScore()">
+                  <option value="3">First touch (Fresh)</option>
+                  <option value="1.5">Light retrace &lt;20%</option>
+                  <option value="0">Zone tested / used</option></select></td>
+                <td class="oe-pts" id="oe1d">3.0</td></tr>
+              <tr>
+                <td><div class="oe-name">2 · Profit Zone (R:R)</div><div class="oe-sub">Space to opposing fresh zone?</div></td>
+                <td class="oe-max">3</td>
+                <td><select class="oe-sel" id="oe2" onchange="calcScore()">
+                  <option value="3">R:R ≥ 5:1</option>
+                  <option value="1.5">R:R ≥ 3:1</option>
+                  <option value="0">R:R &lt; 3:1</option></select></td>
+                <td class="oe-pts" id="oe2d">3.0</td></tr>
+              <tr>
+                <td><div class="oe-name">3 · Strength</div><div class="oe-sub">Quality of leg-out from zone base?</div></td>
+                <td class="oe-max">2</td>
+                <td><select class="oe-sel" id="oe3" onchange="calcScore()">
+                  <option value="2">Explosive / Impulsive</option>
+                  <option value="1">Moderate</option>
+                  <option value="0">Weak / Gradual</option></select></td>
+                <td class="oe-pts" id="oe3d">2.0</td></tr>
+              <tr>
+                <td><div class="oe-name">4 · Time (Base Candles)</div><div class="oe-sub">Candle count forming the base?</div></td>
+                <td class="oe-max">2</td>
+                <td><select class="oe-sel" id="oe4" onchange="calcScore()">
+                  <option value="2">1–2 base candles</option>
+                  <option value="1">3–5 base candles</option>
+                  <option value="0">6+ candles (compress TF)</option></select></td>
+                <td class="oe-pts" id="oe4d">2.0</td></tr>
+              <tr>
+                <td><div class="oe-name">5 · Curve Position</div><div class="oe-sub">Zone on correct curve side?</div></td>
+                <td class="oe-max">2</td>
+                <td><select class="oe-sel" id="oe5" onchange="calcScore()">
+                  <option value="2">Curve HIGH (Supply) / LOW (Demand)</option>
+                  <option value="1">Equilibrium zone</option>
+                  <option value="0">Wrong side of curve</option></select></td>
+                <td class="oe-pts" id="oe5d">2.0</td></tr>
+              <tr>
+                <td><div class="oe-name">6 · Trend Alignment</div><div class="oe-sub">Does ITF trend support direction?</div></td>
+                <td class="oe-max">1</td>
+                <td><select class="oe-sel" id="oe6" onchange="calcScore()">
+                  <option value="1">Trend aligned (HL/HH or LH/LL)</option>
+                  <option value="0.5">Sideways / Ranging</option>
+                  <option value="0">Counter-trend</option></select></td>
+                <td class="oe-pts" id="oe6d">1.0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Outcome -->
+      <div class="panel">
+        <div class="phdr"><h3>Trade Outcome</h3><span class="ptag pt-o phdr-r">Post-Trade Record</span></div>
+        <div class="pb">
+          <div class="frow f2">
+            <div class="fld"><label>Outcome</label>
+              <select id="outcome"><option value="OPEN">Open / Pending</option><option value="WIN">Win ✓</option><option value="LOSS">Loss ✗</option><option value="BREAKEVEN">Breakeven ~</option></select></div>
+            <div class="fld"><label>Actual P&amp;L (R-multiples)</label>
+              <input type="number" id="pnlR" step="0.1" placeholder="e.g. 4.8 or -1.0"></div>
+          </div>
+          <div class="fld" style="margin-top:10px"><label>Trade Notes &amp; Rationale</label>
+            <textarea id="notes" style="width:100%;background:var(--s3);border:1px solid var(--border2);border-radius:3px;color:var(--text);font-family:'Fira Code',monospace;font-size:11px;padding:8px 10px;outline:none;resize:vertical;min-height:68px;line-height:1.6;transition:border-color .2s" placeholder="Entry rationale, chart observations, rule adherence notes, post-trade reflection, lessons learned..."></textarea></div>
+        </div>
+      </div>
+
+      <button class="btn btn-main" id="logBtn" onclick="logTrade()">⊕ Log Trade &amp; Get AI Coach Review</button>
+    </div>
+
+    <!-- RIGHT: GAUGE + COACH -->
+    <div>
+      <!-- Live Score Gauge -->
+      <div class="panel">
+        <div class="phdr"><h3>Live Odds Score</h3><span class="ptag pt-c phdr-r" id="entryTag">PROXIMAL</span></div>
+        <div class="gauge-area">
+          <svg id="gsvg" viewBox="0 0 200 120" width="200" height="120">
+            <path d="M15,110 A85,85,0,0,1,185,110" fill="none" stroke="rgba(0,168,210,0.1)" stroke-width="11" stroke-linecap="round"/>
+            <path id="gFill" d="M15,110 A85,85,0,0,1,185,110" fill="none" stroke="#00e676" stroke-width="11" stroke-linecap="round" stroke-dasharray="266.9" stroke-dashoffset="0" style="transition:all .4s ease"/>
+            <text x="10" y="118" font-size="9" fill="rgba(78,111,138,0.8)" font-family="monospace">0</text>
+            <text x="95" y="22" font-size="9" fill="rgba(78,111,138,0.8)" text-anchor="middle" font-family="monospace">6.5</text>
+            <text x="190" y="118" font-size="9" fill="rgba(78,111,138,0.8)" text-anchor="end" font-family="monospace">13</text>
+            <line id="m7" x1="79" y1="26" x2="83" y2="34" stroke="rgba(255,193,7,0.45)" stroke-width="1.5"/>
+            <line id="m9" x1="116" y1="27" x2="112" y2="35" stroke="rgba(0,230,118,0.45)" stroke-width="1.5"/>
+          </svg>
+          <div class="g-score" id="gScore" style="color:var(--green)">10.0</div>
+          <div class="g-raw">Raw score: <span id="gRaw">13.0</span> / 13</div>
+          <div class="dec-badge db-prox" id="decBadge">▶ PROXIMAL ENTRY</div>
+          <div class="bdown">
+            <div class="brow"><span class="bname">1 · Freshness</span><span class="bval" id="b1">3.0</span></div>
+            <div class="brow"><span class="bname">2 · Profit Zone</span><span class="bval" id="b2">3.0</span></div>
+            <div class="brow"><span class="bname">3 · Strength</span><span class="bval" id="b3">2.0</span></div>
+            <div class="brow"><span class="bname">4 · Time</span><span class="bval" id="b4">2.0</span></div>
+            <div class="brow"><span class="bname">5 · Curve</span><span class="bval" id="b5">2.0</span></div>
+            <div class="brow"><span class="bname">6 · Trend</span><span class="bval" id="b6">1.0</span></div>
+            <div class="btotal"><span class="braw" id="braw">Raw: 13.0/13</span><span class="bnorm" id="bnorm">Norm: 10.0/10</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- AI Coach -->
+      <div class="panel">
+        <div class="phdr"><h3>AI Methodology Coach</h3><span class="ptag pt-c phdr-r">OTA · Bachir Chaaya S&amp;D</span></div>
+        <div id="coachOut">
+          <div class="coach-ph">Log a trade to receive an AI-generated coaching review based on the OTA / Bachir Chaaya Supply &amp; Demand framework. Process quality is graded independently of trade outcome — a losing trade with excellent process scores an A.</div>
+        </div>
+      </div>
+
+      <!-- Author Card -->
+      <div style="background:var(--s2);border:1px solid var(--border);border-radius:5px;padding:12px 14px;display:flex;align-items:center;gap:12px">
+        <div style="width:34px;height:34px;border-radius:50%;background:var(--cyan2);border:1px solid var(--border2);display:grid;place-items:center;font-family:'Chakra Petch',sans-serif;font-weight:600;font-size:11px;color:var(--cyan);flex-shrink:0">MF</div>
+        <div style="flex:1">
+          <div style="font-size:11px;color:var(--text);margin-bottom:2px">Mochammad Fathan</div>
+          <div style="font-size:10px;color:var(--text2)">Technical Analysis Cert. · OTA S&amp;D Practitioner · AI Integration</div>
+        </div>
+        <span style="font-size:9px;border:1px solid var(--border2);padding:3px 8px;border-radius:2px;color:var(--text3);letter-spacing:0.1em">PORTFOLIO</span>
+      </div>
+    </div>
+  </div>
+</div><!-- /tp-entry -->
+
+<!-- ─────────── TAB: JOURNAL ─────────── -->
+<div class="tpanel" id="tp-journal">
+  <div class="disc"><b>TRADE LOG:</b> A structured record of trades reviewed against the OTA S&amp;D methodology. Odds Enhancer score and AI process grade are tracked independently of outcome — consistent with the principle that systematic process produces long-term edge.</div>
+  <div class="panel">
+    <div class="phdr"><h3>Logged Trades</h3>
+      <div class="phdr-r"><button class="btn-sm" onclick="clearAll()">Clear All</button></div></div>
+    <div id="jContent">
+      <div class="empty-st"><div style="font-size:22px;opacity:0.15;margin-bottom:8px">◎</div>No trades logged yet. Use the New Entry tab to begin.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─────────── TAB: STATS ─────────── -->
+<div class="tpanel" id="tp-stats">
+  <div id="statsContent">
+    <div class="panel empty-st" style="padding:48px;text-align:center"><div style="font-size:22px;opacity:0.15;margin-bottom:8px">◎</div><div style="font-size:11px;color:var(--text2);line-height:1.85">Log at least one trade to see performance statistics.<br>Stats track process quality independently of outcome.</div></div>
+  </div>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>
+  <div class="wrap fi">
+    <span>TRADECRAFT · FX Trade Journal & S&amp;D Methodology Coach · Portfolio Demo</span>
+    <span>Mochammad Fathan · AI + Technical Analysis · v1.0</span>
+  </div>
+</footer>
+
+</div><!-- /z1 -->
+
+<script>
+// ── HELPERS ──────────────────────────────────────────────────────────────
+const g=id=>document.getElementById(id);
+const gv=id=>parseFloat(g(id)?.value)||0;
+const gs=id=>g(id)?.value?.trim()||'';
+
+// ── API DOT ──────────────────────────────────────────────────────────────
+function toggleDot(){
+  const k=gs('apiKeyInput');
+  const d=g('apiDot');
+  d.className=k.length>20?'api-dot on':'api-dot';
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────
+function sw(e,tab){
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('on'));
+  e.target.classList.add('on');
+  g('tp-'+tab).classList.add('on');
+  if(tab==='journal')loadJournal();
+  if(tab==='stats')loadStats();
+}
+
+// ── SYNC ZONE TYPE TO DIRECTION ──────────────────────────────────────────
+function syncZone(){
+  g('ztype').value=gs('dir')==='LONG'?'Demand':'Supply';
+}
+
+// ── R:R CALCULATOR ───────────────────────────────────────────────────────
+function calcRR(){
+  const e=gv('entry'),sl=gv('sl'),tp=gv('tp');
+  if(!e||!sl||!tp){g('rrVal').style.color='var(--text2)';g('rrVal').textContent='—';return;}
+  const risk=Math.abs(e-sl),reward=Math.abs(tp-e);
+  if(!risk){return;}
+  const rr=(reward/risk).toFixed(2);
+  g('rrVal').textContent=rr+':1';
+  g('rrVal').style.color=rr>=5?'var(--green)':rr>=3?'var(--gold)':'var(--red)';
+  // Auto-suggest OE2
+  if(rr>=5)g('oe2').value='3';
+  else if(rr>=3)g('oe2').value='1.5';
+  else g('oe2').value='0';
+  calcScore();
+}
+
+// ── CURVE CALCULATOR ─────────────────────────────────────────────────────
+function calcCurve(){
+  const hi=gv('wkH'),lo=gv('wkL'),cur=gv('wkC');
+  if(!hi||!lo||!cur||hi===lo){
+    g('curveVal').textContent='—'; g('curveCls').textContent='Enter 52W data above';
+    g('curveCls').style.color='var(--text2)'; return;
+  }
+  const pct=((cur-lo)/(hi-lo)*100);
+  g('curveVal').textContent=pct.toFixed(1)+'%';
+  const dir=gs('dir');
+  let cls,col,oe5v;
+  if(pct>=70){cls='CURVE HIGH — SHORT bias';col='var(--red)';oe5v=(dir==='SHORT')?'2':'0';}
+  else if(pct<=30){cls='CURVE LOW — LONG bias';col='var(--green)';oe5v=(dir==='LONG')?'2':'0';}
+  else{cls='EQUILIBRIUM — Neutral';col='var(--gold)';oe5v='1';}
+  g('curveCls').textContent=cls; g('curveCls').style.color=col;
+  g('oe5').value=oe5v;
+  calcScore();
+}
+
+// ── GAUGE UPDATE ─────────────────────────────────────────────────────────
+function updateGauge(norm){
+  const arc=266.9;
+  const fill=norm>0?arc*(1-norm/10):arc;
+  const fill_el=g('gFill');
+  fill_el.style.strokeDashoffset=fill;
+  const col=norm>=9?'#00e676':norm>=7?'#ffc107':'#ff1744';
+  fill_el.style.stroke=norm>0?col:'rgba(0,168,210,0.06)';
+  g('gScore').textContent=norm.toFixed(1);
+  g('gScore').style.color=norm>0?col:'var(--text2)';
+}
+
+// ── CALC SCORE ────────────────────────────────────────────────────────────
+function calcScore(){
+  const vals=[1,2,3,4,5,6].map(i=>parseFloat(g('oe'+i)?.value)||0);
+  const raw=vals.reduce((a,b)=>a+b,0);
+  const norm=(raw/13)*10;
+  vals.forEach((v,i)=>{
+    g('oe'+(i+1)+'d').textContent=v.toFixed(1);
+    g('b'+(i+1)).textContent=v.toFixed(1);
+  });
+  g('braw').textContent='Raw: '+raw.toFixed(1)+'/13';
+  g('bnorm').textContent='Norm: '+norm.toFixed(1)+'/10';
+  updateGauge(norm);
+  // Decision badge
+  let dec,dcls,etag,etcls;
+  if(norm>=9){dec='▶ PROXIMAL ENTRY';dcls='dec-badge db-prox';etag='PROXIMAL';etcls='ptag pt-g';}
+  else if(norm>=7){dec='◉ CONFIRM ENTRY';dcls='dec-badge db-conf';etag='CONFIRM';etcls='ptag pt-o';}
+  else{dec='✕ NO TRADE';dcls='dec-badge db-nt';etag='NO TRADE';etcls='ptag pt-r';}
+  const db=g('decBadge');
+  db.textContent=dec; db.className=dcls;
+  const et=g('entryTag');
+  et.textContent=etag; et.className=etcls+' phdr-r';
+  g('gRaw').textContent=raw.toFixed(1);
+  return{vals,raw:parseFloat(raw.toFixed(2)),norm:parseFloat(norm.toFixed(2)),decision:etag};
+}
+
+// ── LOCAL STORAGE ─────────────────────────────────────────────────────────
+function getTrades(){try{return JSON.parse(localStorage.getItem('tc_trades')||'[]');}catch{return[];}}
+function saveTrades(t){localStorage.setItem('tc_trades',JSON.stringify(t));}
+function updateCount(){g('jCount').textContent=getTrades().length;}
+function clearAll(){if(confirm('Remove all logged trades? Cannot be undone.')){saveTrades([]);updateCount();loadJournal();}}
+function delTrade(id){saveTrades(getTrades().filter(t=>t.id!==id));updateCount();loadJournal();}
+
+// ── LOG TRADE ─────────────────────────────────────────────────────────────
+function logTrade(){
+  const key=gs('apiKeyInput');
+  if(!key){alert('Enter your Anthropic API key in the header first.');return;}
+  const{vals,raw,norm,decision}=calcScore();
+  const trade={
+    id:Date.now(),
+    pair:gs('pair'),dir:gs('dir'),session:gs('sess'),
+    date:gs('tdate'),time:gs('ttime'),duration:gs('dur'),
+    entry:gv('entry'),sl:gv('sl'),tp:gv('tp'),rr:g('rrVal').textContent,
+    bachir:gs('bachir'),
+    wkH:gv('wkH'),wkL:gv('wkL'),wkC:gv('wkC'),
+    curvePct:g('curveVal').textContent,
+    curveCls:g('curveCls').textContent,
+    macro:gs('macro'),ztype:gs('ztype'),zform:gs('zform'),zauth:gs('zauth'),
+    corr:gs('corr'),news:gs('news'),
+    oe:[...vals],rawScore:raw,normScore:norm,decision,
+    outcome:gs('outcome'),pnlR:gv('pnlR'),notes:gs('notes'),
+    aiReview:null,ts:new Date().toISOString()
+  };
+  const trades=getTrades();trades.unshift(trade);saveTrades(trades);updateCount();
+  getCoach(trade,key);
+}
+
+// ── AI COACH ──────────────────────────────────────────────────────────────
+async function getCoach(t,key){
+  const btn=g('logBtn');
+  btn.disabled=true;btn.textContent='⟳ Getting AI Review...';
+  g('coachOut').innerHTML=`<div class="coach-loading"><div class="cspin"></div><div style="font-size:11px;color:var(--text2)">Reviewing against OTA S&D rules...<br><span style="opacity:0.55;font-size:10px">Checking compliance · Evaluating process quality · Generating coaching points</span></div></div>`;
+
+  const prompt=`You are a certified OTA Supply & Demand trading coach using the Bachir Chaaya methodology. Review this trade journal entry and return structured coaching JSON only — no markdown, no preamble.
+
+TRADE:
+Pair: ${t.pair} | Direction: ${t.dir} | Session: ${t.session} | Duration: ${t.duration}
+Date: ${t.date} ${t.time}
+Entry: ${t.entry} | Stop: ${t.sl} | Target: ${t.tp} | R:R: ${t.rr}
+Bachir's Rule (Spread Check): ${t.bachir}
+52W High: ${t.wkH} | 52W Low: ${t.wkL} | Current: ${t.wkC}
+Curve Position: ${t.curvePct} — ${t.curveCls}
+Macro Regime: ${t.macro}
+Zone: ${t.ztype} | Formation: ${t.zform} | Authenticity: ${t.zauth}
+Correlation Confirmation: ${t.corr}
+News/Calendar: ${t.news}
+Odds Enhancers: [1-Freshness:${t.oe[0]}/3, 2-ProfitZone:${t.oe[1]}/3, 3-Strength:${t.oe[2]}/2, 4-Time:${t.oe[3]}/2, 5-Curve:${t.oe[4]}/2, 6-Trend:${t.oe[5]}/1]
+Raw Score: ${t.rawScore}/13 | Normalized: ${t.normScore}/10 | Decision: ${t.decision}
+Outcome: ${t.outcome} | P&L: ${t.pnlR}R
+Notes: ${t.notes||'None'}
+
+OTA Rules to evaluate:
+1. Authentic + Fresh = Trade. Non-Authentic + Non-Fresh = No Trade (strict).
+2. R:R must be ≥ 3:1. Bachir's Rule: if spread > 10% of zone width → abandon.
+3. Score ≥ 9.0 → Proximal entry. 7.0–8.9 → Confirm entry. < 7.0 → No Trade.
+4. Zone type must match direction: Demand for Long, Supply for Short.
+5. Curve alignment: Long from Curve LOW (<30%), Short from Curve HIGH (>70%).
+6. Equilibrium (30–70%): no action unless exceptional setup.
+7. No high-impact news within 2–4 hours of entry.
+8. 2+ lead indicators should confirm. Divergence = downgrade or skip.
+9. HQ Zone = Fresh + Authentic + Explosive leg-out + ≤6 base candles + formed EU/US session.
+10. Process quality scored independently of outcome.
+
+Return ONLY this JSON:
+{
+  "process_grade": "<A+|A|A-|B+|B|B-|C+|C|C-|D|F>",
+  "process_score": <0-100>,
+  "verdict": "2-3 sentences on PROCESS quality, not outcome. Reference specific numbers.",
+  "rule_checks": [
+    {"rule": "Rule label", "status": "<PASS|FAIL|WARN>", "note": "specific note with data"}
+  ],
+  "strengths": ["specific strength with reference to actual trade data"],
+  "coaching_points": [
+    {"priority": "<HIGH|MEDIUM|LOW>", "title": "short title", "detail": "specific, actionable point referencing OTA rules and actual trade numbers"}
+  ],
+  "methodology_note": "One principle from Bachir Chaaya / OTA S&D that this trade illustrates or should have applied."
+}
+Provide 3-5 rule checks, 1-3 strengths, 2-4 coaching points. Reference actual data throughout.`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1600,messages:[{role:'user',content:prompt}]})
+    });
+    if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e.error?.message||`HTTP ${res.status}`);}
+    const data=await res.json();
+    const raw=data.content[0].text.trim().replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+    let r;try{r=JSON.parse(raw);}catch{const m=raw.match(/\{[\s\S]*\}/);r=m?JSON.parse(m[0]):{process_grade:'?',verdict:'Parse error. Trade saved.',rule_checks:[],strengths:[],coaching_points:[],methodology_note:''};}
+    renderCoach(r,t);
+    const trades=getTrades();const idx=trades.findIndex(x=>x.id===t.id);
+    if(idx>-1){trades[idx].aiReview=r;saveTrades(trades);}
+  }catch(err){
+    g('coachOut').innerHTML=`<div style="padding:14px;font-size:11px;color:var(--red);line-height:1.7">⚠ Review error: ${err.message}<br><span style="opacity:0.6;font-size:10px">Trade was saved to journal. Check your API key and try again.</span></div>`;
+  }
+  btn.disabled=false;btn.innerHTML='⊕ Log Trade &amp; Get AI Coach Review';
+}
+
+function gcol(grade){
+  if(!grade||grade==='?')return'var(--text2)';
+  if(grade[0]==='A')return'var(--green)';
+  if(grade[0]==='B')return'var(--cyan)';
+  if(grade[0]==='C')return'var(--gold)';
+  return'var(--red)';
+}
+
+function renderCoach(r,t){
+  const gc=gcol(r.process_grade);
+  const checks=(r.rule_checks||[]).map(c=>{
+    const sym=c.status==='PASS'?'✓':c.status==='FAIL'?'✗':'⚠';
+    const cls=c.status==='PASS'?'pass':c.status==='FAIL'?'fail':'warn';
+    return`<div class="rule-row"><span class="ri ${cls}">${sym}</span><span><b>${c.rule}:</b> ${c.note}</span></div>`;
+  }).join('');
+  const strengths=(r.strengths||[]).map(s=>`<div class="rule-row"><span class="ri pass">✓</span><span>${s}</span></div>`).join('');
+  const cpts=(r.coaching_points||[]).map(p=>{
+    const pc=p.priority==='HIGH'?'var(--red)':p.priority==='MEDIUM'?'var(--gold)':'var(--cyan)';
+    return`<div class="cpt"><b style="color:${pc}">[${p.priority}]</b> <b>${p.title}:</b> ${p.detail}</div>`;
+  }).join('');
+
+  g('coachOut').innerHTML=`<div class="coach-body">
+    <div class="coach-top">
+      <div class="coach-grade" style="color:${gc}">${r.process_grade||'?'}</div>
+      <div>
+        <div style="font-size:11px;color:var(--text2)">Process Quality Grade</div>
+        <div style="font-size:10px;color:var(--text3)">${t.pair} · ${t.dir} · ${t.date}</div>
+      </div>
+      <div style="margin-left:auto;font-family:'Chakra Petch',sans-serif;font-size:22px;font-weight:700;color:${gc}">${r.process_score||0}/100</div>
+    </div>
+    <div class="coach-verdict">${r.verdict||''}</div>
+    ${checks?`<div class="csec"><div class="csec-title">Rule Compliance</div>${checks}</div>`:''}
+    ${strengths?`<div class="csec"><div class="csec-title">Process Strengths</div>${strengths}</div>`:''}
+    ${cpts?`<div class="csec"><div class="csec-title">Coaching Points</div>${cpts}</div>`:''}
+    ${r.methodology_note?`<div class="mnote"><b style="color:var(--cyan)">Methodology Principle:</b> ${r.methodology_note}</div>`:''}
+  </div>`;
+}
+
+// ── JOURNAL ───────────────────────────────────────────────────────────────
+function loadJournal(){
+  const trades=getTrades();
+  if(!trades.length){g('jContent').innerHTML=`<div class="empty-st"><div style="font-size:22px;opacity:0.15;margin-bottom:8px">◎</div>No trades logged yet.</div>`;return;}
+  const rows=trades.map(t=>{
+    const dc=t.dir==='LONG'?'d-long':'d-short';
+    const dsym=t.dir==='LONG'?'↑':'↓';
+    const oc=t.outcome==='WIN'?'o-win':t.outcome==='LOSS'?'o-loss':t.outcome==='OPEN'?'o-open':'o-be';
+    const sc=t.normScore>=9?'sp-px':t.normScore>=7?'sp-cf':'sp-nt';
+    const gr=t.aiReview?.process_grade||'—';
+    const gc2=t.aiReview?gcol(gr):'var(--text2)';
+    const pnl=t.pnlR?(t.pnlR>0?'+':'')+t.pnlR+'R':'—';
+    const pnlc=t.pnlR>0?'var(--green)':t.pnlR<0?'var(--red)':'var(--text2)';
+    return`<tr><td><span class="pname">${t.pair}</span></td><td class="${dc}">${dsym} ${t.dir}</td><td>${t.date||'—'}</td><td>${t.session}</td><td><span class="spill ${sc}">${t.normScore.toFixed(1)}</span></td><td class="${oc}">${t.outcome}</td><td style="color:${pnlc}">${pnl}</td><td style="color:${gc2};font-family:'Chakra Petch',sans-serif;font-weight:600">${gr}</td><td><button class="btn-sm" onclick="delTrade(${t.id})">Remove</button></td></tr>`;
+  }).join('');
+  g('jContent').innerHTML=`<div style="overflow-x:auto"><table class="jtbl"><thead><tr><th>Pair</th><th>Direction</th><th>Date</th><th>Session</th><th>Score</th><th>Outcome</th><th>P&L</th><th>Grade</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────
+function loadStats(){
+  const trades=getTrades();
+  if(!trades.length){g('statsContent').innerHTML=`<div class="panel empty-st" style="padding:48px;text-align:center"><div style="font-size:22px;opacity:0.15;margin-bottom:8px">◎</div><div style="font-size:11px;color:var(--text2);line-height:1.85">Log at least one trade to see performance statistics.</div></div>`;return;}
+  const closed=trades.filter(t=>t.outcome!=='OPEN');
+  const wins=closed.filter(t=>t.outcome==='WIN');
+  const losses=closed.filter(t=>t.outcome==='LOSS');
+  const bes=closed.filter(t=>t.outcome==='BREAKEVEN');
+  const wr=closed.length?(wins.length/closed.length*100).toFixed(1):'0.0';
+  const avgNorm=(trades.reduce((a,b)=>a+b.normScore,0)/trades.length).toFixed(2);
+  const totalPnl=closed.reduce((a,b)=>a+(b.pnlR||0),0).toFixed(2);
+  const pxc=trades.filter(t=>t.decision==='PROXIMAL').length;
+  const cfc=trades.filter(t=>t.decision==='CONFIRM').length;
+  const ntc=trades.filter(t=>t.decision==='NO TRADE').length;
+  const avgGrade=avgNorm>=9?'A':avgNorm>=8?'B+':avgNorm>=7?'B':avgNorm>=6?'C':'D';
+  const agc=gcol(avgGrade);
+  // Pair breakdown
+  const pm={};
+  trades.forEach(t=>{if(!pm[t.pair])pm[t.pair]={n:0,w:0,s:0};pm[t.pair].n++;if(t.outcome==='WIN')pm[t.pair].w++;pm[t.pair].s+=t.normScore;});
+  const prows=Object.entries(pm).map(([p,d])=>`<tr><td style="font-family:'Chakra Petch',sans-serif;color:#d8eaf8;font-weight:600">${p}</td><td>${d.n}</td><td style="color:${d.w/d.n>=0.5?'var(--green)':'var(--red)'}">${(d.w/d.n*100).toFixed(0)}%</td><td style="color:var(--cyan)">${(d.s/d.n).toFixed(2)}</td></tr>`).join('');
+
+  g('statsContent').innerHTML=`
+  <div class="stat-grid">
+    <div class="sc"><div class="sc-lbl">Total Trades</div><div class="sc-val" style="color:var(--cyan)">${trades.length}</div><div class="sc-sub">${closed.length} closed · ${trades.length-closed.length} open</div></div>
+    <div class="sc"><div class="sc-lbl">Win Rate</div><div class="sc-val" style="color:${parseFloat(wr)>=50?'var(--green)':'var(--red)'}">${wr}%</div><div class="sc-sub">${wins.length}W · ${losses.length}L · ${bes.length}BE</div></div>
+    <div class="sc"><div class="sc-lbl">Avg Process Score</div><div class="sc-val" style="color:${agc}">${avgNorm}</div><div class="sc-sub">Process Grade: ${avgGrade}</div></div>
+    <div class="sc"><div class="sc-lbl">Total P&L</div><div class="sc-val" style="color:${parseFloat(totalPnl)>=0?'var(--green)':'var(--red)'}">${parseFloat(totalPnl)>0?'+':''}${totalPnl}R</div><div class="sc-sub">R-multiples, closed trades</div></div>
+  </div>
+  <div style="font-size:9px;color:var(--text2);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px">Entry Method Distribution</div>
+  <div class="dist-row">
+    <div class="dc"><div class="dc-n" style="color:var(--green)">${pxc}</div><div class="dc-l">Proximal (≥9.0)</div></div>
+    <div class="dc"><div class="dc-n" style="color:var(--gold)">${cfc}</div><div class="dc-l">Confirm (7.0–8.9)</div></div>
+    <div class="dc"><div class="dc-n" style="color:var(--red)">${ntc}</div><div class="dc-l">No Trade (&lt;7.0)</div></div>
+  </div>
+  <div style="font-size:9px;color:var(--text2);letter-spacing:0.18em;text-transform:uppercase;margin-bottom:10px">Performance by Pair</div>
+  <div class="panel" style="overflow:hidden"><table class="ptbl"><thead><tr><th>Pair</th><th>Trades</th><th>Win Rate</th><th>Avg Score</th></tr></thead><tbody>${prows}</tbody></table></div>`;
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+const now=new Date();
+g('tdate').value=now.toISOString().split('T')[0];
+g('ttime').value=now.toTimeString().slice(0,5);
+calcScore();
+updateCount();
+</script>
+</body>
+</html>
