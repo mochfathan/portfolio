@@ -810,6 +810,21 @@ function renderRiskDashboard(buyerRisk, renterRisk, comp, mc, p) {
     </div>`;
 
   document.getElementById('risk-content').innerHTML = `
+    <div class="mc-viz">
+      <div class="mc-viz-head">
+        <div class="mc-viz-title">Monte Carlo Visualization</div>
+        <div class="mc-viz-tabs">
+          <button class="mc-vtab ${MC.chartMode==='fan'?'on':''}" onclick="setMcViz('fan')">Fan Chart</button>
+          <button class="mc-vtab ${MC.chartMode==='spread'?'on':''}" onclick="setMcViz('spread')">Spread Histogram</button>
+        </div>
+      </div>
+      <div class="mc-chart-wrap"><canvas id="mc-chart"></canvas></div>
+      <div class="mc-viz-note">
+        ${MC.chartMode==='fan'
+          ? 'Fan chart shows the 5th-to-95th percentile wealth band and median line for buyer and renter paths across the full horizon.'
+          : 'Histogram shows terminal buyer-minus-renter wealth across all stochastic paths. Values above zero favor buying; values below zero favor renting.'}
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:8px;margin-bottom:12px">
       ${mCard('P(Buyer beats renter)', pct(comp.buyerWin), 'Share of stochastic paths where buyer terminal wealth exceeds renter terminal wealth.', comp.buyerWin>=0.50?'var(--buyer)':'var(--danger)')}
       ${mCard('P(Renter beats buyer)', pct(comp.renterWin), 'Share of stochastic paths where renter terminal wealth exceeds buyer terminal wealth.', comp.renterWin>=0.50?'var(--renter)':'var(--danger)')}
@@ -823,6 +838,7 @@ function renderRiskDashboard(buyerRisk, renterRisk, comp, mc, p) {
     <div style="margin-top:10px;font-size:9px;color:var(--text3);line-height:1.7;padding-top:8px;border-top:1px solid var(--border);font-style:italic">
       Risk metrics derived from ${MC.runs} Monte Carlo paths. Each path now draws a full sequence of correlated annual shocks for returns, housing, rent, income, living costs, and inflation. VaR and CVaR are terminal-wealth measures; drawdown probabilities capture intra-horizon peak-to-trough risk. Results are probabilistic — not guaranteed outcomes.
     </div>`;
+  drawMonteCarloChart(mc,p,comp);
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1315,7 +1331,7 @@ if (MC.enabled) {
   const renterRisk = computeRiskMetrics(renterPaths);
   const compRisk = computeComparisonMetrics(mc);
 
-  renderRiskDashboard(buyerRisk, renterRisk, compRisk);
+  renderRiskDashboard(buyerRisk, renterRisk, compRisk, mc, p);
 
 } else {
   // When OFF, reset text so user knows why it's empty
