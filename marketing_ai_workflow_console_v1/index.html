@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Marketing AI Workflow Console</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <aside class="sidebar">
+      <div>
+        <p class="eyebrow">AI workflow system</p>
+        <h1>Marketing AI Workflow Console</h1>
+        <p class="lede">Lead intake, AI drafting, task routing, SOP execution, and audit logging — powered by your preferred AI provider.</p>
+      </div>
+      <nav class="nav-stack" aria-label="Workflow sections">
+        <a href="#ai-config">AI provider</a>
+        <a href="#intake">Lead intake</a>
+        <a href="#knowledge">Knowledge</a>
+        <a href="#drafts">Drafts</a>
+        <a href="#tasks">Tasks</a>
+        <a href="#sop">SOP</a>
+        <a href="#audit">Audit</a>
+      </nav>
+      <div class="status-panel" id="statusPanel">
+        <span class="status-dot" id="statusDot"></span>
+        <div>
+          <strong id="statusTitle">No provider configured</strong>
+          <span id="statusSub">Select a provider and enter your API key to enable AI generation.</span>
+        </div>
+      </div>
+    </aside>
+
+    <section class="workspace">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Integrated workflow</p>
+          <h2>Lead to campaign response</h2>
+        </div>
+        <div class="toolbar">
+          <button id="loadSample" type="button">Load sample</button>
+          <button id="runWorkflow" type="button" class="primary">Run workflow</button>
+          <button id="resetWorkflow" type="button">Reset</button>
+        </div>
+      </header>
+
+      <!-- STEP 0 — AI PROVIDER CONFIGURATION -->
+      <section class="panel provider-panel" id="ai-config">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Step 0</p>
+            <h3>AI provider</h3>
+          </div>
+          <span class="integration-tag">Universal API</span>
+        </div>
+        <div class="provider-grid">
+          <label>Provider
+            <select id="aiProvider">
+              <option value="simulation">Simulation mode (no API key)</option>
+              <option value="claude">Claude (Anthropic)</option>
+              <option value="openai">OpenAI (ChatGPT)</option>
+              <option value="custom">Custom / In-house endpoint</option>
+            </select>
+          </label>
+          <label id="modelLabel">Model
+            <select id="aiModel">
+              <option value="">— select provider first —</option>
+            </select>
+          </label>
+        </div>
+        <div class="provider-grid" id="apiKeyRow">
+          <label>API key
+            <div class="key-input-wrap">
+              <input id="apiKey" type="password" placeholder="Paste your API key here — stored in memory only, never sent anywhere except the provider endpoint">
+              <button type="button" id="toggleKey" class="icon-btn" title="Show / hide key">&#9679;&#9679;&#9679;</button>
+            </div>
+          </label>
+          <label id="customEndpointLabel" style="display:none;">Custom endpoint URL
+            <input id="customEndpoint" type="text" placeholder="https://your-api.example.com/v1">
+          </label>
+        </div>
+        <div class="provider-note" id="providerNote">
+          Choose a provider. In simulation mode the workflow runs with deterministic logic — no API key required. Switching to a live provider generates real AI output for qualification, email drafts, and creative briefs.
+        </div>
+      </section>
+
+      <!-- STEP 1 & 2 — INTAKE + QUALIFICATION -->
+      <section class="grid two" id="intake">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 1</p>
+              <h3>Lead intake</h3>
+            </div>
+            <span class="integration-tag">Gmail / Form</span>
+          </div>
+          <label>Company
+            <input id="company" type="text" placeholder="Example: Northstar Dental Group">
+          </label>
+          <label>Contact name
+            <input id="contact" type="text" placeholder="Example: Maya Chen">
+          </label>
+          <label>Industry
+            <select id="industry">
+              <option value="Healthcare">Healthcare</option>
+              <option value="SaaS">SaaS</option>
+              <option value="Real estate">Real estate</option>
+              <option value="Education">Education</option>
+              <option value="Retail">Retail</option>
+            </select>
+          </label>
+          <label>Goal
+            <textarea id="goal" rows="4" placeholder="Describe the business goal, campaign need, or pain point."></textarea>
+          </label>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 2</p>
+              <h3>Qualification</h3>
+            </div>
+            <span class="integration-tag ai-tag" id="classifierTag">AI classifier</span>
+          </div>
+          <div class="score-card">
+            <span>Fit score</span>
+            <strong id="fitScore">--</strong>
+          </div>
+          <div class="qualification-list" id="qualificationList">
+            <p>Run the workflow to classify urgency, fit, next action, and risk notes.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- STEP 3 & 4 — KNOWLEDGE + CONTROLS -->
+      <section class="grid two" id="knowledge">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 3</p>
+              <h3>Project knowledge</h3>
+            </div>
+            <span class="integration-tag">Google Drive</span>
+          </div>
+          <label>Brand voice
+            <textarea id="brandVoice" rows="4">Professional, practical, calm, evidence-aware, and action-oriented. Avoid hype. Use concise client-ready language.</textarea>
+          </label>
+          <label>Approved offer
+            <textarea id="offer" rows="4">Marketing growth diagnostic, paid media audit, landing-page conversion review, and 30-day campaign sprint proposal.</textarea>
+          </label>
+        </article>
+
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 4</p>
+              <h3>Workflow controls</h3>
+            </div>
+            <span class="integration-tag">Governance</span>
+          </div>
+          <div class="control-list">
+            <label class="check-row"><input id="humanReview" type="checkbox" checked> Require human approval before sending email</label>
+            <label class="check-row"><input id="sourceCitations" type="checkbox" checked> Include source notes in draft</label>
+            <label class="check-row"><input id="createTask" type="checkbox" checked> Create Notion-style follow-up task</label>
+            <label class="check-row"><input id="creativeBrief" type="checkbox" checked> Create Canva-style creative brief</label>
+          </div>
+        </article>
+      </section>
+
+      <!-- STEP 5 & 6 — DRAFTS -->
+      <section class="grid two" id="drafts">
+        <article class="panel output-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 5</p>
+              <h3>Email draft</h3>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="integration-tag ai-tag">Gmail draft</span>
+              <button type="button" class="copy-btn" id="copyEmail" title="Copy to clipboard">Copy</button>
+            </div>
+          </div>
+          <pre id="emailDraft">Run the workflow to generate a client-safe draft.</pre>
+        </article>
+
+        <article class="panel output-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 6</p>
+              <h3>Creative brief</h3>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <span class="integration-tag ai-tag">Canva</span>
+              <button type="button" class="copy-btn" id="copyBrief" title="Copy to clipboard">Copy</button>
+            </div>
+          </div>
+          <pre id="briefDraft">Run the workflow to generate a design brief.</pre>
+        </article>
+      </section>
+
+      <!-- STEP 7 & 8 — TASKS + SOP -->
+      <section class="grid two" id="tasks">
+        <article class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 7</p>
+              <h3>Task routing</h3>
+            </div>
+            <span class="integration-tag">Notion</span>
+          </div>
+          <div id="taskBoard" class="task-board">
+            <p>No task created yet.</p>
+          </div>
+        </article>
+
+        <article class="panel" id="sop">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Step 8</p>
+              <h3>SOP checklist</h3>
+            </div>
+            <span class="integration-tag">Operations</span>
+          </div>
+          <ol class="sop-list">
+            <li>Capture lead data from approved source.</li>
+            <li>Classify fit, urgency, risk, and recommended next action.</li>
+            <li>Retrieve approved offer and brand voice.</li>
+            <li>Generate draft email and internal task.</li>
+            <li>Human reviewer approves before external sending.</li>
+            <li>Log decision, owner, and next follow-up date.</li>
+          </ol>
+        </article>
+      </section>
+
+      <!-- AUDIT LOG -->
+      <section class="panel" id="audit">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">System record</p>
+            <h3>Audit log</h3>
+          </div>
+          <span class="integration-tag">Traceability</span>
+        </div>
+        <div id="auditLog" class="audit-log" aria-live="polite"></div>
+      </section>
+    </section>
+  </main>
+  <script src="app.js"></script>
+</body>
+</html>
