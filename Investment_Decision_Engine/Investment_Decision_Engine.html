@@ -265,11 +265,18 @@ select.form-input option{background:var(--bg3);}
       </div>
     </div>
     <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
+    
+    <!-- Google Sheet Sync -->
+    <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+      <div class="panel-title" style="margin-bottom:6px; font-size:9px; opacity:0.8;">Google Sheet Sync (BETA)</div>
+      <input type="text" id="sheet-url" class="form-input" placeholder="Paste Published CSV URL..." style="font-size:9px; height:24px; padding:2px 8px;">
+      <button class="btn-import" onclick="syncWithGoogleSheet()" style="margin-top:6px; padding:4px;">Sync with Sheet</button>
+    </div>
   </div>
 
   <div class="panel-header">
     <span class="panel-title">Company Inputs</span>
-    <span class="panel-hint">$M unless noted</span>
+    <span class="panel-hint">Millions unless noted</span>
   </div>
 
   <!-- Company Info -->
@@ -319,6 +326,7 @@ select.form-input option{background:var(--bg3);}
     <button class="demo-btn" onclick="loadPreset('MSFT')">MSFT</button>
     <button class="demo-btn" onclick="loadPreset('GOOGL')">GOOGL</button>
     <button class="demo-btn" onclick="loadPreset('BBCA')">BBCA.JK</button>
+    <button class="demo-btn" onclick="loadPreset('7203')">7203.T</button>
     <button class="demo-btn warn" onclick="loadPreset('WEAK')">⚠ Distressed</button>
     <button class="demo-btn" onclick="clearAll()" style="margin-left:auto;color:var(--text3)">↺ Clear</button>
   </div>
@@ -335,33 +343,33 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content active" id="itab-0">
     <div class="fsec">Current Period (TTM / Annual)</div>
     <div class="form-row">
-      <div><label class="form-label">Revenue <small>($M)</small></label><input class="form-input" id="i-rev" type="number" placeholder="383285"></div>
-      <div><label class="form-label">COGS <small>($M)</small></label><input class="form-input" id="i-cogs" type="number" placeholder="214137"></div>
+      <div><label class="form-label">Revenue <small>(Millions)</small></label><input class="form-input" id="i-rev" type="number" placeholder="383285"></div>
+      <div><label class="form-label">COGS <small>(Millions)</small></label><input class="form-input" id="i-cogs" type="number" placeholder="214137"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">EBIT <small>(Op. Income)</small></label><input class="form-input" id="i-ebit" type="number" placeholder="114301"></div>
-      <div><label class="form-label">EBITDA <small>($M)</small></label><input class="form-input" id="i-ebitda" type="number" placeholder="125820"></div>
+      <div><label class="form-label">EBITDA <small>(Millions)</small></label><input class="form-input" id="i-ebitda" type="number" placeholder="125820"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Interest Expense <small>($M)</small></label><input class="form-input" id="i-int" type="number" placeholder="3933"></div>
-      <div><label class="form-label">Net Income <small>($M)</small></label><input class="form-input" id="i-ni" type="number" placeholder="96995"></div>
+      <div><label class="form-label">Interest Expense <small>(Millions)</small></label><input class="form-input" id="i-int" type="number" placeholder="3933"></div>
+      <div><label class="form-label">Net Income <small>(Millions)</small></label><input class="form-input" id="i-ni" type="number" placeholder="96995"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">EPS Basic <small>($)</small></label><input class="form-input" id="i-epsb" type="number" step="0.01" placeholder="6.16"></div>
-      <div><label class="form-label">EPS Diluted <small>($)</small></label><input class="form-input" id="i-epsd" type="number" step="0.01" placeholder="6.13"></div>
+      <div><label class="form-label">EPS Basic <small>(Unit)</small></label><input class="form-input" id="i-epsb" type="number" step="0.01" placeholder="6.16"></div>
+      <div><label class="form-label">EPS Diluted <small>(Unit)</small></label><input class="form-input" id="i-epsd" type="number" step="0.01" placeholder="6.13"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Forward EPS <small>($)</small></label><input class="form-input" id="i-feps" type="number" step="0.01" placeholder="6.60"></div>
-      <div><label class="form-label">Dividends/Share <small>($)</small></label><input class="form-input" id="i-dps" type="number" step="0.01" placeholder="0.96"></div>
+      <div><label class="form-label">Forward EPS <small>(Unit)</small></label><input class="form-input" id="i-feps" type="number" step="0.01" placeholder="6.60"></div>
+      <div><label class="form-label">Dividends/Share <small>(Unit)</small></label><input class="form-input" id="i-dps" type="number" step="0.01" placeholder="0.96"></div>
     </div>
     <div class="fsec">Prior Year (for Growth Analysis)</div>
     <div class="form-row">
-      <div><label class="form-label">Revenue PY <small>($M)</small></label><input class="form-input" id="i-revpy" type="number" placeholder="394328"></div>
-      <div><label class="form-label">Net Income PY <small>($M)</small></label><input class="form-input" id="i-nipy" type="number" placeholder="99803"></div>
+      <div><label class="form-label">Revenue PY <small>(Millions)</small></label><input class="form-input" id="i-revpy" type="number" placeholder="394328"></div>
+      <div><label class="form-label">Net Income PY <small>(Millions)</small></label><input class="form-input" id="i-nipy" type="number" placeholder="99803"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">EPS Diluted PY <small>($)</small></label><input class="form-input" id="i-epsdy" type="number" step="0.01" placeholder="6.11"></div>
-      <div><label class="form-label">Gross Profit PY <small>($M)</small></label><input class="form-input" id="i-gpy" type="number" placeholder="170782"></div>
+      <div><label class="form-label">EPS Diluted PY <small>(Unit)</small></label><input class="form-input" id="i-epsdy" type="number" step="0.01" placeholder="6.11"></div>
+      <div><label class="form-label">Gross Profit PY <small>(Millions)</small></label><input class="form-input" id="i-gpy" type="number" placeholder="170782"></div>
     </div>
   </div>
 
@@ -369,12 +377,12 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-1">
     <div class="fsec">Current Period — Assets</div>
     <div class="form-row">
-      <div><label class="form-label">Total Assets <small>($M)</small></label><input class="form-input" id="i-ta" type="number" placeholder="352583"></div>
-      <div><label class="form-label">Current Assets <small>($M)</small></label><input class="form-input" id="i-ca" type="number" placeholder="143566"></div>
+      <div><label class="form-label">Total Assets <small>(Millions)</small></label><input class="form-input" id="i-ta" type="number" placeholder="352583"></div>
+      <div><label class="form-label">Current Assets <small>(Millions)</small></label><input class="form-input" id="i-ca" type="number" placeholder="143566"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">Cash & Equivalents</label><input class="form-input" id="i-cash" type="number" placeholder="29965"></div>
-      <div><label class="form-label">Inventory <small>($M)</small></label><input class="form-input" id="i-inv" type="number" placeholder="6331"></div>
+      <div><label class="form-label">Inventory <small>(Millions)</small></label><input class="form-input" id="i-inv" type="number" placeholder="6331"></div>
     </div>
     <div class="fsec">Liabilities & Equity</div>
     <div class="form-row">
@@ -382,7 +390,7 @@ select.form-input option{background:var(--bg3);}
       <div><label class="form-label">Current Liabilities</label><input class="form-input" id="i-cl" type="number" placeholder="145308"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Total Debt <small>($M)</small></label><input class="form-input" id="i-debt" type="number" placeholder="111088"></div>
+      <div><label class="form-label">Total Debt <small>(Millions)</small></label><input class="form-input" id="i-debt" type="number" placeholder="111088"></div>
       <div><label class="form-label">Total Equity (BV)</label><input class="form-input" id="i-eq" type="number" placeholder="62146"></div>
     </div>
     <div class="form-row">
@@ -408,8 +416,8 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-2">
     <div class="fsec">Cash Flow Statement</div>
     <div class="form-row">
-      <div><label class="form-label">Operating CF <small>($M)</small></label><input class="form-input" id="i-ocf" type="number" placeholder="110543"></div>
-      <div><label class="form-label">Capex <small>(+ve, $M)</small></label><input class="form-input" id="i-capex" type="number" placeholder="10959"></div>
+      <div><label class="form-label">Operating CF <small>(Millions)</small></label><input class="form-input" id="i-ocf" type="number" placeholder="110543"></div>
+      <div><label class="form-label">Capex <small>(+ve, Millions)</small></label><input class="form-input" id="i-capex" type="number" placeholder="10959"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">FCF <small>(or auto OCF-Capex)</small></label><input class="form-input" id="i-fcf" type="number" placeholder="auto-calc"></div>
@@ -422,7 +430,7 @@ select.form-input option{background:var(--bg3);}
     </div>
     <div class="form-row">
       <div><label class="form-label">Terminal Growth Rate <small>%</small></label><input class="form-input" id="i-tgrate" type="number" step="0.1" placeholder="3.0"></div>
-      <div><label class="form-label">Net Debt Override <small>($M)</small></label><input class="form-input" id="i-netdebt" type="number" placeholder="auto-calc"></div>
+      <div><label class="form-label">Net Debt Override <small>(Millions)</small></label><input class="form-input" id="i-netdebt" type="number" placeholder="auto-calc"></div>
     </div>
   </div>
 
@@ -430,12 +438,12 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-3">
     <div class="fsec">Market Data</div>
     <div class="form-row">
-      <div><label class="form-label">Current Price <small>($)</small></label><input class="form-input" id="i-price" type="number" step="0.01" placeholder="189.30"></div>
+      <div><label class="form-label">Current Price <small>(Unit)</small></label><input class="form-input" id="i-price" type="number" step="0.01" placeholder="189.30"></div>
       <div><label class="form-label">Beta <small>(vs. market)</small></label><input class="form-input" id="i-beta" type="number" step="0.01" placeholder="1.29"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">52-Week High <small>($)</small></label><input class="form-input" id="i-h52" type="number" step="0.01" placeholder="199.62"></div>
-      <div><label class="form-label">52-Week Low <small>($)</small></label><input class="form-input" id="i-l52" type="number" step="0.01" placeholder="124.17"></div>
+      <div><label class="form-label">52-Week High <small>(Unit)</small></label><input class="form-input" id="i-h52" type="number" step="0.01" placeholder="199.62"></div>
+      <div><label class="form-label">52-Week Low <small>(Unit)</small></label><input class="form-input" id="i-l52" type="number" step="0.01" placeholder="124.17"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">Market Cap <small>(auto or override)</small></label><input class="form-input" id="i-mc" type="number" placeholder="auto-calc"></div>
@@ -546,9 +554,18 @@ select.form-input option{background:var(--bg3);}
     </div>
 
     <!-- DISCLAIMER -->
-    <div class="disclaimer">
-      <div style="font-family:var(--mono);font-size:9.5px;color:var(--gold);letter-spacing:0.10em;text-transform:uppercase;margin-bottom:5px;">⚠ Important Disclaimer</div>
-      <p style="font-size:10.5px;color:var(--text3);line-height:1.6;">For educational and analytical purposes only. Does not constitute financial advice, solicitation, or an investment recommendation. All computations rely on user-supplied inputs and established quantitative frameworks. Verify all figures against primary sources. Consult a licensed financial adviser before making investment decisions. Past performance does not guarantee future results.</p>
+    <div class="disclaimer" style="border-left: 3px solid var(--gold); padding-left: 18px;">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:8px;font-weight:600;">⚠ Legal Disclaimer & Terms of Use</div>
+      <div style="font-size:10.5px;color:var(--text2);line-height:1.6;display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div>
+          <p><strong>Not Financial Advice:</strong> This tool is provided strictly for educational and research purposes. It does not constitute financial, investment, tax, or legal advice. No output from this engine should be construed as a recommendation to buy, sell, or hold any security.</p>
+          <p style="margin-top:8px;"><strong>Data Integrity:</strong> All computations rely on user-supplied inputs or imported CSV data. This engine does not verify the accuracy, completeness, or timeliness of external data. Always cross-reference results with primary regulatory filings (SEC, IDX, FSA, etc.).</p>
+        </div>
+        <div>
+          <p><strong>Model Risk:</strong> Quantitative models (DCF, Altman-Z, etc.) are based on historical data and mathematical assumptions that may not reflect current market realities. Past performance is never a guarantee of future results.</p>
+          <p style="margin-top:8px;"><strong>No Liability:</strong> By using this tool, you acknowledge that the developers and authors are not responsible for any financial losses or damages resulting from its use. Consult a licensed financial advisor before making investment decisions.</p>
+        </div>
+      </div>
     </div>
 
   </div><!-- /results-content -->
@@ -664,6 +681,19 @@ var PRESETS = {
     price:9500, beta:0.85, h52:10425, l52:8175, mc:0, tax:22.0,
     rfr:6.5, mrp:5.5, apt:11000, cons:2.0
   },
+  '7203': {
+    name:'Toyota Motor Corp', ticker:'7203.T', sector:'Consumer Discretionary', currency:'JPY',
+    rev:45095300, cogs:36000000, ebit:5352900, ebitda:7500000, int:150000, ni:4944900,
+    epsb:365.94, epsd:365.94, feps:380.0, dps:75.0,
+    revpy:37154200, nipy:2451300, epsdy:179.47, gpy:6500000,
+    ta:85418800, ca:25000000, cash:4968000, inv:4500000,
+    tl:50184400, cl:22000000, debt:31000000, eq:33805000, re:28000000, shr:13500,
+    tapy:74000000, debtpy:28000000, capy:22000000, clpy:20000000, nipy2:2451300, shrpy:13600,
+    ocf:4435000, capex:1500000, fcf:2935000, fcfpy:2500000,
+    wacc:6.0, grate:5.0, tgrate:1.5, netdebt:0,
+    price:3200, beta:0.65, h52:3890, l52:2100, mc:0, tax:30.0,
+    rfr:1.0, mrp:6.0, apt:3600, cons:1.9
+  },
   WEAK: {
     name:'Sample Distressed Corp.', ticker:'DIST', sector:'Industrials', currency:'USD',
     rev:45000, cogs:42000, ebit:-2500, ebitda:1200, int:4800, ni:-6200,
@@ -679,7 +709,34 @@ var PRESETS = {
   }
 };
 
-/* ── CSV DATA AUTOMATION ──────────────────── */
+/* ── DATA AUTOMATION ──────────────────────── */
+async function syncWithGoogleSheet() {
+  const url = document.getElementById('sheet-url').value.trim();
+  const status = document.getElementById('import-status');
+  if (!url) {
+    status.textContent = 'Please enter a valid URL';
+    status.style.color = 'var(--red)';
+    return;
+  }
+  
+  status.textContent = 'Connecting to Google Sheets...';
+  status.style.color = 'var(--gold)';
+  
+  try {
+    const response = await fetch(url);
+    if (!response.ok) throw new Error('Failed to fetch sheet');
+    const text = await response.text();
+    const mappedCount = parseYahooCSV(text);
+    status.textContent = 'Sync Complete (' + mappedCount + ' fields mapped)';
+    status.style.color = 'var(--teal)';
+    setTimeout(() => { runAnalysis(); }, 100);
+  } catch (err) {
+    console.error(err);
+    status.textContent = 'Sync Failed: Ensure URL is Published as CSV';
+    status.style.color = 'var(--red)';
+  }
+}
+
 function handleFiles(files) {
   if (!files.length) return;
   const status = document.getElementById('import-status');
@@ -687,13 +744,14 @@ function handleFiles(files) {
   status.style.color = 'var(--gold)';
   
   let processedCount = 0;
+  let totalMapped = 0;
   for (let i = 0; i < files.length; i++) {
     const reader = new FileReader();
     reader.onload = function(e) {
-      parseYahooCSV(e.target.result);
+      totalMapped += parseYahooCSV(e.target.result);
       processedCount++;
       if (processedCount === files.length) {
-        status.textContent = 'Import Complete (' + files.length + ' files)';
+        status.textContent = 'Import Complete (' + totalMapped + ' fields mapped)';
         status.style.color = 'var(--teal)';
         setTimeout(() => { runAnalysis(); }, 100);
       }
@@ -734,6 +792,7 @@ function parseYahooCSV(text) {
     { label: "EBITDA", cur: "i-ebitda" },
     { label: "Interest Expense", cur: "i-int" },
     { label: "Net Income Common Stockholders", cur: "i-ni", prev: "i-nipy" },
+    { label: "Net Income", cur: "i-ni", prev: "i-nipy" },
     { label: "Basic EPS", cur: "i-epsb" },
     { label: "Diluted EPS", cur: "i-epsd", prev: "i-epsdy" },
     { label: "Tax Provision", cur: "i-tax" },
@@ -741,33 +800,43 @@ function parseYahooCSV(text) {
     { label: "Current Assets", cur: "i-ca", prev: "i-capy" },
     { label: "Inventory", cur: "i-inv" },
     { label: "Total Liabilities Net Minority Interest", cur: "i-tl" },
+    { label: "Total Liabilities", cur: "i-tl" },
     { label: "Current Liabilities", cur: "i-cl", prev: "i-clpy" },
     { label: "Total Debt", cur: "i-debt", prev: "i-debtpy" },
     { label: "Stockholders' Equity", cur: "i-eq" },
+    { label: "Total Equity Gross Minority Interest", cur: "i-eq" },
     { label: "Retained Earnings", cur: "i-re" },
     { label: "Ordinary Shares Number", cur: "i-shr", prev: "i-shrpy" },
     { label: "Operating Cash Flow", cur: "i-ocf" },
+    { label: "Cash Flow from Operating Activities", cur: "i-ocf" },
     { label: "Capital Expenditure", cur: "i-capex", mult: -1 },
+    { label: "Investments in Property Plant and Equipment", cur: "i-capex", mult: -1 },
     { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy" }
   ];
 
+  let fieldsMapped = 0;
   rows.forEach(row => {
-    const rowHeader = row[0];
-    const match = mapping.find(m => m.label.toLowerCase() === rowHeader.toLowerCase());
+    if (!row[0]) return;
+    const rowHeader = row[0].toLowerCase().replace(/[^a-z]/g, ''); // strictly alpha for robustness
+    const match = mapping.find(m => m.label.toLowerCase().replace(/[^a-z]/g, '') === rowHeader);
+
     if (match) {
-      const val = parseFloat(row[dataIdx]);
-      const prevVal = parseFloat(row[pyIdx]);
+      let rawVal = row[dataIdx] ? row[dataIdx].replace(/[^-0-9.]/g, '') : '';
+      let rawPrevVal = row[pyIdx] ? row[pyIdx].replace(/[^-0-9.]/g, '') : '';
+      
+      const val = parseFloat(rawVal);
+      const prevVal = parseFloat(rawPrevVal);
       const mult = match.mult || 1;
 
       if (!isNaN(val)) {
         const el = document.getElementById(match.cur);
         if (el) {
           let finalVal = val * mult;
-          // Scale down by 1M for non-per-share values
           if (!match.cur.includes('eps') && !match.cur.includes('price')) {
             finalVal /= 1000000;
           }
           el.value = finalVal.toFixed(2).replace(/\.00$/, '');
+          fieldsMapped++;
         }
       }
       
@@ -783,6 +852,8 @@ function parseYahooCSV(text) {
       }
     }
   });
+  console.log('CSV Import: Mapped ' + fieldsMapped + ' fields.');
+  return fieldsMapped;
 }
 
 /* ── TAB SWITCHING ────────────────────────── */
