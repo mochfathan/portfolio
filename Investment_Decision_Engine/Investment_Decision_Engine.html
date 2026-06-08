@@ -589,6 +589,11 @@ select.form-input option{background:var(--bg3);}
       <p>Damodaran (2012), <em>Investment Valuation</em>; Brealey, Myers &amp; Allen, <em>Principles of Corporate Finance</em>. 5-year FCF projection discounted at WACC + terminal value via Gordon Growth Model. Intrinsic value = Equity Value ÷ Shares Outstanding.</p>
       <code class="formula">IV = Σ FCFₜ/(1+r)ᵗ + [FCF₅(1+g_T)/(r−g_T)]/(1+r)⁵ − Net Debt</code>
     </div>
+    <div class="mfi">
+      <h4>Price / Sales Ratio</h4>
+      <p>Kenneth Fisher, <em>Super Stocks</em> (1984). One of the first models to use P/S as a primary valuation metric for identifying undervalued "super stocks" before they show significant earnings. Fisher preferred P/S &lt; 0.75.</p>
+      <code class="formula">P/S = Market Cap / Total Revenue</code>
+    </div>
   </div>
 </footer>
 
@@ -597,9 +602,10 @@ select.form-input option{background:var(--bg3);}
 <script>
 /* ═══════════════════════════════════════════════════════════════
    INVESTMENT DECISION ENGINE v1.0
-   Multi-Factor Composite Scoring with 6 Quantitative Models
+   Multi-Factor Composite Scoring with 7 Quantitative Models
    Ref: Graham (1934,1949) · Piotroski (2000) · Altman (1968) ·
-        Greenblatt (2006) · Lynch (1989) · Damodaran (2012)
+        Greenblatt (2006) · Lynch (1989) · Damodaran (2012) ·
+        Fisher (1984)
 ═══════════════════════════════════════════════════════════════ */
 
 var CHARTS = { radar: null, bar: null, dcf: null };
