@@ -1,0 +1,1517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Investment Decision Engine v1.0</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ── RESET & BASE ─────────────────────────── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0B0C0E; --bg2:#111318; --bg3:#181B21; --bg4:#1E2229;
+  --border:rgba(255,255,255,0.07); --b2:rgba(255,255,255,0.12);
+  --gold:#D4A853; --gold2:#F0C46A;
+  --teal:#3ECFA0; --red:#E05C5C; --blue:#5B9CF6; --orange:#E8854A;
+  --text:#E8E6E0; --text2:#9B9891; --text3:#5C5A55;
+  --mono:'IBM Plex Mono',monospace; --sans:'IBM Plex Sans',sans-serif; --serif:'DM Serif Display',serif;
+  --r:6px; --rl:10px;
+}
+html{font-size:13px;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;line-height:1.5;overflow-x:hidden;}
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-track{background:var(--bg2);}
+::-webkit-scrollbar-thumb{background:var(--bg4);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text3);}
+
+/* ── LAYOUT ───────────────────────────────── */
+.app{max-width:1400px;margin:0 auto;padding:0 20px 60px;}
+
+/* ── HEADER ───────────────────────────────── */
+.header{padding:30px 0 22px;border-bottom:1px solid var(--border);margin-bottom:22px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.header-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.18em;color:var(--gold);text-transform:uppercase;margin-bottom:6px;}
+.header-title{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1.1;color:var(--text);}
+.header-title em{font-style:italic;color:var(--gold2);}
+.header-sub{font-size:11.5px;color:var(--text2);margin-top:6px;max-width:560px;line-height:1.6;}
+.header-right{text-align:right;}
+.header-badge{font-family:var(--mono);font-size:9px;padding:3px 10px;border:1px solid var(--border);border-radius:var(--r);color:var(--text3);letter-spacing:0.06em;display:inline-block;margin-bottom:4px;}
+.header-version{font-family:var(--mono);font-size:9px;color:var(--text3);}
+
+/* ── MAIN GRID ────────────────────────────── */
+.main-grid{display:grid;grid-template-columns:390px 1fr;gap:18px;align-items:start;}
+@media(max-width:1024px){
+  .main-grid{grid-template-columns:1fr;}
+  .input-panel{position:relative!important;top:0!important;max-height:none!important;margin-bottom:20px;}
+  .input-tab-nav{position:relative!important;top:0!important;}
+}
+
+/* ── INPUT PANEL ──────────────────────────── */
+.input-panel{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rl);scrollbar-width:thin;scrollbar-color:var(--bg4) var(--bg2);}
+.panel-header{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;}
+.panel-title{font-family:var(--mono);font-size:11px;letter-spacing:0.10em;color:var(--gold);text-transform:uppercase;}
+.panel-hint{font-family:var(--mono);font-size:9px;color:var(--text3);}
+
+/* ── COMPANY INFO ─────────────────────────── */
+.company-info{padding:12px 16px;border-bottom:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.company-info .full{grid-column:1/-1;}
+
+/* ── DEMO BAR ─────────────────────────────── */
+.demo-bar{padding:9px 16px;border-bottom:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap;align-items:center;}
+.demo-label{font-family:var(--mono);font-size:9px;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;margin-right:2px;}
+.demo-btn{font-family:var(--mono);font-size:10px;padding:3px 9px;border:1px solid var(--border);border-radius:4px;background:transparent;color:var(--text2);cursor:pointer;letter-spacing:0.04em;transition:all 0.15s;}
+.demo-btn:hover{background:var(--bg4);color:var(--gold);border-color:var(--gold);}
+.demo-btn.warn{color:var(--orange);border-color:rgba(232,133,74,0.3);}
+.demo-btn.warn:hover{background:rgba(232,133,74,0.1);border-color:var(--orange);}
+
+/* ── INPUT TABS ───────────────────────────── */
+.input-tab-nav{display:flex;border-bottom:1px solid var(--border);background:var(--bg3);position:sticky;top:40px;z-index:9;}
+.input-tab-btn{font-family:var(--mono);font-size:10px;letter-spacing:0.06em;text-transform:uppercase;padding:7px 0;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;flex:1;text-align:center;}
+.input-tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.input-tab-btn:hover:not(.active){color:var(--text2);}
+.input-tab-content{display:none;padding:12px 16px;}
+.input-tab-content.active{display:block;}
+
+/* ── FORM ELEMENTS ────────────────────────── */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:8px;}
+.form-group{margin-bottom:8px;}
+.form-label{display:block;font-family:var(--mono);font-size:9.5px;color:var(--text3);letter-spacing:0.06em;margin-bottom:3px;text-transform:uppercase;}
+.form-label small{color:var(--text3);font-size:8.5px;font-style:normal;opacity:0.7;}
+.form-input{width:100%;padding:5px 9px;background:var(--bg4);border:1px solid var(--border);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:11px;outline:none;transition:border-color 0.15s;}
+.form-input:focus{border-color:var(--gold);}
+.form-input::placeholder{color:var(--text3);font-size:10px;}
+select.form-input{cursor:pointer;}
+select.form-input option{background:var(--bg3);}
+.fsec{font-family:var(--mono);font-size:9.5px;letter-spacing:0.10em;color:var(--gold);text-transform:uppercase;margin:10px 0 7px;padding-bottom:4px;border-bottom:1px solid var(--border);}
+
+/* ── ANALYZE BUTTON ───────────────────────── */
+.analyze-btn{width:calc(100% - 32px);margin:10px 16px 12px;padding:10px;background:var(--gold);border:none;border-radius:var(--r);color:#0B0C0E;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;}
+.analyze-btn:hover{background:var(--gold2);box-shadow:0 0 20px rgba(212,168,83,0.3);}
+.analyze-btn:active{transform:scale(0.99);}
+
+/* ── RESULTS PANEL ────────────────────────── */
+.results-panel{min-height:600px;}
+.empty-state{height:540px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px dashed rgba(255,255,255,0.08);border-radius:var(--rl);color:var(--text3);gap:10px;}
+.empty-icon{font-size:36px;opacity:0.25;}
+.empty-text{font-family:var(--mono);font-size:11.5px;letter-spacing:0.06em;}
+.empty-sub{font-family:var(--mono);font-size:10px;color:var(--text3);opacity:0.6;}
+
+/* ── VERDICT BANNER ───────────────────────── */
+.verdict-banner{border-radius:var(--rl);padding:18px 22px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;border:1px solid var(--border);background:var(--bg2);}
+.verdict-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text3);margin-bottom:5px;}
+.verdict-company{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);margin-bottom:3px;}
+.verdict-sub{font-family:var(--mono);font-size:10px;color:var(--text2);}
+.verdict-right{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.verdict-score-num{font-family:var(--serif);font-size:48px;line-height:1;font-weight:400;}
+.verdict-score-label{font-family:var(--mono);font-size:9px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text3);}
+.verdict-tag{display:inline-block;padding:4px 14px;border-radius:4px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;margin-top:4px;}
+.verdict-price-line{font-family:var(--mono);font-size:10px;color:var(--text2);margin-top:6px;}
+.verdict-confidence{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:3px;}
+
+/* ── SCORE CARDS ROW ──────────────────────── */
+.score-cards{display:grid;grid-template-columns:repeat(5,1fr);gap:9px;margin-bottom:14px;}
+@media(max-width:1100px){.score-cards{grid-template-columns:repeat(3,1fr);}}
+@media(max-width:650px){.score-cards{grid-template-columns:1fr 1fr;}}
+.score-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:11px 13px;position:relative;overflow:hidden;}
+.score-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.score-card.sc-green::before{background:var(--teal);}
+.score-card.sc-gold::before{background:var(--gold);}
+.score-card.sc-red::before{background:var(--red);}
+.sc-name{font-family:var(--mono);font-size:9px;letter-spacing:0.10em;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+.sc-val{font-family:var(--serif);font-size:26px;font-weight:400;line-height:1;margin-bottom:4px;}
+.sc-bar{height:2px;background:var(--bg4);border-radius:2px;margin-top:7px;overflow:hidden;}
+.sc-bar-fill{height:100%;border-radius:2px;}
+.sc-wt{font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:5px;}
+
+/* ── OUTPUT TABS ──────────────────────────── */
+.output-tab-nav{display:flex;border-bottom:1px solid var(--border);margin-bottom:14px;overflow-x:auto;scrollbar-width:none;}
+.output-tab-nav::-webkit-scrollbar{display:none;}
+.output-tab-btn{font-family:var(--mono);font-size:10.5px;letter-spacing:0.06em;text-transform:uppercase;padding:8px 16px;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;}
+.output-tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.output-tab-btn:hover:not(.active){color:var(--text2);}
+.output-tab-content{display:none;}
+.output-tab-content.active{display:block;}
+
+/* ── CARD BASE ────────────────────────────── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;overflow:hidden;}
+.card-title{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px;}
+.chart-wrap{position:relative;height:220px;width:100%;}
+
+/* ── DASH GRID ────────────────────────────── */
+.dash-grid{display:grid;grid-template-columns:300px 1fr;gap:12px;margin-bottom:12px;}
+@media(max-width:1250px){.dash-grid{grid-template-columns:1fr;}}
+
+/* ── METRICS TABLE ────────────────────────── */
+.mtable{width:100%;border-collapse:collapse;}
+.mtable th{font-family:var(--mono);font-size:9px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text3);text-align:left;padding:4px 7px;border-bottom:1px solid var(--border);}
+.mtable td{font-family:var(--mono);font-size:10.5px;padding:5px 7px;border-bottom:1px solid rgba(255,255,255,0.04);color:var(--text);}
+.mtable tr:last-child td{border-bottom:none;}
+.mtable td:last-child{text-align:right;}
+.dot{display:inline-block;width:5px;height:5px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.dot-g{background:var(--teal);}
+.dot-a{background:var(--gold);}
+.dot-r{background:var(--red);}
+
+/* ── MODEL CARDS GRID ─────────────────────── */
+.models-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:12px;}
+@media(max-width:1100px){.models-grid{grid-template-columns:1fr 1fr;}}
+.mcard{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;}
+.mcard-title{font-family:var(--mono);font-size:10px;letter-spacing:0.10em;text-transform:uppercase;color:var(--gold);margin-bottom:3px;}
+.mcard-author{font-size:10.5px;color:var(--text3);font-style:italic;margin-bottom:9px;}
+.mcard-value{font-family:var(--serif);font-size:30px;font-weight:400;line-height:1;margin-bottom:4px;}
+.mcard-label{font-family:var(--mono);font-size:10px;color:var(--text2);}
+.mcard-sub{font-size:10.5px;color:var(--text3);margin-top:6px;line-height:1.5;}
+
+/* ── BADGE ────────────────────────────────── */
+.badge{display:inline-block;padding:2px 8px;border-radius:3px;font-family:var(--mono);font-size:9.5px;font-weight:600;}
+.bg{background:rgba(62,207,160,0.15);color:var(--teal);}
+.br{background:rgba(224,92,92,0.15);color:var(--red);}
+.ba{background:rgba(212,168,83,0.15);color:var(--gold);}
+
+/* ── PIOTROSKI SIGNALS ────────────────────── */
+.pio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-top:8px;}
+.pio-sig{font-family:var(--mono);font-size:9px;padding:3px 5px;border-radius:3px;text-align:center;}
+.pio-pass{background:rgba(62,207,160,0.12);color:var(--teal);}
+.pio-fail{background:rgba(224,92,92,0.12);color:var(--red);}
+
+/* ── DCF CARD ─────────────────────────────── */
+.dcf-meta{font-size:10.5px;color:var(--text3);margin-bottom:10px;line-height:1.5;}
+.dcf-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:12px;}
+@media(max-width:900px){.dcf-grid{grid-template-columns:1fr 1fr;}}
+.dcf-item-label{font-family:var(--mono);font-size:9px;letter-spacing:0.07em;text-transform:uppercase;color:var(--text3);margin-bottom:3px;}
+.dcf-item-value{font-family:var(--serif);font-size:20px;font-weight:400;}
+.dcf-item-sub{font-family:var(--mono);font-size:9.5px;color:var(--text2);margin-top:2px;}
+.dcf-chart-wrap{height:160px;position:relative;}
+
+/* ── HEALTH GRID ──────────────────────────── */
+.health-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+@media(max-width:700px){.health-grid{grid-template-columns:1fr;}}
+.hr{display:flex;justify-content:space-between;align-items:center;padding:4.5px 0;border-bottom:1px solid rgba(255,255,255,0.04);font-family:var(--mono);font-size:10.5px;}
+.hr:last-child{border-bottom:none;}
+.hr-name{color:var(--text2);}
+.hr-val{font-weight:500;}
+
+/* ── MODELS HEALTH ROW ────────────────────── */
+.model-health-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+
+/* ── THESIS ───────────────────────────────── */
+.thesis-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;margin-bottom:10px;}
+.thesis-sec{font-family:var(--mono);font-size:9.5px;letter-spacing:0.10em;text-transform:uppercase;margin-bottom:7px;}
+.thesis-list{list-style:none;}
+.thesis-list li{font-size:11.5px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:flex-start;gap:7px;color:var(--text2);line-height:1.5;}
+.thesis-list li:last-child{border-bottom:none;}
+.th-ico{flex-shrink:0;font-size:11px;margin-top:1px;}
+
+/* ── DISCLAIMER ───────────────────────────── */
+.disclaimer{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-top:8px;}
+
+/* ── METHODOLOGY FOOTER ───────────────────── */
+.methodology{margin-top:36px;padding:22px 0;border-top:1px solid var(--border);}
+.mft{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--gold);margin-bottom:14px;}
+.mfg{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+@media(max-width:900px){.mfg{grid-template-columns:1fr;}}
+.mfi h4{font-family:var(--mono);font-size:10.5px;color:var(--text2);margin-bottom:5px;}
+.mfi p{font-size:10.5px;color:var(--text3);line-height:1.6;}
+.formula{font-family:var(--mono);font-size:9.5px;color:var(--teal);background:var(--bg3);padding:5px 8px;border-radius:4px;margin-top:5px;display:block;}
+
+/* ── DATA IMPORT ──────────────────────────── */
+.import-section{padding:12px 16px;border-bottom:1px solid var(--border);background:var(--bg3);}
+.import-controls{display:flex;gap:8px;margin-top:8px;}
+.file-input-wrapper{flex:1;position:relative;overflow:hidden;display:inline-block;}
+.file-input-wrapper input[type=file]{font-size:100px;position:absolute;left:0;top:0;opacity:0;cursor:pointer;}
+.btn-import{font-family:var(--mono);font-size:10px;padding:6px 12px;background:var(--bg4);border:1px solid var(--border);border-radius:4px;color:var(--text2);cursor:pointer;transition:all 0.15s;text-align:center;width:100%;}
+.btn-import:hover{background:var(--gold);color:var(--bg);border-color:var(--gold);}
+
+/* ── UTILITY ──────────────────────────────── */
+.tg{color:var(--teal);} .ta{color:var(--gold);} .tr{color:var(--red);}
+.tb{color:var(--blue);} .to{color:var(--orange);} .tm{color:var(--text3);}
+.hidden{display:none!important;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ══ HEADER ════════════════════════════════ -->
+<header class="header">
+  <div>
+    <div class="header-eyebrow">Financial Intelligence · Learning Programme</div>
+    <h1 class="header-title">Investment <em>Decision Engine</em></h1>
+    <p class="header-sub">
+      Composite scoring across Valuation · Profitability · Growth · Financial Health · Cash Flow Quality.
+      Incorporates Graham Number, Piotroski F-Score, Altman Z-Score, Greenblatt Magic Formula, PEG Ratio, and DCF Intrinsic Value.
+    </p>
+  </div>
+  <div class="header-right">
+    <div class="header-badge">v1.0 · Standalone HTML</div>
+    <div class="header-version" style="margin-top:4px;">Framework: Multi-Factor Composite Model</div>
+    <div class="header-version" style="margin-top:2px;">Ref: Graham · Damodaran · Piotroski · Altman · Lynch · Greenblatt</div>
+  </div>
+</header>
+
+<!-- ══ MAIN GRID ══════════════════════════════ -->
+<div class="main-grid">
+
+<!-- ════ LEFT: INPUT PANEL ════════════════════ -->
+<div class="input-panel">
+
+  <!-- Data Automation -->
+  <div class="import-section">
+    <div class="panel-title" style="margin-bottom:6px;">Data Automation</div>
+    <div class="header-sub" style="font-size:10px;margin-top:0;margin-bottom:8px;">Upload Yahoo Finance Financials CSVs to auto-populate fields.</div>
+    <div class="import-controls">
+      <div class="file-input-wrapper">
+        <label for="csv-upload" class="btn-import" style="display:block;">Choose CSV Files...</label>
+        <input type="file" id="csv-upload" accept=".csv" multiple onchange="handleFiles(this.files)" style="display:none;">
+      </div>
+    </div>
+    <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
+  </div>
+
+  <div class="panel-header">
+    <span class="panel-title">Company Inputs</span>
+    <span class="panel-hint">$M unless noted</span>
+  </div>
+
+  <!-- Company Info -->
+  <div class="company-info">
+    <div class="full">
+      <label class="form-label">Company Name</label>
+      <input class="form-input" id="i-name" placeholder="e.g. Apple Inc." type="text">
+    </div>
+    <div>
+      <label class="form-label">Ticker Symbol</label>
+      <input class="form-input" id="i-ticker" placeholder="AAPL" type="text">
+    </div>
+    <div>
+      <label class="form-label">Sector</label>
+      <select class="form-input" id="i-sector">
+        <option value="Technology">Technology</option>
+        <option value="Financials">Financials</option>
+        <option value="Consumer Discretionary">Consumer Discretionary</option>
+        <option value="Consumer Staples">Consumer Staples</option>
+        <option value="Healthcare">Healthcare</option>
+        <option value="Energy">Energy</option>
+        <option value="Industrials">Industrials</option>
+        <option value="Materials">Materials</option>
+        <option value="Utilities">Utilities</option>
+        <option value="Real Estate">Real Estate</option>
+        <option value="Communication Services">Communication Services</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+    <div>
+      <label class="form-label">Currency</label>
+      <select class="form-input" id="i-currency">
+        <option value="USD">USD ($)</option>
+        <option value="IDR">IDR (Rp)</option>
+        <option value="EUR">EUR (€)</option>
+        <option value="GBP">GBP (£)</option>
+        <option value="JPY">JPY (¥)</option>
+        <option value="SGD">SGD (S$)</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Demo Presets -->
+  <div class="demo-bar">
+    <span class="demo-label">Demo ▸</span>
+    <button class="demo-btn" onclick="loadPreset('AAPL')">AAPL</button>
+    <button class="demo-btn" onclick="loadPreset('MSFT')">MSFT</button>
+    <button class="demo-btn" onclick="loadPreset('GOOGL')">GOOGL</button>
+    <button class="demo-btn" onclick="loadPreset('BBCA')">BBCA.JK</button>
+    <button class="demo-btn warn" onclick="loadPreset('WEAK')">⚠ Distressed</button>
+    <button class="demo-btn" onclick="clearAll()" style="margin-left:auto;color:var(--text3)">↺ Clear</button>
+  </div>
+
+  <!-- Input Sub-Tabs -->
+  <div class="input-tab-nav">
+    <button class="input-tab-btn active" onclick="switchIT(0)">Income</button>
+    <button class="input-tab-btn" onclick="switchIT(1)">Balance</button>
+    <button class="input-tab-btn" onclick="switchIT(2)">Cash Flow</button>
+    <button class="input-tab-btn" onclick="switchIT(3)">Market</button>
+  </div>
+
+  <!-- ── TAB 0: INCOME STATEMENT ── -->
+  <div class="input-tab-content active" id="itab-0">
+    <div class="fsec">Current Period (TTM / Annual)</div>
+    <div class="form-row">
+      <div><label class="form-label">Revenue <small>($M)</small></label><input class="form-input" id="i-rev" type="number" placeholder="383285"></div>
+      <div><label class="form-label">COGS <small>($M)</small></label><input class="form-input" id="i-cogs" type="number" placeholder="214137"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">EBIT <small>(Op. Income)</small></label><input class="form-input" id="i-ebit" type="number" placeholder="114301"></div>
+      <div><label class="form-label">EBITDA <small>($M)</small></label><input class="form-input" id="i-ebitda" type="number" placeholder="125820"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Interest Expense <small>($M)</small></label><input class="form-input" id="i-int" type="number" placeholder="3933"></div>
+      <div><label class="form-label">Net Income <small>($M)</small></label><input class="form-input" id="i-ni" type="number" placeholder="96995"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">EPS Basic <small>($)</small></label><input class="form-input" id="i-epsb" type="number" step="0.01" placeholder="6.16"></div>
+      <div><label class="form-label">EPS Diluted <small>($)</small></label><input class="form-input" id="i-epsd" type="number" step="0.01" placeholder="6.13"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Forward EPS <small>($)</small></label><input class="form-input" id="i-feps" type="number" step="0.01" placeholder="6.60"></div>
+      <div><label class="form-label">Dividends/Share <small>($)</small></label><input class="form-input" id="i-dps" type="number" step="0.01" placeholder="0.96"></div>
+    </div>
+    <div class="fsec">Prior Year (for Growth Analysis)</div>
+    <div class="form-row">
+      <div><label class="form-label">Revenue PY <small>($M)</small></label><input class="form-input" id="i-revpy" type="number" placeholder="394328"></div>
+      <div><label class="form-label">Net Income PY <small>($M)</small></label><input class="form-input" id="i-nipy" type="number" placeholder="99803"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">EPS Diluted PY <small>($)</small></label><input class="form-input" id="i-epsdy" type="number" step="0.01" placeholder="6.11"></div>
+      <div><label class="form-label">Gross Profit PY <small>($M)</small></label><input class="form-input" id="i-gpy" type="number" placeholder="170782"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB 1: BALANCE SHEET ── -->
+  <div class="input-tab-content" id="itab-1">
+    <div class="fsec">Current Period — Assets</div>
+    <div class="form-row">
+      <div><label class="form-label">Total Assets <small>($M)</small></label><input class="form-input" id="i-ta" type="number" placeholder="352583"></div>
+      <div><label class="form-label">Current Assets <small>($M)</small></label><input class="form-input" id="i-ca" type="number" placeholder="143566"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Cash & Equivalents</label><input class="form-input" id="i-cash" type="number" placeholder="29965"></div>
+      <div><label class="form-label">Inventory <small>($M)</small></label><input class="form-input" id="i-inv" type="number" placeholder="6331"></div>
+    </div>
+    <div class="fsec">Liabilities & Equity</div>
+    <div class="form-row">
+      <div><label class="form-label">Total Liabilities</label><input class="form-input" id="i-tl" type="number" placeholder="290437"></div>
+      <div><label class="form-label">Current Liabilities</label><input class="form-input" id="i-cl" type="number" placeholder="145308"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Total Debt <small>($M)</small></label><input class="form-input" id="i-debt" type="number" placeholder="111088"></div>
+      <div><label class="form-label">Total Equity (BV)</label><input class="form-input" id="i-eq" type="number" placeholder="62146"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Retained Earnings</label><input class="form-input" id="i-re" type="number" placeholder="-214000"></div>
+      <div><label class="form-label">Shares Out. <small>(M)</small></label><input class="form-input" id="i-shr" type="number" step="0.1" placeholder="15728"></div>
+    </div>
+    <div class="fsec">Prior Year (for Piotroski & Trends)</div>
+    <div class="form-row">
+      <div><label class="form-label">Total Assets PY</label><input class="form-input" id="i-tapy" type="number" placeholder="352755"></div>
+      <div><label class="form-label">Total Debt PY</label><input class="form-input" id="i-debtpy" type="number" placeholder="120069"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Current Assets PY</label><input class="form-input" id="i-capy" type="number" placeholder="135405"></div>
+      <div><label class="form-label">Current Liab. PY</label><input class="form-input" id="i-clpy" type="number" placeholder="153982"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Net Income PY (for ROA-PY)</label><input class="form-input" id="i-nipy2" type="number" placeholder="99803"></div>
+      <div><label class="form-label">Shares Out. PY <small>(M)</small></label><input class="form-input" id="i-shrpy" type="number" step="0.1" placeholder="16300"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB 2: CASH FLOW ── -->
+  <div class="input-tab-content" id="itab-2">
+    <div class="fsec">Cash Flow Statement</div>
+    <div class="form-row">
+      <div><label class="form-label">Operating CF <small>($M)</small></label><input class="form-input" id="i-ocf" type="number" placeholder="110543"></div>
+      <div><label class="form-label">Capex <small>(+ve, $M)</small></label><input class="form-input" id="i-capex" type="number" placeholder="10959"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">FCF <small>(or auto OCF-Capex)</small></label><input class="form-input" id="i-fcf" type="number" placeholder="auto-calc"></div>
+      <div><label class="form-label">FCF Prior Year</label><input class="form-input" id="i-fcfpy" type="number" placeholder="92953"></div>
+    </div>
+    <div class="fsec">DCF Model Assumptions</div>
+    <div class="form-row">
+      <div><label class="form-label">WACC / Discount Rate <small>%</small></label><input class="form-input" id="i-wacc" type="number" step="0.1" placeholder="9.0"></div>
+      <div><label class="form-label">FCF Growth Y1–5 <small>%</small></label><input class="form-input" id="i-grate" type="number" step="0.1" placeholder="8.0"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Terminal Growth Rate <small>%</small></label><input class="form-input" id="i-tgrate" type="number" step="0.1" placeholder="3.0"></div>
+      <div><label class="form-label">Net Debt Override <small>($M)</small></label><input class="form-input" id="i-netdebt" type="number" placeholder="auto-calc"></div>
+    </div>
+  </div>
+
+  <!-- ── TAB 3: MARKET DATA ── -->
+  <div class="input-tab-content" id="itab-3">
+    <div class="fsec">Market Data</div>
+    <div class="form-row">
+      <div><label class="form-label">Current Price <small>($)</small></label><input class="form-input" id="i-price" type="number" step="0.01" placeholder="189.30"></div>
+      <div><label class="form-label">Beta <small>(vs. market)</small></label><input class="form-input" id="i-beta" type="number" step="0.01" placeholder="1.29"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">52-Week High <small>($)</small></label><input class="form-input" id="i-h52" type="number" step="0.01" placeholder="199.62"></div>
+      <div><label class="form-label">52-Week Low <small>($)</small></label><input class="form-input" id="i-l52" type="number" step="0.01" placeholder="124.17"></div>
+    </div>
+    <div class="form-row">
+      <div><label class="form-label">Market Cap <small>(auto or override)</small></label><input class="form-input" id="i-mc" type="number" placeholder="auto-calc"></div>
+      <div><label class="form-label">Effective Tax Rate <small>%</small></label><input class="form-input" id="i-tax" type="number" step="0.1" placeholder="21.0"></div>
+    </div>
+    <div class="fsec">Rate Assumptions</div>
+    <div class="form-row">
+      <div><label class="form-label">Risk-Free Rate <small>%</small></label><input class="form-input" id="i-rfr" type="number" step="0.1" placeholder="4.5"></div>
+      <div><label class="form-label">Market Risk Premium <small>%</small></label><input class="form-input" id="i-mrp" type="number" step="0.1" placeholder="5.5"></div>
+    </div>
+    <div class="fsec">Analyst Estimates (optional)</div>
+    <div class="form-row">
+      <div><label class="form-label">Consensus Price Target</label><input class="form-input" id="i-apt" type="number" step="0.01" placeholder="210.00"></div>
+      <div><label class="form-label">Consensus Rating <small>(1=SB, 5=SS)</small></label><input class="form-input" id="i-cons" type="number" min="1" max="5" step="0.1" placeholder="2.1"></div>
+    </div>
+  </div>
+
+  <button class="analyze-btn" onclick="runAnalysis()">⚡ &nbsp;Run Full Analysis</button>
+</div><!-- /input-panel -->
+
+<!-- ════ RIGHT: RESULTS PANEL ════════════════ -->
+<div class="results-panel">
+
+  <!-- Empty State -->
+  <div id="empty-state" class="empty-state">
+    <div class="empty-icon">◎</div>
+    <div class="empty-text">Enter data and click Run Full Analysis</div>
+    <div class="empty-sub">or load a demo preset to explore the model</div>
+  </div>
+
+  <!-- Results Content -->
+  <div id="results-content" class="hidden">
+
+    <!-- VERDICT BANNER -->
+    <div class="verdict-banner" id="verdict-banner">
+      <div>
+        <div class="verdict-label">Investment Analysis · Decision Engine</div>
+        <div class="verdict-company" id="v-company">—</div>
+        <div class="verdict-sub" id="v-sub">—</div>
+        <div style="margin-top:8px"><span class="verdict-tag" id="v-tag">—</span></div>
+        <div class="verdict-price-line" id="v-price-line" style="margin-top:8px">—</div>
+        <div class="verdict-confidence" id="v-confidence">—</div>
+      </div>
+      <div class="verdict-right">
+        <div class="verdict-score-num" id="v-score">—</div>
+        <div class="verdict-score-label">Composite Score / 100</div>
+      </div>
+    </div>
+
+    <!-- 5 SCORE CARDS -->
+    <div class="score-cards" id="score-cards"></div>
+
+    <!-- OUTPUT TABS -->
+    <div class="output-tab-nav">
+      <button class="output-tab-btn active" onclick="switchOT(0)">Dashboard</button>
+      <button class="output-tab-btn" onclick="switchOT(1)">Valuation Models</button>
+      <button class="output-tab-btn" onclick="switchOT(2)">Health &amp; Risk</button>
+      <button class="output-tab-btn" onclick="switchOT(3)">Investment Thesis</button>
+    </div>
+
+    <!-- ── OUTPUT TAB 0: DASHBOARD ── -->
+    <div class="output-tab-content active" id="otab-0">
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-title">Multi-Factor Radar</div>
+          <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Key Metrics — Signal Overview</div>
+          <table class="mtable" id="metrics-table"></table>
+        </div>
+      </div>
+      <div class="dash-grid">
+        <div class="card">
+          <div class="card-title">Score Breakdown (Horizontal)</div>
+          <div class="chart-wrap"><canvas id="barChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Derived Ratios &amp; Figures</div>
+          <table class="mtable" id="derived-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── OUTPUT TAB 1: VALUATION MODELS ── -->
+    <div class="output-tab-content" id="otab-1">
+      <div class="models-grid" id="models-grid"></div>
+      <div class="card">
+        <div class="card-title">Discounted Cash Flow — 5-Year Projection + Terminal Value</div>
+        <div class="dcf-meta" id="dcf-meta"></div>
+        <div class="dcf-grid" id="dcf-grid"></div>
+        <div class="dcf-chart-wrap"><canvas id="dcfChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- ── OUTPUT TAB 2: HEALTH & RISK ── -->
+    <div class="output-tab-content" id="otab-2">
+      <div class="health-grid" id="health-grid"></div>
+      <div class="model-health-row">
+        <div class="mcard" id="altman-card"></div>
+        <div class="mcard" id="piotroski-card"></div>
+      </div>
+    </div>
+
+    <!-- ── OUTPUT TAB 3: INVESTMENT THESIS ── -->
+    <div class="output-tab-content" id="otab-3">
+      <div id="thesis-content"></div>
+    </div>
+
+    <!-- DISCLAIMER -->
+    <div class="disclaimer">
+      <div style="font-family:var(--mono);font-size:9.5px;color:var(--gold);letter-spacing:0.10em;text-transform:uppercase;margin-bottom:5px;">⚠ Important Disclaimer</div>
+      <p style="font-size:10.5px;color:var(--text3);line-height:1.6;">For educational and analytical purposes only. Does not constitute financial advice, solicitation, or an investment recommendation. All computations rely on user-supplied inputs and established quantitative frameworks. Verify all figures against primary sources. Consult a licensed financial adviser before making investment decisions. Past performance does not guarantee future results.</p>
+    </div>
+
+  </div><!-- /results-content -->
+</div><!-- /results-panel -->
+</div><!-- /main-grid -->
+
+<!-- ══ METHODOLOGY FOOTER ══════════════════ -->
+<footer class="methodology">
+  <div class="mft">Methodological Framework &amp; Academic References</div>
+  <div class="mfg">
+    <div class="mfi">
+      <h4>Graham Number &amp; Margin of Safety</h4>
+      <p>Benjamin Graham, <em>Security Analysis</em> (1934) &amp; <em>The Intelligent Investor</em> (1949). The Graham Number defines a defensible maximum price based on earnings power and net asset value. MoS = (GN − Price) / Price.</p>
+      <code class="formula">GN = √(22.5 × EPS_diluted × BVPS)</code>
+    </div>
+    <div class="mfi">
+      <h4>Piotroski F-Score</h4>
+      <p>Joseph Piotroski, "Value Investing: The Use of Historical Financial Statement Information to Separate Winners from Losers," <em>Journal of Accounting Research</em> (2000). Binary 9-point score across profitability (F1–F4), leverage/liquidity (F5–F6), and operating efficiency (F7–F9).</p>
+      <code class="formula">F = ROA + ΔROA + OCF + Accruals + ΔLevr + ΔLiquid + NoDilution + ΔGM + ΔAT</code>
+    </div>
+    <div class="mfi">
+      <h4>Altman Z-Score</h4>
+      <p>Edward Altman (1968). Public company model using five financial ratios. Z > 2.99: Safe · 1.81–2.99: Grey · &lt; 1.81: Distress. <em>Note: X4 component uses Market Cap; results for private firms may require substituting Market Cap with Book Value.</em></p>
+      <code class="formula">Z = 1.2X₁ + 1.4X₂ + 3.3X₃ + 0.6X₄ + 1.0X₅</code>
+    </div>
+    <div class="mfi">
+      <h4>Magic Formula (Greenblatt)</h4>
+      <p>Joel Greenblatt, <em>The Little Book That Beats the Market</em> (2006). Simultaneous ranking on Earnings Yield (EBIT/EV) and Return on Invested Capital (EBIT/IC). Higher rank on both dimensions = strongest candidates.</p>
+      <code class="formula">EY = EBIT/EV · ROIC = NOPAT/(NWC + Net PPE)</code>
+    </div>
+    <div class="mfi">
+      <h4>PEG Ratio (Lynch)</h4>
+      <p>Peter Lynch, <em>One Up on Wall Street</em> (1989). Adjusts P/E for earnings growth rate; popularised GARP (Growth at a Reasonable Price) investing. PEG &lt; 1.0: potentially undervalued relative to growth; &gt; 2.0: growth priced in.</p>
+      <code class="formula">PEG = (P/E Ratio) ÷ EPS_Growth_Rate (%)</code>
+    </div>
+    <div class="mfi">
+      <h4>DCF — Perpetuity Growth Model</h4>
+      <p>Damodaran (2012), <em>Investment Valuation</em>; Brealey, Myers &amp; Allen, <em>Principles of Corporate Finance</em>. 5-year FCF projection discounted at WACC + terminal value via Gordon Growth Model. Intrinsic value = Equity Value ÷ Shares Outstanding.</p>
+      <code class="formula">IV = Σ FCFₜ/(1+r)ᵗ + [FCF₅(1+g_T)/(r−g_T)]/(1+r)⁵ − Net Debt</code>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /app -->
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   INVESTMENT DECISION ENGINE v1.0
+   Multi-Factor Composite Scoring with 6 Quantitative Models
+   Ref: Graham (1934,1949) · Piotroski (2000) · Altman (1968) ·
+        Greenblatt (2006) · Lynch (1989) · Damodaran (2012)
+═══════════════════════════════════════════════════════════════ */
+
+var CHARTS = { radar: null, bar: null, dcf: null };
+
+/* ── PRESET DATA (FY2023 / TTM approximate, $M unless noted) ── */
+var PRESETS = {
+  AAPL: {
+    name:'Apple Inc.', ticker:'AAPL', sector:'Technology', currency:'USD',
+    rev:383285, cogs:214137, ebit:114301, ebitda:125820, int:3933, ni:96995,
+    epsb:6.16, epsd:6.13, feps:6.60, dps:0.96,
+    revpy:394328, nipy:99803, epsdy:6.11, gpy:170782,
+    ta:352583, ca:143566, cash:29965, inv:6331,
+    tl:290437, cl:145308, debt:111088, eq:62146, re:-214000, shr:15728,
+    tapy:352755, debtpy:120069, capy:135405, clpy:153982, nipy2:99803, shrpy:16300,
+    ocf:110543, capex:10959, fcf:99584, fcfpy:92953,
+    wacc:9.0, grate:6.0, tgrate:3.0, netdebt:0,
+    price:189.30, beta:1.29, h52:199.62, l52:124.17, mc:0, tax:21.0,
+    rfr:4.5, mrp:5.5, apt:210.0, cons:2.1
+  },
+  MSFT: {
+    name:'Microsoft Corporation', ticker:'MSFT', sector:'Technology', currency:'USD',
+    rev:211915, cogs:65863, ebit:88523, ebitda:100250, int:1940, ni:72361,
+    epsb:9.81, epsd:9.72, feps:11.80, dps:2.72,
+    revpy:198270, nipy:72738, epsdy:9.65, gpy:146052,
+    ta:411976, ca:184257, cash:111255, inv:2500,
+    tl:205753, cl:104149, debt:79272, eq:206223, re:118848, shr:7432,
+    tapy:364840, debtpy:78399, capy:169684, clpy:95082, nipy2:72738, shrpy:7469,
+    ocf:87582, capex:28107, fcf:59475, fcfpy:65149,
+    wacc:8.5, grate:12.0, tgrate:3.5, netdebt:0,
+    price:374.91, beta:0.90, h52:384.30, l52:219.35, mc:0, tax:21.0,
+    rfr:4.5, mrp:5.5, apt:420.0, cons:1.8
+  },
+  GOOGL: {
+    name:'Alphabet Inc.', ticker:'GOOGL', sector:'Communication Services', currency:'USD',
+    rev:307394, cogs:133332, ebit:84293, ebitda:97000, int:1500, ni:73795,
+    epsb:5.84, epsd:5.80, feps:7.20, dps:0,
+    revpy:282836, nipy:59972, epsdy:4.56, gpy:156633,
+    ta:402392, ca:162127, cash:110916, inv:1100,
+    tl:110843, cl:81814, debt:28400, eq:291483, re:211000, shr:12628,
+    tapy:359268, debtpy:29260, capy:154070, clpy:69300, nipy2:59972, shrpy:13190,
+    ocf:101746, capex:32251, fcf:69495, fcfpy:60010,
+    wacc:9.5, grate:15.0, tgrate:3.5, netdebt:0,
+    price:140.36, beta:1.06, h52:153.78, l52:83.45, mc:0, tax:21.0,
+    rfr:4.5, mrp:5.5, apt:175.0, cons:1.6
+  },
+  BBCA: {
+    name:'Bank Central Asia Tbk', ticker:'BBCA.JK', sector:'Financials', currency:'IDR',
+    rev:85000000, cogs:18000000, ebit:42000000, ebitda:44000000, int:12000000, ni:36000000,
+    epsb:292.5, epsd:292.5, feps:325.0, dps:168.0,
+    revpy:71000000, nipy:31400000, epsdy:254.0, gpy:53000000,
+    ta:1400000000, ca:800000000, cash:150000000, inv:0,
+    tl:1210000000, cl:900000000, debt:250000000, eq:190000000, re:140000000, shr:122400,
+    tapy:1274000000, debtpy:230000000, capy:720000000, clpy:820000000, nipy2:31400000, shrpy:122400,
+    ocf:38000000, capex:2500000, fcf:35500000, fcfpy:30000000,
+    wacc:10.0, grate:12.0, tgrate:4.0, netdebt:0,
+    price:9500, beta:0.85, h52:10425, l52:8175, mc:0, tax:22.0,
+    rfr:6.5, mrp:5.5, apt:11000, cons:2.0
+  },
+  WEAK: {
+    name:'Sample Distressed Corp.', ticker:'DIST', sector:'Industrials', currency:'USD',
+    rev:45000, cogs:42000, ebit:-2500, ebitda:1200, int:4800, ni:-6200,
+    epsb:-3.10, epsd:-3.10, feps:-1.50, dps:0,
+    revpy:52000, nipy:-3200, epsdy:-1.60, gpy:9000,
+    ta:85000, ca:18000, cash:2500, inv:12000,
+    tl:78000, cl:22000, debt:58000, eq:7000, re:-25000, shr:2000,
+    tapy:92000, debtpy:52000, capy:22000, clpy:19000, nipy2:-3200, shrpy:1900,
+    ocf:-1800, capex:3200, fcf:-5000, fcfpy:2100,
+    wacc:14.0, grate:2.0, tgrate:1.5, netdebt:0,
+    price:8.50, beta:1.95, h52:22.40, l52:6.10, mc:0, tax:21.0,
+    rfr:4.5, mrp:5.5, apt:7.0, cons:4.2
+  }
+};
+
+/* ── CSV DATA AUTOMATION ──────────────────── */
+function handleFiles(files) {
+  if (!files.length) return;
+  const status = document.getElementById('import-status');
+  status.textContent = 'Processing ' + files.length + ' file(s)...';
+  status.style.color = 'var(--gold)';
+  
+  let processedCount = 0;
+  for (let i = 0; i < files.length; i++) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      parseYahooCSV(e.target.result);
+      processedCount++;
+      if (processedCount === files.length) {
+        status.textContent = 'Import Complete (' + files.length + ' files)';
+        status.style.color = 'var(--teal)';
+        setTimeout(() => { runAnalysis(); }, 100);
+      }
+    };
+    reader.readAsText(files[i]);
+  }
+}
+
+function parseYahooCSV(text) {
+  const lines = text.split(/\r?\n/);
+  if (lines.length < 2) return;
+  
+  const rows = lines.map(line => {
+    // Simple CSV parser that handles quotes
+    const result = [];
+    let cell = '';
+    let inQuotes = false;
+    for (let char of line) {
+      if (char === '"') inQuotes = !inQuotes;
+      else if (char === ',' && !inQuotes) {
+        result.push(cell.trim());
+        cell = '';
+      } else cell += char;
+    }
+    result.push(cell.trim());
+    return result;
+  });
+
+  const header = rows[0];
+  const ttmIdx = header.findIndex(h => h.toLowerCase() === 'ttm');
+  const dataIdx = ttmIdx !== -1 ? ttmIdx : 1; 
+  const pyIdx = dataIdx + 1; 
+
+  const mapping = [
+    { label: "Total Revenue", cur: "i-rev", prev: "i-revpy" },
+    { label: "Cost of Revenue", cur: "i-cogs" },
+    { label: "Operating Income", cur: "i-ebit" },
+    { label: "EBITDA", cur: "i-ebitda" },
+    { label: "Interest Expense", cur: "i-int" },
+    { label: "Net Income Common Stockholders", cur: "i-ni", prev: "i-nipy" },
+    { label: "Basic EPS", cur: "i-epsb" },
+    { label: "Diluted EPS", cur: "i-epsd", prev: "i-epsdy" },
+    { label: "Tax Provision", cur: "i-tax" },
+    { label: "Total Assets", cur: "i-ta", prev: "i-tapy" },
+    { label: "Current Assets", cur: "i-ca", prev: "i-capy" },
+    { label: "Inventory", cur: "i-inv" },
+    { label: "Total Liabilities Net Minority Interest", cur: "i-tl" },
+    { label: "Current Liabilities", cur: "i-cl", prev: "i-clpy" },
+    { label: "Total Debt", cur: "i-debt", prev: "i-debtpy" },
+    { label: "Stockholders' Equity", cur: "i-eq" },
+    { label: "Retained Earnings", cur: "i-re" },
+    { label: "Ordinary Shares Number", cur: "i-shr", prev: "i-shrpy" },
+    { label: "Operating Cash Flow", cur: "i-ocf" },
+    { label: "Capital Expenditure", cur: "i-capex", mult: -1 },
+    { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy" }
+  ];
+
+  rows.forEach(row => {
+    const rowHeader = row[0];
+    const match = mapping.find(m => m.label.toLowerCase() === rowHeader.toLowerCase());
+    if (match) {
+      const val = parseFloat(row[dataIdx]);
+      const prevVal = parseFloat(row[pyIdx]);
+      const mult = match.mult || 1;
+
+      if (!isNaN(val)) {
+        const el = document.getElementById(match.cur);
+        if (el) {
+          let finalVal = val * mult;
+          // Scale down by 1M for non-per-share values
+          if (!match.cur.includes('eps') && !match.cur.includes('price')) {
+            finalVal /= 1000000;
+          }
+          el.value = finalVal.toFixed(2).replace(/\.00$/, '');
+        }
+      }
+      
+      if (match.prev && !isNaN(prevVal)) {
+        const elPrev = document.getElementById(match.prev);
+        if (elPrev) {
+          let finalPrev = prevVal * mult;
+          if (!match.prev.includes('eps')) {
+            finalPrev /= 1000000;
+          }
+          elPrev.value = finalPrev.toFixed(2).replace(/\.00$/, '');
+        }
+      }
+    }
+  });
+}
+
+/* ── TAB SWITCHING ────────────────────────── */
+function switchIT(idx){
+  document.querySelectorAll('.input-tab-btn').forEach(function(b,i){b.classList.toggle('active',i===idx);});
+  document.querySelectorAll('.input-tab-content').forEach(function(c,i){c.classList.toggle('active',i===idx);});
+}
+function switchOT(idx){
+  document.querySelectorAll('.output-tab-btn').forEach(function(b,i){b.classList.toggle('active',i===idx);});
+  document.querySelectorAll('.output-tab-content').forEach(function(c,i){c.classList.toggle('active',i===idx);});
+}
+
+/* ── LOAD PRESET ──────────────────────────── */
+function loadPreset(key){
+  var d=PRESETS[key]; if(!d) return;
+  var m=[
+    ['i-name',d.name],['i-ticker',d.ticker],['i-sector',d.sector],['i-currency',d.currency],
+    ['i-rev',d.rev],['i-cogs',d.cogs],['i-ebit',d.ebit],['i-ebitda',d.ebitda],
+    ['i-int',d.int],['i-ni',d.ni],['i-epsb',d.epsb],['i-epsd',d.epsd],
+    ['i-feps',d.feps],['i-dps',d.dps],['i-revpy',d.revpy],['i-nipy',d.nipy],
+    ['i-epsdy',d.epsdy],['i-gpy',d.gpy],
+    ['i-ta',d.ta],['i-ca',d.ca],['i-cash',d.cash],['i-inv',d.inv],
+    ['i-tl',d.tl],['i-cl',d.cl],['i-debt',d.debt],['i-eq',d.eq],
+    ['i-re',d.re],['i-shr',d.shr],['i-tapy',d.tapy],['i-debtpy',d.debtpy],
+    ['i-capy',d.capy],['i-clpy',d.clpy],['i-nipy2',d.nipy2],['i-shrpy',d.shrpy],
+    ['i-ocf',d.ocf],['i-capex',d.capex],['i-fcf',d.fcf],['i-fcfpy',d.fcfpy],
+    ['i-wacc',d.wacc],['i-grate',d.grate],['i-tgrate',d.tgrate],
+    ['i-netdebt',d.netdebt>0?d.netdebt:''],
+    ['i-price',d.price],['i-beta',d.beta],['i-h52',d.h52],['i-l52',d.l52],
+    ['i-mc',d.mc>0?d.mc:''],['i-tax',d.tax],['i-rfr',d.rfr],['i-mrp',d.mrp],
+    ['i-apt',d.apt],['i-cons',d.cons]
+  ];
+  m.forEach(function(f){
+    var el=document.getElementById(f[0]);
+    if(el) el.value=f[1];
+  });
+  setTimeout(runAnalysis,80);
+}
+function clearAll(){
+  document.querySelectorAll('.form-input').forEach(function(el){if(el.tagName==='INPUT')el.value='';});
+  document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('results-content').classList.add('hidden');
+}
+
+/* ── INPUT READER ─────────────────────────── */
+function g(id){return parseFloat(document.getElementById(id).value)||0;}
+function gn(id){var v=document.getElementById(id).value; return (v===''||v===null)?null:parseFloat(v);}
+function gs(id){return (document.getElementById(id).value||'').trim();}
+function getInputs(){
+  return{
+    name:gs('i-name')||'Unknown Company', ticker:gs('i-ticker')||'—',
+    sector:gs('i-sector'), currency:gs('i-currency')||'USD',
+    rev:g('i-rev'), cogs:g('i-cogs'), ebit:g('i-ebit'), ebitda:g('i-ebitda'),
+    int:g('i-int'), ni:g('i-ni'),
+    epsb:g('i-epsb'), epsd:g('i-epsd'), feps:g('i-feps'), dps:g('i-dps'),
+    revpy:g('i-revpy'), nipy:g('i-nipy'), epsdy:g('i-epsdy'), gpy:g('i-gpy'),
+    ta:g('i-ta'), ca:g('i-ca'), cash:g('i-cash'), inv:g('i-inv'),
+    tl:g('i-tl'), cl:g('i-cl'), debt:g('i-debt'), eq:g('i-eq'),
+    re:parseFloat(document.getElementById('i-re').value)||0,
+    shr:g('i-shr'),
+    tapy:g('i-tapy'), debtpy:g('i-debtpy'), capy:g('i-capy'),
+    clpy:g('i-clpy'), nipy2:g('i-nipy2'), shrpy:g('i-shrpy'),
+    ocf:g('i-ocf'), capex:g('i-capex'), fcfInput:gn('i-fcf'), fcfpy:g('i-fcfpy'),
+    wacc:g('i-wacc')||9, grate:g('i-grate')||8, tgrate:g('i-tgrate')||3,
+    netdebtInput:gn('i-netdebt'),
+    price:g('i-price'), beta:g('i-beta')||1,
+    h52:g('i-h52'), l52:g('i-l52'), mcInput:gn('i-mc'), tax:g('i-tax')||21,
+    rfr:g('i-rfr')||4.5, mrp:g('i-mrp')||5.5,
+    apt:g('i-apt'), cons:g('i-cons')
+  };
+}
+
+/* ── SCORING HELPER: LINEAR INTERPOLATION ─── */
+/* bps = [[value, score], ...] sorted ascending by value */
+function sLin(val, bps){
+  if(val===null||isNaN(val)) return 50;
+  if(val<=bps[0][0]) return bps[0][1];
+  if(val>=bps[bps.length-1][0]) return bps[bps.length-1][1];
+  for(var i=0;i<bps.length-1;i++){
+    if(val>=bps[i][0]&&val<=bps[i+1][0]){
+      var t=(val-bps[i][0])/(bps[i+1][0]-bps[i][0]);
+      return bps[i][1]+t*(bps[i+1][1]-bps[i][1]);
+    }
+  }
+  return 50;
+}
+function avg(arr){return arr.length?arr.reduce(function(a,b){return a+b;},0)/arr.length:50;}
+
+/* ── CALCULATION ENGINE ───────────────────── */
+function calculate(d){
+  var r={};
+
+  /* ── Gross Profit ── */
+  r.gp=(d.cogs>0)?(d.rev-d.cogs):null;
+
+  /* ── FCF ── */
+  r.fcf=(d.fcfInput!==null)?d.fcfInput:(d.ocf-d.capex);
+
+  /* ── Market metrics ── */
+  r.mc=(d.mcInput!==null)?d.mcInput:(d.price*d.shr);
+  r.nd=(d.netdebtInput!==null)?d.netdebtInput:(d.debt-d.cash);
+  r.ev=r.mc+r.nd; if(r.ev<=0) r.ev=r.mc;
+  r.bvps=(d.shr>0)?(d.eq/d.shr):0;
+  r.wc=d.ca-d.cl;
+
+  /* ── Valuation ratios ── */
+  r.pe=(d.epsd>0.001&&d.price>0)?Math.min(d.price/d.epsd, 500):null;
+  r.fpe=(d.feps>0.001&&d.price>0)?Math.min(d.price/d.feps, 500):null;
+  r.pb=(r.bvps>0.001&&d.price>0)?Math.min(d.price/r.bvps, 100):null;
+  r.ps=(d.rev>0&&r.mc>0&&d.shr>0)?Math.min(d.price/(d.rev/d.shr), 100):null;
+  r.evebitda=(r.ev>0&&d.ebitda>0)?Math.min(r.ev/d.ebitda, 200):null;
+  r.evrev=(r.ev>0&&d.rev>0)?Math.min(r.ev/d.rev, 50):null;
+  r.pfcf=(r.fcf>0&&r.mc>0)?Math.min(r.mc/r.fcf, 200):null;
+  r.fcfYield=(r.mc>0&&r.fcf!==0)?(r.fcf/r.mc*100):null;
+  r.divYield=(d.price>0&&d.dps>0)?(d.dps/d.price*100):0;
+  r.payoutRatio=(d.ni>0&&d.dps>0&&d.shr>0)?(d.dps*d.shr/d.ni*100):0;
+
+  /* ── Growth ── */
+  r.revGrowth=(d.revpy>0)?((d.rev-d.revpy)/d.revpy*100):null;
+  r.niGrowth=(d.nipy!==0)?((d.ni-d.nipy)/Math.abs(d.nipy)*100):null;
+  r.epsGrowth=(d.epsdy!==0.001)?((d.epsd-d.epsdy)/Math.abs(d.epsdy)*100):null;
+  r.fcfGrowth=(d.fcfpy!==0)?((r.fcf-d.fcfpy)/Math.abs(d.fcfpy)*100):null;
+  r.gpGrowth=(r.gp!==null&&d.gpy>0)?((r.gp-d.gpy)/d.gpy*100):null;
+
+  /* ── PEG ── */
+  r.peg=(r.pe!==null&&r.epsGrowth!==null&&r.epsGrowth>0.1)?Math.min(r.pe/r.epsGrowth, 20):null;
+
+  /* ── Profitability ── */
+  r.grossMargin=(r.gp!==null&&d.rev>0)?(r.gp/d.rev*100):null;
+  r.ebitMargin=(d.rev>0)?(d.ebit/d.rev*100):null;
+  r.ebitdaMargin=(d.rev>0)?(d.ebitda/d.rev*100):null;
+  r.netMargin=(d.rev>0)?(d.ni/d.rev*100):null;
+  r.fcfMargin=(d.rev>0)?(r.fcf/d.rev*100):null;
+  r.roe=(d.eq>0)?(d.ni/d.eq*100):null;
+  r.roa=(d.ta>0)?(d.ni/d.ta*100):null;
+  var taxR=d.tax/100;
+  var nopat=d.ebit*(1-taxR);
+  var ic=d.eq+d.debt-d.cash;
+  r.roic=(ic>0)?(nopat/ic*100):null;
+
+  /* ── Liquidity & Leverage ── */
+  r.currentRatio=(d.cl>0)?(d.ca/d.cl):null;
+  r.quickRatio=(d.cl>0)?((d.ca-d.inv)/d.cl):null;
+  r.dEquity=(d.eq!==0)?(d.debt/d.eq):null;
+  r.dAssets=(d.ta>0)?(d.debt/d.ta):null;
+  r.netDebtEbitda=(d.ebitda>0)?(r.nd/d.ebitda):null;
+  r.intCov=(d.int>0)?(d.ebit/d.int):(d.ebit>0?99:null);
+  r.fcfNI=(d.ni!==0)?(r.fcf/d.ni):null;
+
+  /* ── Asset Efficiency ── */
+  var avgA=(d.tapy>0)?((d.ta+d.tapy)/2):d.ta;
+  r.assetTurnover=(avgA>0)?(d.rev/avgA):null;
+
+  /* ── Prior-year ratios (Piotroski) ── */
+  r.roaPY=(d.tapy>0&&d.nipy2!==0)?(d.nipy2/d.tapy*100):null;
+  r.crPY=(d.clpy>0)?(d.capy/d.clpy):null;
+  r.levPY=(d.tapy>0)?(d.debtpy/d.tapy):null;
+  r.lev=(d.ta>0)?(d.debt/d.ta):null;
+  r.gpMarPY=(d.revpy>0&&d.gpy>0)?(d.gpy/d.revpy*100):null;
+  r.atPY=(d.tapy>0&&d.revpy>0)?(d.revpy/d.tapy):null;
+
+  /* ── 52-Week Position ── */
+  r.pos52=(d.h52>d.l52&&d.price>0)?((d.price-d.l52)/(d.h52-d.l52)*100):null;
+
+  /* ── Analyst Upside ── */
+  r.analystUp=(d.apt>0&&d.price>0)?((d.apt-d.price)/d.price*100):null;
+
+  /* ══ GRAHAM NUMBER ══ */
+  if(d.epsd>0.001&&r.bvps>0.001){
+    r.grahamNum=Math.sqrt(22.5*d.epsd*r.bvps);
+    r.grahamUp=(d.price>0)?((r.grahamNum-d.price)/d.price*100):null;
+  }else{r.grahamNum=null;r.grahamUp=null;}
+
+  /* ══ ALTMAN Z-SCORE ══ (public company original model) */
+  if(d.ta>0&&d.tl>0){
+    var X1=r.wc/d.ta;
+    var X2=d.re/d.ta;
+    var X3=d.ebit/d.ta;
+    var X4=(d.tl>0)?(r.mc/d.tl):0;
+    var X5=d.rev/d.ta;
+    r.altmanZ=+(1.2*X1+1.4*X2+3.3*X3+0.6*X4+1.0*X5).toFixed(3);
+    r.altmanZone=r.altmanZ>2.99?'SAFE':(r.altmanZ>1.81?'GREY':'DISTRESS');
+    r.negRE = d.re < 0;
+  }else{r.altmanZ=null;r.altmanZone='N/A';r.negRE=false;}
+
+  /* ══ PIOTROSKI F-SCORE ══ */
+  var P={};
+  P.f1=(r.roa!==null&&r.roa>0)?1:0;
+  P.f2=(d.ocf>0)?1:0;
+  P.f3=(r.roa!==null&&r.roaPY!==null&&r.roa>r.roaPY)?1:0;
+  P.f4=(d.ta>0&&r.roa!==null&&(d.ocf/d.ta*100>r.roa))?1:0;
+  P.f5=(r.lev!==null&&r.levPY!==null&&r.lev<r.levPY)?1:0;
+  P.f6=(r.currentRatio!==null&&r.crPY!==null&&r.currentRatio>r.crPY)?1:0;
+  P.f7=(d.shrpy>0 && d.shr<=d.shrpy)?1:0;
+  P.f8=(r.grossMargin!==null&&r.gpMarPY!==null&&r.grossMargin>r.gpMarPY)?1:0;
+  P.f9=(r.assetTurnover!==null&&r.atPY!==null&&r.assetTurnover>r.atPY)?1:0;
+  r.P=P;
+  r.pScore=P.f1+P.f2+P.f3+P.f4+P.f5+P.f6+P.f7+P.f8+P.f9;
+  r.pZone=r.pScore>=7?'STRONG':(r.pScore>=4?'MODERATE':'WEAK');
+  r.pSignals=[
+    {l:'ROA+',v:P.f1},{l:'OCF+',v:P.f2},{l:'ΔROA',v:P.f3},
+    {l:'Accrual',v:P.f4},{l:'ΔLevr',v:P.f5},{l:'ΔLiquid',v:P.f6},
+    {l:'No Dil.',v:P.f7},{l:'ΔGM',v:P.f8},{l:'ΔAT',v:P.f9}
+  ];
+
+  /* ══ MAGIC FORMULA (Greenblatt) ══ */
+  r.earningsYield=(r.ev>0)?(d.ebit/r.ev*100):null;
+  var nwc=Math.max(r.wc,0);
+  var netPPE=Math.max(d.ta-d.ca,0);
+  r.magicROIC=((nwc+netPPE)>0)?(nopat/(nwc+netPPE)*100):null;
+
+  /* ══ DCF MODEL ══ */
+  var wacc=d.wacc/100, gr=d.grate/100, tgr=d.tgrate/100;
+  if(wacc>tgr&&r.fcf>0){
+    var sumPV=0; r.dcfYrs=[];
+    for(var t=1;t<=5;t++){
+      var ft=r.fcf*Math.pow(1+gr,t);
+      var pv=ft/Math.pow(1+wacc,t);
+      sumPV+=pv;
+      r.dcfYrs.push({t:t,fcf:ft,pv:pv});
+    }
+    var fcf5=r.fcf*Math.pow(1+gr,5);
+    r.dcfTV=fcf5*(1+tgr)/(wacc-tgr);
+    r.dcfTVPV=r.dcfTV/Math.pow(1+wacc,5);
+    r.dcfPV=sumPV;
+    r.dcfEqVal=sumPV+r.dcfTVPV-r.nd;
+    r.dcfPS=(d.shr>0)?(r.dcfEqVal/d.shr):null;
+    r.dcfUp=(d.price>0&&r.dcfPS!==null)?((r.dcfPS-d.price)/d.price*100):null;
+  }else{r.dcfYrs=[];r.dcfPS=null;r.dcfUp=null;r.dcfPV=null;r.dcfTVPV=null;r.dcfEqVal=null;}
+
+  /* ══════════════════════════════════════════
+     COMPOSITE SCORING ENGINE
+     Weights: Valuation 25% · Profitability 25%
+              Growth 20% · Health 15% · CF 15%
+  ══════════════════════════════════════════ */
+
+  /* 1. VALUATION SCORE */
+  var vs=[];
+  if(r.pe!==null) vs.push(sLin(r.pe,[[0,100],[8,96],[12,88],[15,80],[20,65],[25,50],[30,35],[40,18],[60,5]]));
+  if(r.fpe!==null) vs.push(sLin(r.fpe,[[0,100],[8,96],[12,90],[15,83],[20,70],[25,55],[30,40],[40,22],[50,5]]));
+  if(r.pb!==null) vs.push(sLin(r.pb,[[0,100],[0.5,95],[1,88],[2,72],[3,58],[5,40],[8,22],[15,5]]));
+  if(r.evebitda!==null) vs.push(sLin(r.evebitda,[[0,100],[5,92],[8,82],[12,70],[16,55],[20,38],[28,18],[40,5]]));
+  if(r.peg!==null) vs.push(sLin(r.peg,[[0,100],[0.5,95],[0.8,88],[1.0,78],[1.5,58],[2.0,38],[3.0,18],[5,5]]));
+  if(r.pfcf!==null) vs.push(sLin(r.pfcf,[[0,100],[10,92],[15,80],[20,66],[25,52],[35,32],[50,12]]));
+  r.sVal=avg(vs)||50;
+
+  /* 2. PROFITABILITY SCORE */
+  var ps=[];
+  if(r.grossMargin!==null) ps.push(sLin(r.grossMargin,[[-20,0],[0,12],[10,28],[20,44],[35,60],[50,74],[65,84],[80,94]]));
+  if(r.netMargin!==null) ps.push(sLin(r.netMargin,[[-30,0],[-10,8],[-5,12],[0,20],[5,40],[10,58],[15,70],[20,80],[30,90],[50,97]]));
+  if(r.roe!==null) ps.push(sLin(r.roe,[[-50,0],[0,10],[5,28],[10,48],[15,63],[20,76],[30,87],[50,95]]));
+  if(r.roa!==null) ps.push(sLin(r.roa,[[-20,0],[0,14],[3,34],[5,50],[8,64],[12,76],[20,87],[30,94]]));
+  if(r.roic!==null) ps.push(sLin(r.roic,[[-20,0],[0,14],[5,34],[10,54],[15,67],[20,79],[30,89],[50,97]]));
+  if(r.ebitdaMargin!==null) ps.push(sLin(r.ebitdaMargin,[[-20,0],[0,14],[5,28],[10,43],[20,58],[30,72],[40,82],[55,92]]));
+  r.sProf=avg(ps)||50;
+
+  /* 3. GROWTH SCORE */
+  var gs2=[];
+  if(r.revGrowth!==null) gs2.push(sLin(r.revGrowth,[[-20,0],[-5,14],[0,28],[3,43],[5,56],[10,68],[15,78],[20,86],[30,93]]));
+  if(r.epsGrowth!==null) gs2.push(sLin(r.epsGrowth,[[-50,0],[-15,8],[-5,14],[0,24],[5,43],[10,58],[15,70],[20,80],[35,90],[50,96]]));
+  if(r.fcfGrowth!==null) gs2.push(sLin(r.fcfGrowth,[[-30,0],[-5,14],[0,27],[5,42],[10,56],[20,70],[30,80],[50,90]]));
+  if(r.niGrowth!==null) gs2.push(sLin(r.niGrowth,[[-50,0],[-10,10],[0,24],[5,40],[10,56],[15,68],[25,80],[40,89]]));
+  r.sGrow=avg(gs2)||50;
+
+  /* 4. FINANCIAL HEALTH SCORE */
+  var hs=[];
+  if(r.currentRatio!==null) hs.push(sLin(r.currentRatio,[[0,8],[0.5,22],[0.8,38],[1.0,52],[1.2,66],[1.5,76],[2.0,85],[3.0,90],[5.0,74]]));
+  if(r.dEquity!==null){var de2=r.dEquity<0?52:sLin(r.dEquity,[[0,94],[0.3,87],[0.5,78],[1.0,60],[2.0,40],[3.0,22],[5.0,8]]);hs.push(de2);}
+  if(r.intCov!==null) hs.push(sLin(r.intCov,[[-5,0],[0,5],[1,20],[2,34],[3,47],[5,61],[8,74],[15,86],[25,94]]));
+  if(r.netDebtEbitda!==null){var nde=r.netDebtEbitda<0?94:sLin(r.netDebtEbitda,[[0,90],[0.5,84],[1,74],[2,58],[3,43],[4,28],[5,14],[8,5]]);hs.push(nde);}
+  if(r.altmanZ!==null) hs.push(sLin(r.altmanZ,[[-2,0],[0,8],[1.0,24],[1.81,38],[2.0,54],[2.99,70],[3.5,80],[5.0,90],[8,96]]));
+  r.sHealth=avg(hs)||50;
+
+  /* 5. CASH FLOW QUALITY SCORE */
+  var cfs=[];
+  if(r.fcfMargin!==null) cfs.push(sLin(r.fcfMargin,[[-20,0],[0,20],[3,38],[5,50],[10,64],[15,74],[20,83],[30,92]]));
+  if(r.fcfNI!==null) cfs.push(sLin(r.fcfNI,[[-2,0],[-0.5,14],[0,24],[0.4,44],[0.7,61],[0.9,74],[1.1,84],[1.5,90],[2.5,78]]));
+  if(r.fcfYield!==null) cfs.push(sLin(r.fcfYield,[[0,28],[1,44],[2,57],[3,67],[4,75],[6,83],[10,90],[15,94]]));
+  if(d.ocf!==0) cfs.push(d.ocf>0?72:16);
+  r.sCF=avg(cfs)||50;
+
+  /* ── COMPOSITE ── */
+  r.composite=r.sVal*0.25+r.sProf*0.25+r.sGrow*0.20+r.sHealth*0.15+r.sCF*0.15;
+
+  /* ── VERDICT ── */
+  if(r.composite>=80){r.verdict='STRONG BUY';r.vColor='#3ECFA0';}
+  else if(r.composite>=65){r.verdict='BUY';r.vColor='#3ECFA0';}
+  else if(r.composite>=50){r.verdict='HOLD';r.vColor='#D4A853';}
+  else if(r.composite>=35){r.verdict='SELL';r.vColor='#E8854A';}
+  else{r.verdict='STRONG SELL';r.vColor='#E05C5C';}
+
+  /* ── CONFIDENCE ── */
+  var filled=0;
+  ['rev','ebit','ni','epsd','ta','eq','shr','price','ocf','wacc'].forEach(function(k){if(d[k]>0||d[k]<0)filled++;});
+  r.confidence=filled>=9?'HIGH':(filled>=6?'MEDIUM':'LOW');
+
+  return r;
+}
+
+/* ── FORMAT HELPERS ───────────────────────── */
+function fN(v,dec,suf,pre){
+  if(v===null||v===undefined||isNaN(v)) return '—';
+  return (pre||'')+v.toFixed(dec!==undefined?dec:1)+(suf||'');
+}
+function fM(v,cur){
+  if(v===null||v===undefined) return '—';
+  var s=cur==='IDR'?'Rp':(cur==='EUR'?'€':(cur==='GBP'?'£':(cur==='JPY'?'¥':(cur==='SGD'?'S$':'$'))));
+  var a=Math.abs(v);
+  if(a>=1e6) return s+(v/1e6).toFixed(2)+'T';
+  if(a>=1e3) return s+(v/1e3).toFixed(1)+'B';
+  return s+v.toFixed(0)+'M';
+}
+function fP(v,cur){
+  if(!v&&v!==0) return '—';
+  var s=cur==='IDR'?'Rp':(cur==='EUR'?'€':(cur==='GBP'?'£':(cur==='JPY'?'¥':(cur==='SGD'?'S$':'$'))));
+  if(cur==='IDR') return s+Math.round(v).toLocaleString('id-ID');
+  return s+Math.abs(v)<0.01?v.toFixed(4):v.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function cS(s){return s>=70?'var(--teal)':(s>=45?'var(--gold)':'var(--red)');}
+function cCls(s){return s>=70?'sc-green':(s>=45?'sc-gold':'sc-red');}
+function cM(v,good,bad,hi){
+  if(v===null||isNaN(v)) return 'var(--text3)';
+  return hi?(v>=good?'var(--teal)':(v>=bad?'var(--gold)':'var(--red)')):(v<=good?'var(--teal)':(v<=bad?'var(--gold)':'var(--red)'));
+}
+function dC(v,good,bad,hi){
+  if(v===null||isNaN(v)) return 'dot-a';
+  return hi?(v>=good?'dot-g':(v>=bad?'dot-a':'dot-r')):(v<=good?'dot-g':(v<=bad?'dot-a':'dot-r'));
+}
+function bdgCls(v){return v>0?'bg':'br';}
+function sign(v){return v>0?'+':'';}
+
+/* ── RENDER ───────────────────────────────── */
+function render(d,r){
+  var cur=d.currency;
+  document.getElementById('empty-state').classList.add('hidden');
+  document.getElementById('results-content').classList.remove('hidden');
+
+  /* VERDICT BANNER */
+  document.getElementById('v-company').textContent=d.name+' ('+d.ticker+')';
+  document.getElementById('v-sub').textContent=d.sector+' · '+cur+' · Data Confidence: '+r.confidence;
+  var vtag=document.getElementById('v-tag');
+  vtag.textContent=r.verdict;
+  vtag.style.cssText='background:'+r.vColor+'22;color:'+r.vColor+';border:1px solid '+r.vColor+'55;';
+  var vs2=document.getElementById('v-score');
+  vs2.textContent=r.composite.toFixed(1);
+  vs2.style.color=r.vColor;
+  var pts=[];
+  if(d.price>0) pts.push(fP(d.price,cur)+' current');
+  if(r.dcfPS!==null) pts.push('DCF: '+fP(r.dcfPS,cur));
+  if(r.grahamNum!==null) pts.push('Graham: '+fP(r.grahamNum,cur));
+  if(d.apt>0) pts.push('Consensus Target: '+fP(d.apt,cur));
+  document.getElementById('v-price-line').textContent=pts.join(' · ');
+  document.getElementById('v-confidence').textContent='Piotroski F: '+r.pScore+'/9 · Altman Z: '+fN(r.altmanZ,2)+' ('+r.altmanZone+')';
+
+  /* 5 SCORE CARDS */
+  var scDefs=[
+    {k:'sVal',l:'Valuation',w:'25%'},{k:'sProf',l:'Profitability',w:'25%'},
+    {k:'sGrow',l:'Growth',w:'20%'},{k:'sHealth',l:'Fin. Health',w:'15%'},{k:'sCF',l:'Cash Flow',w:'15%'}
+  ];
+  document.getElementById('score-cards').innerHTML=scDefs.map(function(s){
+    var sc=r[s.k],c=cS(sc),cls=cCls(sc);
+    return '<div class="score-card '+cls+'"><div class="sc-name">'+s.l+'</div>'
+      +'<div class="sc-val" style="color:'+c+'">'+sc.toFixed(0)+'</div>'
+      +'<div class="sc-bar"><div class="sc-bar-fill" style="width:'+sc+'%;background:'+c+'"></div></div>'
+      +'<div class="sc-wt">Weight: '+s.w+'</div></div>';
+  }).join('');
+
+  /* METRICS TABLE */
+  var mRows=[
+    {n:'P/E Ratio',v:fN(r.pe,1,'x'),g:15,b:25,hi:false,raw:r.pe},
+    {n:'Forward P/E',v:fN(r.fpe,1,'x'),g:15,b:25,hi:false,raw:r.fpe},
+    {n:'EV/EBITDA',v:fN(r.evebitda,1,'x'),g:10,b:18,hi:false,raw:r.evebitda},
+    {n:'PEG Ratio (Lynch)',v:fN(r.peg,2),g:1,b:2,hi:false,raw:r.peg},
+    {n:'P/Book',v:fN(r.pb,2,'x'),g:2,b:5,hi:false,raw:r.pb},
+    {n:'FCF Yield',v:fN(r.fcfYield,1,'%'),g:3,b:1,hi:true,raw:r.fcfYield},
+    {n:'Gross Margin',v:fN(r.grossMargin,1,'%'),g:40,b:15,hi:true,raw:r.grossMargin},
+    {n:'Net Margin',v:fN(r.netMargin,1,'%'),g:10,b:0,hi:true,raw:r.netMargin},
+    {n:'EBITDA Margin',v:fN(r.ebitdaMargin,1,'%'),g:20,b:8,hi:true,raw:r.ebitdaMargin},
+    {n:'ROE',v:fN(r.roe,1,'%'),g:15,b:5,hi:true,raw:r.roe},
+    {n:'ROIC',v:fN(r.roic,1,'%'),g:12,b:5,hi:true,raw:r.roic},
+    {n:'Revenue Growth',v:fN(r.revGrowth,1,'%'),g:10,b:0,hi:true,raw:r.revGrowth},
+    {n:'EPS Growth',v:fN(r.epsGrowth,1,'%'),g:10,b:0,hi:true,raw:r.epsGrowth},
+    {n:'FCF Growth',v:fN(r.fcfGrowth,1,'%'),g:10,b:0,hi:true,raw:r.fcfGrowth},
+  ];
+  document.getElementById('metrics-table').innerHTML=
+    '<thead><tr><th>Metric</th><th>Value</th><th>Signal</th></tr></thead><tbody>'
+    +mRows.map(function(m){
+      var dc=dC(m.raw,m.g,m.b,m.hi);
+      var sig=m.raw===null||isNaN(m.raw)?'<span class="tm">N/A</span>'
+        :(dc==='dot-g'?'<span class="tg">▲</span>':(dc==='dot-r'?'<span class="tr">▼</span>':'<span class="ta">─</span>'));
+      return '<tr><td><span class="dot '+dc+'"></span>'+m.n+'</td><td>'+m.v+'</td><td>'+sig+'</td></tr>';
+    }).join('')+'</tbody>';
+
+  /* DERIVED TABLE */
+  var dr=[
+    {n:'Market Cap',v:fM(r.mc,cur)},{n:'Enterprise Value',v:fM(r.ev,cur)},
+    {n:'BVPS',v:fP(r.bvps,cur)},{n:'EPS Diluted',v:fP(d.epsd,cur)},
+    {n:'Forward EPS',v:fP(d.feps,cur)},{n:'Dividend Yield',v:fN(r.divYield,2,'%')},
+    {n:'Payout Ratio',v:fN(r.payoutRatio,1,'%')},{n:'Current Ratio',v:fN(r.currentRatio,2,'x')},
+    {n:'Quick Ratio',v:fN(r.quickRatio,2,'x')},{n:'Debt/Equity',v:fN(r.dEquity,2,'x')},
+    {n:'Net Debt/EBITDA',v:fN(r.netDebtEbitda,2,'x')},{n:'Interest Coverage',v:fN(r.intCov,1,'x')},
+    {n:'Asset Turnover',v:fN(r.assetTurnover,2,'x')},{n:'52W Range Position',v:fN(r.pos52,0,'%')},
+    {n:'FCF/Net Income',v:fN(r.fcfNI,2,'x')},{n:'Net Debt',v:fM(r.nd,cur)},
+    {n:'Working Capital',v:fM(r.wc,cur)},{n:'P/Sales',v:fN(r.ps,2,'x')},
+  ];
+  document.getElementById('derived-table').innerHTML=
+    '<thead><tr><th>Derived Metric</th><th>Value</th></tr></thead><tbody>'
+    +dr.map(function(m){return '<tr><td>'+m.n+'</td><td style="color:var(--text2)">'+m.v+'</td></tr>';}).join('')
+    +'</tbody>';
+
+  renderRadar(r); renderBar(r);
+
+  /* VALUATION MODELS GRID */
+  var mg='';
+  // Graham Number
+  mg+='<div class="mcard"><div class="mcard-title">Graham Number</div>'
+    +'<div class="mcard-author">B. Graham, Security Analysis (1934)</div>'
+    +(r.grahamNum!==null
+      ?'<div class="mcard-value" style="color:'+(r.grahamUp>0?'var(--teal)':'var(--red)')+'">'+fP(r.grahamNum,cur)+'</div>'
+       +'<div class="mcard-label">vs. current price: '+fP(d.price,cur)+'</div>'
+       +'<div class="mcard-sub"><span class="badge '+bdgCls(r.grahamUp)+'">'+sign(r.grahamUp)+fN(r.grahamUp,1,'%')+'</span>'
+       +' '+(r.grahamUp>0?'upside (margin of safety)':'downside (premium to GN)')
+       +'<br><small style="color:var(--text3)">√(22.5 × EPS × BVPS) = √(22.5 × '+fN(d.epsd,2)+' × '+fN(r.bvps,2)+')</small></div>'
+      :'<div class="mcard-value tm">N/A</div><div class="mcard-sub">Requires positive EPS &amp; Book Value</div>'
+    )+'</div>';
+
+  // PEG
+  mg+='<div class="mcard"><div class="mcard-title">PEG Ratio</div>'
+    +'<div class="mcard-author">P. Lynch, One Up on Wall Street (1989)</div>'
+    +(r.peg!==null
+      ?'<div class="mcard-value" style="color:'+(r.peg<1?'var(--teal)':(r.peg<2?'var(--gold)':'var(--red)'))+'">'
+       +r.peg.toFixed(2)+'</div>'
+       +'<div class="mcard-label">'+(r.peg<1?'< 1.0 — Potentially Undervalued':(r.peg<2?'1–2 — Fairly Priced':'> 2.0 — Overvalued for Growth'))+'</div>'
+       +'<div class="mcard-sub" style="margin-top:6px"><small style="color:var(--text3)">P/E ÷ EPS Growth Rate<br>'+fN(r.pe,1)+'x ÷ '+fN(r.epsGrowth,1,'%')+' = '+r.peg.toFixed(2)+'</small></div>'
+      :'<div class="mcard-value tm">N/A</div><div class="mcard-sub">Requires positive P/E and positive EPS growth</div>'
+    )+'</div>';
+
+  // Magic Formula
+  mg+='<div class="mcard"><div class="mcard-title">Magic Formula</div>'
+    +'<div class="mcard-author">J. Greenblatt, Little Book (2006)</div>'
+    +'<div style="margin-bottom:6px"><div class="mcard-value" style="color:var(--gold);font-size:22px">EY: '+fN(r.earningsYield,1,'%')+'</div>'
+    +'<div class="mcard-label">Earnings Yield = EBIT / EV</div></div>'
+    +'<div><div class="mcard-value" style="color:var(--blue);font-size:22px">ROIC: '+fN(r.magicROIC,1,'%')+'</div>'
+    +'<div class="mcard-label">Return on Invested Capital (NOPAT)</div></div>'
+    +'<div class="mcard-sub" style="margin-top:6px"><small style="color:var(--text3)">Higher EY + higher ROIC → stronger Magic Formula rank.<br>NOPAT = EBIT × (1 − Tax Rate)</small></div>'
+    +'</div>';
+
+  // DCF per share
+  mg+='<div class="mcard"><div class="mcard-title">DCF Intrinsic Value</div>'
+    +'<div class="mcard-author">Damodaran, Investment Valuation (2012)</div>'
+    +(r.dcfPS!==null
+      ?'<div class="mcard-value" style="color:'+(r.dcfUp>0?'var(--teal)':'var(--red)')+'">'+fP(r.dcfPS,cur)+'</div>'
+       +'<div class="mcard-label">vs. current: '+fP(d.price,cur)+'</div>'
+       +'<div class="mcard-sub"><span class="badge '+bdgCls(r.dcfUp)+'">'+sign(r.dcfUp)+fN(r.dcfUp,1,'%')+' margin of safety</span>'
+       +'<br><small style="color:var(--text3)">WACC='+d.wacc+'% · g₅='+d.grate+'% · g_T='+d.tgrate+'%</small></div>'
+      :'<div class="mcard-value tm">N/A</div><div class="mcard-sub">Requires positive FCF and WACC &gt; Terminal Growth Rate</div>'
+    )+'</div>';
+
+  // P/Sales
+  mg+='<div class="mcard"><div class="mcard-title">Price / Sales Ratio</div>'
+    +'<div class="mcard-author">K. Fisher, Super Stocks (1984)</div>'
+    +(r.ps!==null
+      ?'<div class="mcard-value" style="color:'+(r.ps<1?'var(--teal)':(r.ps<3?'var(--gold)':'var(--red)'))+'">'+r.ps.toFixed(2)+'x</div>'
+       +'<div class="mcard-label">'+(r.ps<0.75?'Deeply discounted':(r.ps<1.5?'Low — potential value':(r.ps<3?'Moderate premium':(r.ps<5?'Elevated':'High premium'))))+'</div>'
+       +'<div class="mcard-sub"><small style="color:var(--text3)">EV/Rev: '+fN(r.evrev,2,'x')+'<br>Market Cap: '+fM(r.mc,cur)+' · Revenue: '+fM(d.rev,cur)+'</small></div>'
+      :'<div class="mcard-value tm">N/A</div>'
+    )+'</div>';
+
+  // Analyst Consensus
+  mg+='<div class="mcard"><div class="mcard-title">Analyst Consensus</div>'
+    +'<div class="mcard-author">Sell-side research estimate</div>'
+    +(d.apt>0
+      ?'<div class="mcard-value" style="color:'+(r.analystUp>10?'var(--teal)':(r.analystUp>0?'var(--gold)':'var(--red)'))+'">'
+       +fP(d.apt,cur)+'</div>'
+       +'<div class="mcard-label">Consensus Price Target</div>'
+       +'<div class="mcard-sub"><span class="badge '+bdgCls(r.analystUp||0)+'">'+sign(r.analystUp||0)+fN(r.analystUp,1,'%')+' from current</span>'
+       +(d.cons>0?'<br><small style="color:var(--text3)">Rating: '+(['','Strong Buy','Buy','Hold','Sell','Strong Sell'][Math.round(d.cons)]||'N/A')+' ('+d.cons.toFixed(1)+')</small>':'')
+       +'</div>'
+      :'<div class="mcard-value tm">N/A</div><div class="mcard-sub">Enter target price in Market tab</div>'
+    )+'</div>';
+
+  document.getElementById('models-grid').innerHTML=mg;
+
+  /* DCF DETAIL */
+  document.getElementById('dcf-meta').textContent=
+    'Method: 5-year FCF projection discounted at WACC ('+d.wacc+'%) + terminal value via Gordon Growth Model (terminal g = '+d.tgrate+'%). '
+    +'FCF growth Y1–5: '+d.grate+'%. Equity value = PV of FCFs + PV of Terminal Value − Net Debt ÷ Shares Outstanding. '
+    +'Ref: Damodaran (2012); Brealey, Myers & Allen, Principles of Corporate Finance.';
+  if(r.dcfYrs.length>0){
+    document.getElementById('dcf-grid').innerHTML=
+      '<div><div class="dcf-item-label">Base FCF</div><div class="dcf-item-value">'+fM(r.fcf,cur)+'</div><div class="dcf-item-sub">Current period TTM</div></div>'
+      +'<div><div class="dcf-item-label">PV of 5-Yr FCFs</div><div class="dcf-item-value">'+fM(r.dcfPV,cur)+'</div><div class="dcf-item-sub">Discounted @ '+d.wacc+'%</div></div>'
+      +'<div><div class="dcf-item-label">Terminal Value PV</div><div class="dcf-item-value">'+fM(r.dcfTVPV,cur)+'</div><div class="dcf-item-sub">Perpetuity @ '+d.tgrate+'%</div></div>'
+      +'<div><div class="dcf-item-label">Intrinsic Per Share</div>'
+      +'<div class="dcf-item-value" style="color:'+(r.dcfUp>0?'var(--teal)':'var(--red)')+'">'+fP(r.dcfPS,cur)+'</div>'
+      +'<div class="dcf-item-sub">'+sign(r.dcfUp||0)+fN(r.dcfUp,1,'% vs. current')+'</div></div>';
+    renderDCF(r,d);
+  }else{
+    document.getElementById('dcf-grid').innerHTML='<div style="grid-column:1/-1;font-family:var(--mono);font-size:10.5px;color:var(--text3)">Insufficient data: requires positive FCF and WACC &gt; Terminal Growth Rate.</div>';
+  }
+
+  /* HEALTH GRID */
+  var hg='';
+  function hRow(n,v,c){return '<div class="hr"><span class="hr-name">'+n+'</span><span class="hr-val" style="color:'+c+'">'+v+'</span></div>';}
+  hg+='<div class="card"><div class="card-title">Liquidity</div>'
+    +hRow('Current Ratio',fN(r.currentRatio,2,'x'),cM(r.currentRatio,1.5,1.0,true))
+    +hRow('Quick Ratio',fN(r.quickRatio,2,'x'),cM(r.quickRatio,1.0,0.7,true))
+    +hRow('Working Capital',fM(r.wc,cur),r.wc>0?'var(--teal)':'var(--red)')
+    +hRow('Cash & Equivalents',fM(d.cash,cur),'var(--text)')
+    +hRow('Operating Cash Flow',fM(d.ocf,cur),d.ocf>0?'var(--teal)':'var(--red)')
+    +hRow('Free Cash Flow',fM(r.fcf,cur),r.fcf>0?'var(--teal)':'var(--red)')
+    +'</div>';
+  hg+='<div class="card"><div class="card-title">Leverage &amp; Debt</div>'
+    +hRow('Debt / Equity',fN(r.dEquity,2,'x'),cM(r.dEquity,0.5,1.5,false))
+    +hRow('Debt / Assets',fN(r.dAssets,2,'x'),cM(r.dAssets,0.3,0.6,false))
+    +hRow('Net Debt / EBITDA',fN(r.netDebtEbitda,2,'x'),cM(r.netDebtEbitda,1.5,3.0,false))
+    +hRow('Interest Coverage',fN(r.intCov,1,'x'),cM(r.intCov,5,2,true))
+    +hRow('Total Debt',fM(d.debt,cur),'var(--text)')
+    +hRow('Net Debt',fM(r.nd,cur),r.nd<0?'var(--teal)':'var(--text)')
+    +'</div>';
+  hg+='<div class="card"><div class="card-title">Profitability Quality</div>'
+    +hRow('Gross Margin',fN(r.grossMargin,1,'%'),cM(r.grossMargin,40,15,true))
+    +hRow('EBIT Margin',fN(r.ebitMargin,1,'%'),cM(r.ebitMargin,15,5,true))
+    +hRow('EBITDA Margin',fN(r.ebitdaMargin,1,'%'),cM(r.ebitdaMargin,20,8,true))
+    +hRow('Net Margin',fN(r.netMargin,1,'%'),cM(r.netMargin,10,3,true))
+    +hRow('ROE',fN(r.roe,1,'%'),cM(r.roe,15,8,true))
+    +hRow('ROA',fN(r.roa,1,'%'),cM(r.roa,5,2,true))
+    +hRow('ROIC (NOPAT/IC)',fN(r.roic,1,'%'),cM(r.roic,12,5,true))
+    +'</div>';
+  hg+='<div class="card"><div class="card-title">Growth &amp; Efficiency</div>'
+    +hRow('Revenue Growth YoY',fN(r.revGrowth,1,'%'),cM(r.revGrowth,10,0,true))
+    +hRow('Net Income Growth',fN(r.niGrowth,1,'%'),cM(r.niGrowth,10,0,true))
+    +hRow('EPS Growth YoY',fN(r.epsGrowth,1,'%'),cM(r.epsGrowth,10,0,true))
+    +hRow('FCF Growth YoY',fN(r.fcfGrowth,1,'%'),cM(r.fcfGrowth,10,0,true))
+    +hRow('Asset Turnover',fN(r.assetTurnover,2,'x'),cM(r.assetTurnover,0.8,0.4,true))
+    +hRow('FCF / Net Income',fN(r.fcfNI,2,'x'),cM(r.fcfNI,0.85,0.5,true))
+    +hRow('52W Range Position',fN(r.pos52,0,'%'),'var(--text2)')
+    +'</div>';
+  document.getElementById('health-grid').innerHTML=hg;
+
+  /* ALTMAN CARD */
+  var az=r.altmanZ;
+  var azC=az===null?'var(--text3)':(az>2.99?'var(--teal)':(az>1.81?'var(--gold)':'var(--red)'));
+  document.getElementById('altman-card').innerHTML=
+    '<div class="mcard-title">Altman Z-Score</div>'
+    +'<div class="mcard-author">E. Altman, J. of Finance (1968)</div>'
+    +(az!==null
+      ?'<div class="mcard-value" style="color:'+azC+'">'+az.toFixed(2)+'</div>'
+       +'<div class="mcard-label">'+r.altmanZone+' ZONE'+(r.altmanZone==='SAFE'?' — Low bankruptcy risk':(r.altmanZone==='GREY'?' — Monitor closely':' — High bankruptcy risk'))+'</div>'
+       +(r.negRE?'<div class="mcard-sub ta" style="margin-top:4px;font-size:9px;">⚠ Negative Retained Earnings detected. May be due to aggressive buybacks (e.g. AAPL) rather than fundamental distress.</div>':'')
+       +'<div class="mcard-sub" style="margin-top:8px"><small style="color:var(--text3)">'
+       +'Z = 1.2·(WC/TA) + 1.4·(RE/TA) + 3.3·(EBIT/TA) + 0.6·(MC/TL) + 1.0·(Rev/TA)<br>'
+       +'Thresholds: Z &gt; 2.99 Safe · 1.81–2.99 Grey · &lt; 1.81 Distress</small></div>'
+      :'<div class="mcard-value tm">N/A</div><div class="mcard-sub">Requires complete balance sheet data</div>'
+    );
+
+  /* PIOTROSKI CARD */
+  var pfC=r.pScore>=7?'var(--teal)':(r.pScore>=4?'var(--gold)':'var(--red)');
+  document.getElementById('piotroski-card').innerHTML=
+    '<div class="mcard-title">Piotroski F-Score</div>'
+    +'<div class="mcard-author">J. Piotroski, J. of Accounting Research (2000)</div>'
+    +'<div class="mcard-value" style="color:'+pfC+'">'+r.pScore+' / 9</div>'
+    +'<div class="mcard-label">'+r.pZone+' SIGNAL — '+(r.pScore>=7?'7-9: Strong quality indicator':(r.pScore>=4?'4-6: Mixed financial signals':'0-3: Weak or deteriorating financials'))+'</div>'
+    +'<div class="pio-grid">'
+    +r.pSignals.map(function(s){
+      return '<div class="pio-sig '+(s.v?'pio-pass':'pio-fail')+'">'+(s.v?'✓ ':'✗ ')+s.l+'</div>';
+    }).join('')
+    +'</div>'
+    +'<div class="mcard-sub" style="margin-top:8px"><small style="color:var(--text3)">Requires current &amp; prior-year financial data in all input tabs</small></div>';
+
+  /* INVESTMENT THESIS */
+  var bull=[],bear=[];
+  if(r.roe!==null&&r.roe>15) bull.push('ROE of '+fN(r.roe,1,'%')+' signals strong shareholder returns well above typical cost of equity thresholds.');
+  if(r.grossMargin!==null&&r.grossMargin>40) bull.push('Gross margin of '+fN(r.grossMargin,1,'%')+' reflects meaningful pricing power and structural competitive advantage.');
+  if(r.revGrowth!==null&&r.revGrowth>10) bull.push('Revenue growing at '+fN(r.revGrowth,1,'%')+' YoY — above-average top-line expansion indicating demand traction.');
+  if(r.epsGrowth!==null&&r.epsGrowth>10) bull.push('EPS growing at '+fN(r.epsGrowth,1,'%')+' YoY — strong earnings momentum supports premium valuation.');
+  if(r.fcfMargin!==null&&r.fcfMargin>12) bull.push('FCF margin of '+fN(r.fcfMargin,1,'%')+' demonstrates highly efficient cash generation relative to revenue.');
+  if(r.peg!==null&&r.peg<1.0) bull.push('PEG of '+r.peg.toFixed(2)+' (< 1.0) — Lynch\'s GARP criterion suggests undervaluation relative to earnings growth.');
+  if(r.grahamUp!==null&&r.grahamUp>15) bull.push('Price is '+fN(r.grahamUp,0,'% below')+' the Graham Number — meets Graham\'s margin of safety criterion for defensive investors.');
+  if(r.dcfUp!==null&&r.dcfUp>15) bull.push('DCF model implies '+fN(r.dcfUp,0,'% upside')+' at WACC of '+d.wacc+'% — significant intrinsic value cushion (Damodaran method).');
+  if(r.intCov!==null&&r.intCov>8) bull.push('Interest coverage ratio of '+fN(r.intCov,1,'x')+' — robust debt servicing capacity, reduces refinancing risk materially.');
+  if(r.nd<0) bull.push('Net cash position of '+fM(Math.abs(r.nd),cur)+' — cash-rich balance sheet provides strategic optionality (M&A, buybacks, dividends).');
+  if(r.pScore>=7) bull.push('Piotroski F-Score of '+r.pScore+'/9 — historically associated with positive price momentum in value stocks (Piotroski, 2000).');
+  if(r.altmanZ!==null&&r.altmanZ>2.99) bull.push('Altman Z-Score of '+r.altmanZ.toFixed(2)+' in the Safe Zone — negligible near-term bankruptcy risk per Altman (1968) model.');
+  if(r.roic!==null&&r.roic>15) bull.push('ROIC of '+fN(r.roic,1,'%')+' exceeds typical WACC — company is generating positive economic profit (EVA positive).');
+  if(r.analystUp!==null&&r.analystUp>15) bull.push('Sell-side consensus target implies '+fN(r.analystUp,0,'% upside')+' — broad analyst community sees significant appreciation potential.');
+  if(d.shrpy>0&&d.shr<d.shrpy) bull.push('Share count reduced by '+((d.shrpy-d.shr)/d.shrpy*100).toFixed(1)+'% YoY — buyback programme accretes per-share value and signals management confidence.');
+  if(r.roic!==null&&r.earningsYield!==null&&r.earningsYield>8&&r.roic>15) bull.push('Strong Magic Formula combination (EY: '+fN(r.earningsYield,1,'%')+', ROIC: '+fN(r.roic,1,'%')+') — quality business at a reasonable earnings yield (Greenblatt, 2006).');
+
+  if(r.pe!==null&&r.pe>30) bear.push('P/E of '+fN(r.pe,1,'x')+' represents a premium that requires sustained above-average earnings growth to justify on a fundamental basis.');
+  if(r.evebitda!==null&&r.evebitda>20) bear.push('EV/EBITDA of '+fN(r.evebitda,1,'x')+' exceeds typical sector benchmarks — limited room for multiple expansion; execution must be near-perfect.');
+  if(r.revGrowth!==null&&r.revGrowth<0) bear.push('Revenue declining '+fN(Math.abs(r.revGrowth),1,'%')+' YoY — top-line contraction raises questions about competitive positioning and addressable market.');
+  if(r.epsGrowth!==null&&r.epsGrowth<0) bear.push('EPS declining '+fN(Math.abs(r.epsGrowth),1,'%')+' YoY — negative earnings momentum likely to pressure valuation multiples.');
+  if(r.netMargin!==null&&r.netMargin<0) bear.push('Negative net margin of '+fN(r.netMargin,1,'%')+' — company is unprofitable on a net basis; path to positive earnings must be evident.');
+  if(r.dEquity!==null&&r.dEquity>2) bear.push('Debt/equity of '+fN(r.dEquity,2,'x')+' — elevated leverage amplifies downside risk and restricts financial flexibility during stress.');
+  if(r.intCov!==null&&r.intCov<2&&r.intCov>0) bear.push('Interest coverage of '+fN(r.intCov,1,'x')+' — thin EBIT buffer against interest obligations increases default risk in a rising rate environment.');
+  if(r.fcf<0) bear.push('Negative FCF of '+fM(r.fcf,cur)+' — cash-consumptive model requires sustained external financing; watch dilution risk.');
+  if(r.pScore<=3) bear.push('Piotroski F-Score of '+r.pScore+'/9 signals deteriorating financial quality across profitability, leverage, and operating efficiency dimensions.');
+  if(r.altmanZ!==null&&r.altmanZ<1.81) bear.push('Altman Z-Score of '+r.altmanZ.toFixed(2)+' in the Distress Zone — statistically elevated bankruptcy probability per Altman\'s discriminant model (1968).');
+  if(r.currentRatio!==null&&r.currentRatio<1.0) bear.push('Current ratio of '+fN(r.currentRatio,2,'x')+' below 1.0 — current liabilities exceed current assets; near-term liquidity management is critical.');
+  if(r.grahamUp!==null&&r.grahamUp<-20) bear.push('Price trades '+fN(Math.abs(r.grahamUp),0,'% above')+' the Graham Number — significant premium above Graham\'s conservative intrinsic value estimate.');
+  if(r.dcfUp!==null&&r.dcfUp<-20) bear.push('DCF model implies '+fN(Math.abs(r.dcfUp),0,'% downside')+' at WACC of '+d.wacc+'% — current price embeds overly optimistic growth expectations.');
+  if(r.analystUp!==null&&r.analystUp<-10) bear.push('Sell-side consensus price target below current price by '+fN(Math.abs(r.analystUp),0,'%')+' — broad analyst caution warrants additional scrutiny.');
+  if(d.shrpy>0&&d.shr>d.shrpy*1.05) bear.push('Share count increased '+((d.shr-d.shrpy)/d.shrpy*100).toFixed(1)+'% YoY — dilution erodes per-share metrics and may signal capital needs or management misalignment.');
+
+  if(!bull.length) bull.push('Insufficient positive signals detected from the available data. Populate more fields for a comprehensive bull case.');
+  if(!bear.length) bear.push('No significant risk flags identified from available data. Maintain standard monitoring cadence.');
+
+  document.getElementById('thesis-content').innerHTML=
+    '<div class="thesis-card">'
+    +'<div class="thesis-sec" style="color:var(--teal)">▲ Bull Case — Positive Signals ('+bull.length+')</div>'
+    +'<ul class="thesis-list">'+bull.map(function(b){return '<li><span class="th-ico tg">+</span>'+b+'</li>';}).join('')+'</ul></div>'
+    +'<div class="thesis-card">'
+    +'<div class="thesis-sec" style="color:var(--red)">▼ Bear Case — Risks &amp; Concerns ('+bear.length+')</div>'
+    +'<ul class="thesis-list">'+bear.map(function(b){return '<li><span class="th-ico tr">−</span>'+b+'</li>';}).join('')+'</ul></div>'
+    +'<div class="thesis-card">'
+    +'<div class="thesis-sec" style="color:var(--gold)">◎ Quantitative Summary</div>'
+    +'<ul class="thesis-list">'
+    +'<li><span class="th-ico">◈</span>Composite Score: <strong style="color:'+r.vColor+'">'+r.composite.toFixed(1)+'/100</strong> → Verdict: <strong style="color:'+r.vColor+'">'+r.verdict+'</strong></li>'
+    +'<li><span class="th-ico">◈</span>Valuation: '+r.sVal.toFixed(0)+' · Profitability: '+r.sProf.toFixed(0)+' · Growth: '+r.sGrow.toFixed(0)+' · Health: '+r.sHealth.toFixed(0)+' · Cash Flow: '+r.sCF.toFixed(0)+'</li>'
+    +'<li><span class="th-ico">◈</span>Piotroski F-Score: '+r.pScore+'/9 ('+r.pZone+') · Altman Z: '+fN(r.altmanZ,2)+' ('+r.altmanZone+')</li>'
+    +'<li><span class="th-ico">◈</span>Graham Number: '+fP(r.grahamNum,cur)+(r.grahamUp!==null?' ('+sign(r.grahamUp)+fN(r.grahamUp,1,'% vs. current)'):'')+'</li>'
+    +'<li><span class="th-ico">◈</span>DCF Per Share: '+fP(r.dcfPS,cur)+(r.dcfUp!==null?' ('+sign(r.dcfUp)+fN(r.dcfUp,1,'%)'):'')+'</li>'
+    +'<li><span class="th-ico">◈</span>Magic Formula: EY='+fN(r.earningsYield,1,'%')+' · ROIC='+fN(r.magicROIC,1,'%')+' · PEG='+fN(r.peg,2)+'</li>'
+    +'<li><span class="th-ico tm">◈</span>Data Confidence: '+r.confidence+' · Currency: '+cur+'</li>'
+    +'</ul></div>';
+}
+
+/* ── RADAR CHART ──────────────────────────── */
+function renderRadar(r){
+  var ctx=document.getElementById('radarChart').getContext('2d');
+  if(CHARTS.radar){CHARTS.radar.destroy();}
+  CHARTS.radar=new Chart(ctx,{
+    type:'radar',
+    data:{
+      labels:['Valuation','Profitability','Growth','Fin. Health','Cash Flow','Composite'],
+      datasets:[{
+        data:[r.sVal,r.sProf,r.sGrow,r.sHealth,r.sCF,r.composite],
+        backgroundColor:'rgba(212,168,83,0.12)',borderColor:'rgba(212,168,83,0.8)',
+        borderWidth:1.5,pointBackgroundColor:'rgba(212,168,83,0.9)',
+        pointBorderColor:'#0B0C0E',pointBorderWidth:1.5,pointRadius:4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{r:{min:0,max:100,ticks:{stepSize:25,display:false},
+        grid:{color:'rgba(255,255,255,0.05)'},angleLines:{color:'rgba(255,255,255,0.05)'},
+        pointLabels:{color:'#9B9891',font:{family:"'IBM Plex Mono', monospace",size:10}}}},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1E2229',borderColor:'rgba(255,255,255,0.1)',borderWidth:1,
+        titleFont:{family:"'IBM Plex Mono', monospace",size:11},
+        bodyFont:{family:"'IBM Plex Mono', monospace",size:11},
+        titleColor:'#D4A853',bodyColor:'#9B9891',
+        callbacks:{label:function(c){return c.label+': '+c.raw.toFixed(1)+'/100';}}
+      }}
+    }
+  });
+}
+
+/* ── BAR CHART ────────────────────────────── */
+function renderBar(r){
+  var ctx=document.getElementById('barChart').getContext('2d');
+  var scores=[r.sVal,r.sProf,r.sGrow,r.sHealth,r.sCF];
+  var colors=scores.map(function(s){return s>=70?'rgba(62,207,160,0.72)':(s>=45?'rgba(212,168,83,0.72)':'rgba(224,92,92,0.72)');});
+  if(CHARTS.bar){CHARTS.bar.destroy();}
+  CHARTS.bar=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Valuation','Profitability','Growth','Health','Cash Flow'],
+      datasets:[{data:scores,backgroundColor:colors,borderRadius:3,borderSkipped:false}]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,indexAxis:'y',
+      scales:{
+        x:{min:0,max:100,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5C5A55',font:{family:"'IBM Plex Mono', monospace",size:9}}},
+        y:{grid:{display:false},ticks:{color:'#9B9891',font:{family:"'IBM Plex Mono', monospace",size:10}}}
+      },
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'#1E2229',bodyFont:{family:"'IBM Plex Mono', monospace",size:11},bodyColor:'#9B9891',
+        callbacks:{label:function(c){return ' '+c.raw.toFixed(1)+' / 100';}}
+      }}
+    }
+  });
+}
+
+/* ── DCF CHART ────────────────────────────── */
+function renderDCF(r,d){
+  if(!r.dcfYrs||!r.dcfYrs.length) return;
+  var ctx=document.getElementById('dcfChart').getContext('2d');
+  var labs=r.dcfYrs.map(function(y){return 'Y'+y.t;}); labs.push('TV (PV)');
+  var divF=d.currency==='IDR'?1e9:1e3; // IDR: trillions, USD: billions
+  var unit=d.currency==='IDR'?'T':'B';
+  var fcfV=r.dcfYrs.map(function(y){return +(y.fcf/divF).toFixed(2);}); fcfV.push(+(r.dcfTVPV/divF).toFixed(2));
+  var pvV=r.dcfYrs.map(function(y){return +(y.pv/divF).toFixed(2);}); pvV.push(+(r.dcfTVPV/divF).toFixed(2));
+  if(CHARTS.dcf){CHARTS.dcf.destroy();}
+  CHARTS.dcf=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:labs,
+      datasets:[
+        {label:'FCF Projected',data:fcfV,backgroundColor:'rgba(91,156,246,0.5)',borderRadius:3},
+        {label:'Present Value',data:pvV,backgroundColor:'rgba(212,168,83,0.7)',borderRadius:3}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      scales:{
+        x:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#9B9891',font:{family:"'IBM Plex Mono', monospace",size:9}}},
+        y:{grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5C5A55',font:{family:"'IBM Plex Mono', monospace",size:9},
+          callback:function(v){return v+unit;}}}
+      },
+      plugins:{
+        legend:{labels:{color:'#9B9891',font:{family:"'IBM Plex Mono', monospace",size:10},boxWidth:10,padding:12}},
+        tooltip:{backgroundColor:'#1E2229',titleFont:{family:"'IBM Plex Mono', monospace",size:11},
+          bodyFont:{family:"'IBM Plex Mono', monospace",size:11},titleColor:'#D4A853',bodyColor:'#9B9891',
+          callbacks:{label:function(c){return ' '+c.dataset.label+': '+c.raw+unit;}}}
+      }
+    }
+  });
+}
+
+/* ── RUN ANALYSIS ENTRY POINT ─────────────── */
+function runAnalysis(){
+  var btn=document.querySelector('.analyze-btn');
+  btn.textContent='⌛ Calculating…'; btn.disabled=true;
+  setTimeout(function(){
+    try{
+      var d=getInputs();
+      var r=calculate(d);
+      render(d,r);
+      switchOT(0);
+    }catch(e){console.error(e);}
+    btn.textContent='⚡  Run Full Analysis'; btn.disabled=false;
+  },60);
+}
+</script>
+</body>
+</html>
