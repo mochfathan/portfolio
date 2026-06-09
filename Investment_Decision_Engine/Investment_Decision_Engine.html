@@ -724,15 +724,20 @@ async function syncWithGoogleSheet() {
   
   try {
     const response = await fetch(url);
-    if (!response.ok) throw new Error('Failed to fetch sheet');
+    if (!response.ok) throw new Error('Failed to fetch (Status: ' + response.status + ')');
     const text = await response.text();
     const mappedCount = parseYahooCSV(text);
-    status.textContent = 'Sync Complete (' + mappedCount + ' fields mapped)';
-    status.style.color = 'var(--teal)';
-    setTimeout(() => { runAnalysis(); }, 100);
+    if (mappedCount === 0) {
+      status.textContent = 'Sync Complete, but 0 fields mapped. Check headers.';
+      status.style.color = 'var(--orange)';
+    } else {
+      status.textContent = 'Sync Complete (' + mappedCount + ' fields mapped)';
+      status.style.color = 'var(--teal)';
+      setTimeout(() => { runAnalysis(); }, 100);
+    }
   } catch (err) {
     console.error(err);
-    status.textContent = 'Sync Failed: Ensure URL is Published as CSV';
+    status.textContent = 'Sync Failed: ' + err.message + '. Check CORS or URL.';
     status.style.color = 'var(--red)';
   }
 }
@@ -786,6 +791,8 @@ function parseYahooCSV(text) {
   const pyIdx = dataIdx + 1; 
 
   const mapping = [
+    { label: "Company Name", cur: "i-name" },
+    { label: "Ticker", cur: "i-ticker" },
     { label: "Total Revenue", cur: "i-rev", prev: "i-revpy" },
     { label: "Cost of Revenue", cur: "i-cogs" },
     { label: "Operating Income", cur: "i-ebit" },
@@ -798,6 +805,7 @@ function parseYahooCSV(text) {
     { label: "Tax Provision", cur: "i-tax" },
     { label: "Total Assets", cur: "i-ta", prev: "i-tapy" },
     { label: "Current Assets", cur: "i-ca", prev: "i-capy" },
+    { label: "Cash And Cash Equivalents", cur: "i-cash" },
     { label: "Inventory", cur: "i-inv" },
     { label: "Total Liabilities Net Minority Interest", cur: "i-tl" },
     { label: "Total Liabilities", cur: "i-tl" },
@@ -811,7 +819,8 @@ function parseYahooCSV(text) {
     { label: "Cash Flow from Operating Activities", cur: "i-ocf" },
     { label: "Capital Expenditure", cur: "i-capex", mult: -1 },
     { label: "Investments in Property Plant and Equipment", cur: "i-capex", mult: -1 },
-    { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy" }
+    { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy" },
+    { label: "Current Price", cur: "i-price" }
   ];
 
   let fieldsMapped = 0;
@@ -821,33 +830,49 @@ function parseYahooCSV(text) {
     const match = mapping.find(m => m.label.toLowerCase().replace(/[^a-z]/g, '') === rowHeader);
 
     if (match) {
-      let rawVal = row[dataIdx] ? row[dataIdx].replace(/[^-0-9.]/g, '') : '';
-      let rawPrevVal = row[pyIdx] ? row[pyIdx].replace(/[^-0-9.]/g, '') : '';
+      const isStringField = match.cur === 'i-name' || match.cur === 'i-ticker';
+      let rawVal = row[dataIdx] ? row[dataIdx].trim() : '';
+      let rawPrevVal = row[pyIdx] ? row[pyIdx].trim() : '';
       
-      const val = parseFloat(rawVal);
-      const prevVal = parseFloat(rawPrevVal);
+      if (!isStringField) {
+        rawVal = rawVal.replace(/[^-0-9.eE+]/g, '');
+        rawPrevVal = rawPrevVal.replace(/[^-0-9.eE+]/g, '');
+      }
+
+      const val = isStringField ? rawVal : parseFloat(rawVal);
+      const prevVal = isStringField ? rawPrevVal : parseFloat(rawPrevVal);
       const mult = match.mult || 1;
 
-      if (!isNaN(val)) {
+      if (isStringField || !isNaN(val)) {
         const el = document.getElementById(match.cur);
         if (el) {
-          let finalVal = val * mult;
-          if (!match.cur.includes('eps') && !match.cur.includes('price')) {
-            finalVal /= 1000000;
+          if (isStringField) {
+            el.value = val;
+          } else {
+            let finalVal = val * mult;
+            // Scale down by 1M for non-per-share values (including Shares Outstanding)
+            if (!match.cur.includes('eps') && !match.cur.includes('price')) {
+              finalVal /= 1000000;
+            }
+            el.value = finalVal.toFixed(2).replace(/\.00$/, '');
           }
-          el.value = finalVal.toFixed(2).replace(/\.00$/, '');
           fieldsMapped++;
+          console.log('Mapped ' + match.label + ' -> ' + el.value);
         }
       }
       
-      if (match.prev && !isNaN(prevVal)) {
+      if (match.prev && (isStringField || !isNaN(prevVal))) {
         const elPrev = document.getElementById(match.prev);
         if (elPrev) {
-          let finalPrev = prevVal * mult;
-          if (!match.prev.includes('eps')) {
-            finalPrev /= 1000000;
+          if (isStringField) {
+            elPrev.value = prevVal;
+          } else {
+            let finalPrev = prevVal * mult;
+            if (!match.prev.includes('eps')) {
+              finalPrev /= 1000000;
+            }
+            elPrev.value = finalPrev.toFixed(2).replace(/\.00$/, '');
           }
-          elPrev.value = finalPrev.toFixed(2).replace(/\.00$/, '');
         }
       }
     }
