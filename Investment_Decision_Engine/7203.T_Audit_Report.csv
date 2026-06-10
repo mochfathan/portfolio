@@ -1,0 +1,7 @@
+Metric,Formula,Breakdown,Result
+"P/E Ratio","Price / EPS","3200 / 365.94","8.7x"
+"PEG Ratio","P/E / Growth","8.744602940372738 / 103.90037332144648","0.08"
+"ROE","Net Income / Equity","4944900 / 33805000","14.6%"
+"Altman Z-Score","Multi-factor","Weighted sum","1.75"
+"Graham Number","√(22.5 * EPS * BVPS)","Calculated","4,540.67"
+"DCF Per Share","Intrinsic Value","Damodaran Method","3,805.12"

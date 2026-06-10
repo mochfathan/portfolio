@@ -265,6 +265,12 @@ select.form-input option{background:var(--bg3);}
       </div>
     </div>
     <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
+
+    <div class="panel-title" style="margin-top:14px; margin-bottom:6px; font-size:9px; opacity:0.8;">Data Export & Project Save</div>
+    <div style="display:flex; gap:6px;">
+      <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project (CSV)</button>
+      <button class="btn-import" onclick="exportAuditCSV()" style="flex:1; padding:4px;">📊 Export Audit (CSV)</button>
+    </div>
     
     <!-- Google Sheet Sync -->
     <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
@@ -308,7 +314,7 @@ select.form-input option{background:var(--bg3);}
     </div>
     <div>
       <label class="form-label">Currency</label>
-      <select class="form-input" id="i-currency">
+      <select class="form-input" id="i-currency" onchange="updateCurrencyLabels()">
         <option value="USD">USD ($)</option>
         <option value="IDR">IDR (Rp)</option>
         <option value="EUR">EUR (€)</option>
@@ -343,33 +349,33 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content active" id="itab-0">
     <div class="fsec">Current Period (TTM / Annual)</div>
     <div class="form-row">
-      <div><label class="form-label">Revenue <small>(Millions)</small></label><input class="form-input" id="i-rev" type="number" placeholder="383285"></div>
-      <div><label class="form-label">COGS <small>(Millions)</small></label><input class="form-input" id="i-cogs" type="number" placeholder="214137"></div>
+      <div><label class="form-label">Revenue <small>(Millions)</small></label><input class="form-input" id="i-rev" type="number"></div>
+      <div><label class="form-label">COGS <small>(Millions)</small></label><input class="form-input" id="i-cogs" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">EBIT <small>(Op. Income)</small></label><input class="form-input" id="i-ebit" type="number" placeholder="114301"></div>
-      <div><label class="form-label">EBITDA <small>(Millions)</small></label><input class="form-input" id="i-ebitda" type="number" placeholder="125820"></div>
+      <div><label class="form-label">EBIT <small>(Op. Income)</small></label><input class="form-input" id="i-ebit" type="number"></div>
+      <div><label class="form-label">EBITDA <small>(Millions)</small></label><input class="form-input" id="i-ebitda" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Interest Expense <small>(Millions)</small></label><input class="form-input" id="i-int" type="number" placeholder="3933"></div>
-      <div><label class="form-label">Net Income <small>(Millions)</small></label><input class="form-input" id="i-ni" type="number" placeholder="96995"></div>
+      <div><label class="form-label">Interest Expense <small>(Millions)</small></label><input class="form-input" id="i-int" type="number"></div>
+      <div><label class="form-label">Net Income <small>(Millions)</small></label><input class="form-input" id="i-ni" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">EPS Basic <small>(Unit)</small></label><input class="form-input" id="i-epsb" type="number" step="0.01" placeholder="6.16"></div>
-      <div><label class="form-label">EPS Diluted <small>(Unit)</small></label><input class="form-input" id="i-epsd" type="number" step="0.01" placeholder="6.13"></div>
+      <div><label class="form-label">EPS Basic <small>(Unit)</small></label><input class="form-input" id="i-epsb" type="number" step="0.01"></div>
+      <div><label class="form-label">EPS Diluted <small>(Unit)</small></label><input class="form-input" id="i-epsd" type="number" step="0.01"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Forward EPS <small>(Unit)</small></label><input class="form-input" id="i-feps" type="number" step="0.01" placeholder="6.60"></div>
-      <div><label class="form-label">Dividends/Share <small>(Unit)</small></label><input class="form-input" id="i-dps" type="number" step="0.01" placeholder="0.96"></div>
+      <div><label class="form-label">Forward EPS <small>(Unit)</small></label><input class="form-input" id="i-feps" type="number" step="0.01"></div>
+      <div><label class="form-label">Dividends/Share <small>(Unit)</small></label><input class="form-input" id="i-dps" type="number" step="0.01"></div>
     </div>
     <div class="fsec">Prior Year (for Growth Analysis)</div>
     <div class="form-row">
-      <div><label class="form-label">Revenue PY <small>(Millions)</small></label><input class="form-input" id="i-revpy" type="number" placeholder="394328"></div>
-      <div><label class="form-label">Net Income PY <small>(Millions)</small></label><input class="form-input" id="i-nipy" type="number" placeholder="99803"></div>
+      <div><label class="form-label">Revenue PY <small>(Millions)</small></label><input class="form-input" id="i-revpy" type="number"></div>
+      <div><label class="form-label">Net Income PY <small>(Millions)</small></label><input class="form-input" id="i-nipy" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">EPS Diluted PY <small>(Unit)</small></label><input class="form-input" id="i-epsdy" type="number" step="0.01" placeholder="6.11"></div>
-      <div><label class="form-label">Gross Profit PY <small>(Millions)</small></label><input class="form-input" id="i-gpy" type="number" placeholder="170782"></div>
+      <div><label class="form-label">EPS Diluted PY <small>(Unit)</small></label><input class="form-input" id="i-epsdy" type="number" step="0.01"></div>
+      <div><label class="form-label">Gross Profit PY <small>(Millions)</small></label><input class="form-input" id="i-gpy" type="number"></div>
     </div>
   </div>
 
@@ -377,38 +383,38 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-1">
     <div class="fsec">Current Period — Assets</div>
     <div class="form-row">
-      <div><label class="form-label">Total Assets <small>(Millions)</small></label><input class="form-input" id="i-ta" type="number" placeholder="352583"></div>
-      <div><label class="form-label">Current Assets <small>(Millions)</small></label><input class="form-input" id="i-ca" type="number" placeholder="143566"></div>
+      <div><label class="form-label">Total Assets <small>(Millions)</small></label><input class="form-input" id="i-ta" type="number"></div>
+      <div><label class="form-label">Current Assets <small>(Millions)</small></label><input class="form-input" id="i-ca" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Cash & Equivalents</label><input class="form-input" id="i-cash" type="number" placeholder="29965"></div>
-      <div><label class="form-label">Inventory <small>(Millions)</small></label><input class="form-input" id="i-inv" type="number" placeholder="6331"></div>
+      <div><label class="form-label">Cash & Equivalents</label><input class="form-input" id="i-cash" type="number"></div>
+      <div><label class="form-label">Inventory <small>(Millions)</small></label><input class="form-input" id="i-inv" type="number"></div>
     </div>
     <div class="fsec">Liabilities & Equity</div>
     <div class="form-row">
-      <div><label class="form-label">Total Liabilities</label><input class="form-input" id="i-tl" type="number" placeholder="290437"></div>
-      <div><label class="form-label">Current Liabilities</label><input class="form-input" id="i-cl" type="number" placeholder="145308"></div>
+      <div><label class="form-label">Total Liabilities</label><input class="form-input" id="i-tl" type="number"></div>
+      <div><label class="form-label">Current Liabilities</label><input class="form-input" id="i-cl" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Total Debt <small>(Millions)</small></label><input class="form-input" id="i-debt" type="number" placeholder="111088"></div>
-      <div><label class="form-label">Total Equity (BV)</label><input class="form-input" id="i-eq" type="number" placeholder="62146"></div>
+      <div><label class="form-label">Total Debt <small>(Millions)</small></label><input class="form-input" id="i-debt" type="number"></div>
+      <div><label class="form-label">Total Equity (BV)</label><input class="form-input" id="i-eq" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Retained Earnings</label><input class="form-input" id="i-re" type="number" placeholder="-214000"></div>
-      <div><label class="form-label">Shares Out. <small>(M)</small></label><input class="form-input" id="i-shr" type="number" step="0.1" placeholder="15728"></div>
+      <div><label class="form-label">Retained Earnings</label><input class="form-input" id="i-re" type="number"></div>
+      <div><label class="form-label">Shares Out. <small>(M)</small></label><input class="form-input" id="i-shr" type="number" step="0.1"></div>
     </div>
     <div class="fsec">Prior Year (for Piotroski & Trends)</div>
     <div class="form-row">
-      <div><label class="form-label">Total Assets PY</label><input class="form-input" id="i-tapy" type="number" placeholder="352755"></div>
-      <div><label class="form-label">Total Debt PY</label><input class="form-input" id="i-debtpy" type="number" placeholder="120069"></div>
+      <div><label class="form-label">Total Assets PY</label><input class="form-input" id="i-tapy" type="number"></div>
+      <div><label class="form-label">Total Debt PY</label><input class="form-input" id="i-debtpy" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Current Assets PY</label><input class="form-input" id="i-capy" type="number" placeholder="135405"></div>
-      <div><label class="form-label">Current Liab. PY</label><input class="form-input" id="i-clpy" type="number" placeholder="153982"></div>
+      <div><label class="form-label">Current Assets PY</label><input class="form-input" id="i-capy" type="number"></div>
+      <div><label class="form-label">Current Liab. PY</label><input class="form-input" id="i-clpy" type="number"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Net Income PY (for ROA-PY)</label><input class="form-input" id="i-nipy2" type="number" placeholder="99803"></div>
-      <div><label class="form-label">Shares Out. PY <small>(M)</small></label><input class="form-input" id="i-shrpy" type="number" step="0.1" placeholder="16300"></div>
+      <div><label class="form-label">Net Income PY (for ROA-PY)</label><input class="form-input" id="i-nipy2" type="number"></div>
+      <div><label class="form-label">Shares Out. PY <small>(M)</small></label><input class="form-input" id="i-shrpy" type="number" step="0.1"></div>
     </div>
   </div>
 
@@ -416,20 +422,20 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-2">
     <div class="fsec">Cash Flow Statement</div>
     <div class="form-row">
-      <div><label class="form-label">Operating CF <small>(Millions)</small></label><input class="form-input" id="i-ocf" type="number" placeholder="110543"></div>
-      <div><label class="form-label">Capex <small>(+ve, Millions)</small></label><input class="form-input" id="i-capex" type="number" placeholder="10959"></div>
+      <div><label class="form-label">Operating CF <small>(Millions)</small></label><input class="form-input" id="i-ocf" type="number"></div>
+      <div><label class="form-label">Capex <small>(+ve, Millions)</small></label><input class="form-input" id="i-capex" type="number"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">FCF <small>(or auto OCF-Capex)</small></label><input class="form-input" id="i-fcf" type="number" placeholder="auto-calc"></div>
-      <div><label class="form-label">FCF Prior Year</label><input class="form-input" id="i-fcfpy" type="number" placeholder="92953"></div>
+      <div><label class="form-label">FCF Prior Year</label><input class="form-input" id="i-fcfpy" type="number"></div>
     </div>
     <div class="fsec">DCF Model Assumptions</div>
     <div class="form-row">
-      <div><label class="form-label">WACC / Discount Rate <small>%</small></label><input class="form-input" id="i-wacc" type="number" step="0.1" placeholder="9.0"></div>
-      <div><label class="form-label">FCF Growth Y1–5 <small>%</small></label><input class="form-input" id="i-grate" type="number" step="0.1" placeholder="8.0"></div>
+      <div><label class="form-label">WACC / Discount Rate <small>%</small></label><input class="form-input" id="i-wacc" type="number" step="0.1"></div>
+      <div><label class="form-label">FCF Growth Y1–5 <small>%</small></label><input class="form-input" id="i-grate" type="number" step="0.1"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">Terminal Growth Rate <small>%</small></label><input class="form-input" id="i-tgrate" type="number" step="0.1" placeholder="3.0"></div>
+      <div><label class="form-label">Terminal Growth Rate <small>%</small></label><input class="form-input" id="i-tgrate" type="number" step="0.1"></div>
       <div><label class="form-label">Net Debt Override <small>(Millions)</small></label><input class="form-input" id="i-netdebt" type="number" placeholder="auto-calc"></div>
     </div>
   </div>
@@ -438,26 +444,26 @@ select.form-input option{background:var(--bg3);}
   <div class="input-tab-content" id="itab-3">
     <div class="fsec">Market Data</div>
     <div class="form-row">
-      <div><label class="form-label">Current Price <small>(Unit)</small></label><input class="form-input" id="i-price" type="number" step="0.01" placeholder="189.30"></div>
-      <div><label class="form-label">Beta <small>(vs. market)</small></label><input class="form-input" id="i-beta" type="number" step="0.01" placeholder="1.29"></div>
+      <div><label class="form-label">Current Price <small>(Unit)</small></label><input class="form-input" id="i-price" type="number" step="0.01"></div>
+      <div><label class="form-label">Beta <small>(vs. market)</small></label><input class="form-input" id="i-beta" type="number" step="0.01"></div>
     </div>
     <div class="form-row">
-      <div><label class="form-label">52-Week High <small>(Unit)</small></label><input class="form-input" id="i-h52" type="number" step="0.01" placeholder="199.62"></div>
-      <div><label class="form-label">52-Week Low <small>(Unit)</small></label><input class="form-input" id="i-l52" type="number" step="0.01" placeholder="124.17"></div>
+      <div><label class="form-label">52-Week High <small>(Unit)</small></label><input class="form-input" id="i-h52" type="number" step="0.01"></div>
+      <div><label class="form-label">52-Week Low <small>(Unit)</small></label><input class="form-input" id="i-l52" type="number" step="0.01"></div>
     </div>
     <div class="form-row">
       <div><label class="form-label">Market Cap <small>(auto or override)</small></label><input class="form-input" id="i-mc" type="number" placeholder="auto-calc"></div>
-      <div><label class="form-label">Effective Tax Rate <small>%</small></label><input class="form-input" id="i-tax" type="number" step="0.1" placeholder="21.0"></div>
+      <div><label class="form-label">Effective Tax Rate <small>%</small></label><input class="form-input" id="i-tax" type="number" step="0.1"></div>
     </div>
     <div class="fsec">Rate Assumptions</div>
     <div class="form-row">
-      <div><label class="form-label">Risk-Free Rate <small>%</small></label><input class="form-input" id="i-rfr" type="number" step="0.1" placeholder="4.5"></div>
-      <div><label class="form-label">Market Risk Premium <small>%</small></label><input class="form-input" id="i-mrp" type="number" step="0.1" placeholder="5.5"></div>
+      <div><label class="form-label">Risk-Free Rate <small>%</small></label><input class="form-input" id="i-rfr" type="number" step="0.1"></div>
+      <div><label class="form-label">Market Risk Premium <small>%</small></label><input class="form-input" id="i-mrp" type="number" step="0.1"></div>
     </div>
     <div class="fsec">Analyst Estimates (optional)</div>
     <div class="form-row">
-      <div><label class="form-label">Consensus Price Target</label><input class="form-input" id="i-apt" type="number" step="0.01" placeholder="210.00"></div>
-      <div><label class="form-label">Consensus Rating <small>(1=SB, 5=SS)</small></label><input class="form-input" id="i-cons" type="number" min="1" max="5" step="0.1" placeholder="2.1"></div>
+      <div><label class="form-label">Consensus Price Target <small>(Unit)</small></label><input class="form-input" id="i-apt" type="number" step="0.01"></div>
+      <div><label class="form-label">Consensus Rating <small>(1=SB, 5=SS)</small></label><input class="form-input" id="i-cons" type="number" min="1" max="5" step="0.1"></div>
     </div>
   </div>
 
@@ -502,6 +508,7 @@ select.form-input option{background:var(--bg3);}
       <button class="output-tab-btn" onclick="switchOT(1)">Valuation Models</button>
       <button class="output-tab-btn" onclick="switchOT(2)">Health &amp; Risk</button>
       <button class="output-tab-btn" onclick="switchOT(3)">Investment Thesis</button>
+      <button class="output-tab-btn" onclick="switchOT(4)">Calculations Audit</button>
     </div>
 
     <!-- ── OUTPUT TAB 0: DASHBOARD ── -->
@@ -551,6 +558,15 @@ select.form-input option{background:var(--bg3);}
     <!-- ── OUTPUT TAB 3: INVESTMENT THESIS ── -->
     <div class="output-tab-content" id="otab-3">
       <div id="thesis-content"></div>
+    </div>
+
+    <!-- ── OUTPUT TAB 4: CALCULATIONS AUDIT ── -->
+    <div class="output-tab-content" id="otab-4">
+      <div class="card">
+        <div class="card-title">Full Calculation Audit & Formula Transparency</div>
+        <p class="header-sub" style="margin-bottom:15px; max-width: 100%;">Verify every metric produced by the engine. Formulas below use your current inputs.</p>
+        <div id="audit-content"></div>
+      </div>
     </div>
 
     <!-- DISCLAIMER -->
@@ -791,46 +807,75 @@ function parseYahooCSV(text) {
   const pyIdx = dataIdx + 1; 
 
   const mapping = [
-    { label: "Company Name", cur: "i-name" },
-    { label: "Ticker", cur: "i-ticker" },
-    { label: "Total Revenue", cur: "i-rev", prev: "i-revpy" },
-    { label: "Cost of Revenue", cur: "i-cogs" },
-    { label: "Operating Income", cur: "i-ebit" },
-    { label: "EBITDA", cur: "i-ebitda" },
-    { label: "Interest Expense", cur: "i-int" },
-    { label: "Net Income Common Stockholders", cur: "i-ni", prev: "i-nipy" },
-    { label: "Net Income", cur: "i-ni", prev: "i-nipy" },
-    { label: "Basic EPS", cur: "i-epsb" },
-    { label: "Diluted EPS", cur: "i-epsd", prev: "i-epsdy" },
-    { label: "Tax Provision", cur: "i-tax" },
-    { label: "Total Assets", cur: "i-ta", prev: "i-tapy" },
-    { label: "Current Assets", cur: "i-ca", prev: "i-capy" },
-    { label: "Cash And Cash Equivalents", cur: "i-cash" },
-    { label: "Inventory", cur: "i-inv" },
-    { label: "Total Liabilities Net Minority Interest", cur: "i-tl" },
-    { label: "Total Liabilities", cur: "i-tl" },
-    { label: "Current Liabilities", cur: "i-cl", prev: "i-clpy" },
-    { label: "Total Debt", cur: "i-debt", prev: "i-debtpy" },
-    { label: "Stockholders' Equity", cur: "i-eq" },
-    { label: "Total Equity Gross Minority Interest", cur: "i-eq" },
-    { label: "Retained Earnings", cur: "i-re" },
-    { label: "Ordinary Shares Number", cur: "i-shr", prev: "i-shrpy" },
-    { label: "Operating Cash Flow", cur: "i-ocf" },
-    { label: "Cash Flow from Operating Activities", cur: "i-ocf" },
-    { label: "Capital Expenditure", cur: "i-capex", mult: -1 },
-    { label: "Investments in Property Plant and Equipment", cur: "i-capex", mult: -1 },
-    { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy" },
-    { label: "Current Price", cur: "i-price" }
+    { label: "Company Name", cur: "i-name", scale: false },
+    { label: "Ticker", cur: "i-ticker", scale: false },
+    { label: "Total Revenue", cur: "i-rev", prev: "i-revpy", scale: true },
+    { label: "Cost of Revenue", cur: "i-cogs", scale: true },
+    { label: "Operating Income", cur: "i-ebit", scale: true },
+    { label: "EBITDA", cur: "i-ebitda", scale: true },
+    { label: "Interest Expense", cur: "i-int", scale: true },
+    { label: "Net Income Common Stockholders", cur: "i-ni", prev: "i-nipy", scale: true },
+    { label: "Net Income", cur: "i-ni", prev: "i-nipy", scale: true },
+    { label: "Basic EPS", cur: "i-epsb", scale: false },
+    { label: "Diluted EPS", cur: "i-epsd", prev: "i-epsdy", scale: false },
+    { label: "Tax Provision", cur: "i-tax", scale: true },
+    { label: "Total Assets", cur: "i-ta", prev: "i-tapy", scale: true },
+    { label: "Current Assets", cur: "i-ca", prev: "i-capy", scale: true },
+    { label: "Cash And Cash Equivalents", cur: "i-cash", scale: true },
+    { label: "Inventory", cur: "i-inv", scale: true },
+    { label: "Total Liabilities Net Minority Interest", cur: "i-tl", scale: true },
+    { label: "Total Liabilities", cur: "i-tl", scale: true },
+    { label: "Current Liabilities", cur: "i-cl", prev: "i-clpy", scale: true },
+    { label: "Total Debt", cur: "i-debt", prev: "i-debtpy", scale: true },
+    { label: "Stockholders' Equity", cur: "i-eq", scale: true },
+    { label: "Total Equity Gross Minority Interest", cur: "i-eq", scale: true },
+    { label: "Retained Earnings", cur: "i-re", scale: true },
+    { label: "Ordinary Shares Number", cur: "i-shr", prev: "i-shrpy", scale: true },
+    { label: "Operating Cash Flow", cur: "i-ocf", scale: true },
+    { label: "Cash Flow from Operating Activities", cur: "i-ocf", scale: true },
+    { label: "Capital Expenditure", cur: "i-capex", mult: -1, scale: true },
+    { label: "Investments in Property Plant and Equipment", cur: "i-capex", mult: -1, scale: true },
+    { label: "Free Cash Flow", cur: "i-fcf", prev: "i-fcfpy", scale: true },
+    { label: "Current Price", cur: "i-price", scale: false },
+    // Project Specific Mappings
+    { label: "Sector", cur: "i-sector", scale: false },
+    { label: "Currency", cur: "i-currency", scale: false },
+    { label: "Forward EPS", cur: "i-feps", scale: false },
+    { label: "Dividends Per Share", cur: "i-dps", scale: false },
+    { label: "Revenue Prior Year", cur: "i-revpy", scale: true },
+    { label: "Net Income Prior Year", cur: "i-nipy", prev: "i-nipy2", scale: true },
+    { label: "EPS Diluted Prior Year", cur: "i-epsdy", scale: false },
+    { label: "Gross Profit Prior Year", cur: "i-gpy", scale: true },
+    { label: "Total Assets Prior Year", cur: "i-tapy", scale: true },
+    { label: "Total Debt Prior Year", cur: "i-debtpy", scale: true },
+    { label: "Current Assets Prior Year", cur: "i-capy", scale: true },
+    { label: "Current Liabilities Prior Year", cur: "i-clpy", scale: true },
+    { label: "Shares Outstanding Prior Year", cur: "i-shrpy", scale: true },
+    { label: "Free Cash Flow Prior Year", cur: "i-fcfpy", scale: true },
+    { label: "WACC Discount Rate", cur: "i-wacc", scale: false },
+    { label: "FCF Growth Rate", cur: "i-grate", scale: false },
+    { label: "Terminal Growth Rate", cur: "i-tgrate", scale: false },
+    { label: "Beta", cur: "i-beta", scale: false },
+    { label: "52-Week High", cur: "i-h52", scale: false },
+    { label: "52-Week Low", cur: "i-l52", scale: false },
+    { label: "Effective Tax Rate", cur: "i-tax", scale: false },
+    { label: "Risk-Free Rate", cur: "i-rfr", scale: false },
+    { label: "Market Risk Premium", cur: "i-mrp", scale: false },
+    { label: "Analyst Price Target", cur: "i-apt", scale: false },
+    { label: "Analyst Consensus Rating", cur: "i-cons", scale: false },
+    { label: "Net Debt Override", cur: "i-netdebt", scale: true },
+    { label: "Market Cap Override", cur: "i-mc", scale: true },
+    { label: "Free Cash Flow Override", cur: "i-fcf", scale: true }
   ];
 
   let fieldsMapped = 0;
   rows.forEach(row => {
     if (!row[0]) return;
-    const rowHeader = row[0].toLowerCase().replace(/[^a-z]/g, ''); // strictly alpha for robustness
+    const rowHeader = row[0].toLowerCase().replace(/[^a-z]/g, ''); // strictly alpha
     const match = mapping.find(m => m.label.toLowerCase().replace(/[^a-z]/g, '') === rowHeader);
 
     if (match) {
-      const isStringField = match.cur === 'i-name' || match.cur === 'i-ticker';
+      const isStringField = match.cur === 'i-name' || match.cur === 'i-ticker' || match.cur === 'i-sector' || match.cur === 'i-currency';
       let rawVal = row[dataIdx] ? row[dataIdx].trim() : '';
       let rawPrevVal = row[pyIdx] ? row[pyIdx].trim() : '';
       
@@ -850,14 +895,10 @@ function parseYahooCSV(text) {
             el.value = val;
           } else {
             let finalVal = val * mult;
-            // Scale down by 1M for non-per-share values (including Shares Outstanding)
-            if (!match.cur.includes('eps') && !match.cur.includes('price')) {
-              finalVal /= 1000000;
-            }
+            if (match.scale) finalVal /= 1000000;
             el.value = finalVal.toFixed(2).replace(/\.00$/, '');
           }
           fieldsMapped++;
-          console.log('Mapped ' + match.label + ' -> ' + el.value);
         }
       }
       
@@ -868,9 +909,7 @@ function parseYahooCSV(text) {
             elPrev.value = prevVal;
           } else {
             let finalPrev = prevVal * mult;
-            if (!match.prev.includes('eps')) {
-              finalPrev /= 1000000;
-            }
+            if (match.scale) finalPrev /= 1000000;
             elPrev.value = finalPrev.toFixed(2).replace(/\.00$/, '');
           }
         }
@@ -879,6 +918,102 @@ function parseYahooCSV(text) {
   });
   console.log('CSV Import: Mapped ' + fieldsMapped + ' fields.');
   return fieldsMapped;
+}
+
+/* ── CSV EXPORT ───────────────────────────── */
+function exportProjectCSV() {
+  const d = getInputs();
+  const ticker = d.ticker || 'STOCK';
+  const mapping = [
+    { label: "Company Name", val: d.name },
+    { label: "Ticker", val: d.ticker },
+    { label: "Sector", val: d.sector },
+    { label: "Currency", val: d.currency },
+    { label: "Total Revenue", val: d.rev * 1e6 },
+    { label: "Cost of Revenue", val: d.cogs * 1e6 },
+    { label: "Operating Income", val: d.ebit * 1e6 },
+    { label: "EBITDA", val: d.ebitda * 1e6 },
+    { label: "Interest Expense", val: d.int * 1e6 },
+    { label: "Net Income", val: d.ni * 1e6 },
+    { label: "Basic EPS", val: d.epsb },
+    { label: "Diluted EPS", val: d.epsd },
+    { label: "Forward EPS", val: d.feps },
+    { label: "Dividends Per Share", val: d.dps },
+    { label: "Revenue Prior Year", val: d.revpy * 1e6 },
+    { label: "Net Income Prior Year", val: d.nipy * 1e6 },
+    { label: "EPS Diluted Prior Year", val: d.epsdy },
+    { label: "Gross Profit Prior Year", val: d.gpy * 1e6 },
+    { label: "Total Assets", val: d.ta * 1e6 },
+    { label: "Current Assets", val: d.ca * 1e6 },
+    { label: "Cash And Cash Equivalents", val: d.cash * 1e6 },
+    { label: "Inventory", val: d.inv * 1e6 },
+    { label: "Total Liabilities", val: d.tl * 1e6 },
+    { label: "Current Liabilities", val: d.cl * 1e6 },
+    { label: "Total Debt", val: d.debt * 1e6 },
+    { label: "Stockholders' Equity", val: d.eq * 1e6 },
+    { label: "Retained Earnings", val: d.re * 1e6 },
+    { label: "Ordinary Shares Number", val: d.shr * 1e6 },
+    { label: "Total Assets Prior Year", val: d.tapy * 1e6 },
+    { label: "Total Debt Prior Year", val: d.debtpy * 1e6 },
+    { label: "Current Assets Prior Year", val: d.capy * 1e6 },
+    { label: "Current Liabilities Prior Year", val: d.clpy * 1e6 },
+    { label: "Shares Outstanding Prior Year", val: d.shrpy * 1e6 },
+    { label: "Operating Cash Flow", val: d.ocf * 1e6 },
+    { label: "Capital Expenditure", val: d.capex * -1e6 },
+    { label: "Free Cash Flow", val: (d.fcfInput || (d.ocf - d.capex)) * 1e6 },
+    { label: "Free Cash Flow Prior Year", val: d.fcfpy * 1e6 },
+    { label: "Current Price", val: d.price },
+    { label: "WACC Discount Rate", val: d.wacc },
+    { label: "FCF Growth Rate", val: d.grate },
+    { label: "Terminal Growth Rate", val: d.tgrate },
+    { label: "Beta", val: d.beta },
+    { label: "52-Week High", val: d.h52 },
+    { label: "52-Week Low", val: d.l52 },
+    { label: "Effective Tax Rate", val: d.tax },
+    { label: "Risk-Free Rate", val: d.rfr },
+    { label: "Market Risk Premium", val: d.mrp },
+    { label: "Analyst Price Target", val: d.apt },
+    { label: "Analyst Consensus Rating", val: d.cons },
+    { label: "Net Debt Override", val: d.netdebtInput !== null ? d.netdebtInput * 1e6 : "" },
+    { label: "Market Cap Override", val: d.mcInput !== null ? d.mcInput * 1e6 : "" },
+    { label: "Free Cash Flow Override", val: d.fcfInput !== null ? d.fcfInput * 1e6 : "" }
+  ];
+
+  let csvContent = "Metric,Value\n" + mapping.map(m => `"${m.label}","${m.val}"`).join("\n");
+  downloadCSV(csvContent, `${ticker}_Project_Save.csv`);
+}
+
+function exportAuditCSV() {
+  const d = getInputs();
+  const r = calculate(d);
+  const cur = d.currency;
+  
+  // Minimal audit row generator for CSV
+  const audit = [
+    { n: 'P/E Ratio', f: 'Price / EPS', c: d.price + ' / ' + d.epsd, v: fN(r.pe, 1, 'x') },
+    { n: 'PEG Ratio', f: 'P/E / Growth', c: r.pe + ' / ' + r.epsGrowth, v: fN(r.peg, 2) },
+    { n: 'ROE', f: 'Net Income / Equity', c: d.ni + ' / ' + d.eq, v: fN(r.roe, 1, '%') },
+    { n: 'Altman Z-Score', f: 'Multi-factor', c: 'Weighted sum', v: fN(r.altmanZ, 2) },
+    { n: 'Graham Number', f: '√(22.5 * EPS * BVPS)', c: 'Calculated', v: fP(r.grahamNum, cur) },
+    { n: 'DCF Per Share', f: 'Intrinsic Value', c: 'Damodaran Method', v: fP(r.dcfPS, cur) }
+  ];
+
+  let csvContent = "Metric,Formula,Breakdown,Result\n" + 
+    audit.map(a => `"${a.n}","${a.f}","${a.c}","${a.v}"`).join("\n");
+  
+  downloadCSV(csvContent, `${d.ticker || 'STOCK'}_Audit_Report.csv`);
+}
+
+function downloadCSV(content, filename) {
+  const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute("download", filename);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
 }
 
 /* ── TAB SWITCHING ────────────────────────── */
@@ -915,18 +1050,113 @@ function loadPreset(key){
     var el=document.getElementById(f[0]);
     if(el) el.value=f[1];
   });
+  updateCurrencyLabels();
+  updateAutoCalcUI();
   setTimeout(runAnalysis,80);
 }
-function clearAll(){
-  document.querySelectorAll('.form-input').forEach(function(el){if(el.tagName==='INPUT')el.value='';});
-  document.getElementById('empty-state').classList.remove('hidden');
-  document.getElementById('results-content').classList.add('hidden');
+
+// Global listener for live auto-calc feedback & field synchronization
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('form-input')) {
+    const id = e.target.id;
+    const val = e.target.value;
+
+    // 1. MIRROR SYNC: Keep redundant fields in sync
+    if (id === 'i-nipy') {
+      const target = document.getElementById('i-nipy2');
+      if (target) target.value = val;
+    } else if (id === 'i-nipy2') {
+      const target = document.getElementById('i-nipy');
+      if (target) target.value = val;
+    }
+
+    // 2. TRIGGER AUTO-CALC PREVIEWS
+    updateAutoCalcUI();
+  }
+});
+
+function updateAutoCalcUI() {
+  const d = getInputs();
+  const cur = d.currency;
+  
+  // Helper to show/hide "Auto" hints
+  const setHint = (elId, value, condition) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (el.value === '' && condition) {
+      el.placeholder = 'Auto: ' + fM(value, cur);
+    } else if (el.value === '') {
+      el.placeholder = 'auto-calc';
+    }
+  };
+
+  setHint('i-mc', d.price * d.shr, d.price > 0 && d.shr > 0);
+  setHint('i-netdebt', d.debt - d.cash, d.debt !== 0 || d.cash !== 0);
+  setHint('i-fcf', d.ocf - d.capex, d.ocf !== 0 || d.capex !== 0);
 }
 
-/* ── INPUT READER ─────────────────────────── */
-function g(id){return parseFloat(document.getElementById(id).value)||0;}
-function gn(id){var v=document.getElementById(id).value; return (v===''||v===null)?null:parseFloat(v);}
+function clearAll(){
+  document.querySelectorAll('.form-input').forEach(function(el){if(el.tagName==='INPUT')el.value='';});
+  document.getElementById('csv-upload').value = '';
+  document.getElementById('import-status').textContent = 'Ready to import';
+  document.getElementById('import-status').style.color = 'var(--text3)';
+  document.getElementById('empty-state').classList.remove('hidden');
+  document.getElementById('results-content').classList.add('hidden');
+  updateCurrencyLabels();
+}
+
+function updateCurrencyLabels() {
+  const select = document.getElementById('i-currency');
+  if(!select) return;
+  const symbol = select.options[select.selectedIndex].text.split('(')[1].split(')')[0];
+  
+  const labels = document.querySelectorAll('.form-label');
+  labels.forEach(label => {
+    const small = label.querySelector('small');
+    if (!small) return;
+    
+    const txt = label.textContent.toLowerCase();
+    const sTxt = small.textContent;
+    
+    // Check if this small tag is a currency/unit placeholder
+    const isCurrencyHint = sTxt.includes('Millions') || sTxt.includes('Unit') || 
+                          /[\$\¥\€\£]|Rp|S\$/.test(sTxt);
+    
+    if (isCurrencyHint) {
+       if (txt.includes('revenue') || txt.includes('cogs') || txt.includes('income') || 
+           txt.includes('ebit') || txt.includes('assets') || txt.includes('liabilities') || 
+           txt.includes('debt') || txt.includes('equity') || txt.includes('cash') || 
+           txt.includes('capex') || txt.includes('fcf')) {
+         small.textContent = '(Millions ' + symbol + ')';
+       } else if (txt.includes('price') || txt.includes('eps') || txt.includes('dividends') || txt.includes('target')) {
+         small.textContent = '(' + symbol + ')';
+       }
+    } else if (sTxt === '(M)' || sTxt.includes('Shares')) {
+      small.textContent = '(M Shares)';
+    }
+  });
+  
+  const hint = document.querySelector('.panel-hint');
+  if (hint) hint.textContent = 'Millions ' + symbol + ' unless noted';
+}
+
+/* ── UTILITY ──────────────────────────────── */
+function g(id){
+  var el=document.getElementById(id);
+  if(!el) return 0;
+  var v=el.value.trim();
+  return (v===''||isNaN(parseFloat(v)))?0:parseFloat(v);
+}
+function gn(id){
+  var el=document.getElementById(id);
+  if(!el) return null;
+  var v=el.value.trim();
+  if(v===''||v===null) return null;
+  var val=parseFloat(v);
+  return isNaN(val)?null:val;
+}
 function gs(id){return (document.getElementById(id).value||'').trim();}
+
 function getInputs(){
   return{
     name:gs('i-name')||'Unknown Company', ticker:gs('i-ticker')||'—',
@@ -937,7 +1167,7 @@ function getInputs(){
     revpy:g('i-revpy'), nipy:g('i-nipy'), epsdy:g('i-epsdy'), gpy:g('i-gpy'),
     ta:g('i-ta'), ca:g('i-ca'), cash:g('i-cash'), inv:g('i-inv'),
     tl:g('i-tl'), cl:g('i-cl'), debt:g('i-debt'), eq:g('i-eq'),
-    re:parseFloat(document.getElementById('i-re').value)||0,
+    re:g('i-re'),
     shr:g('i-shr'),
     tapy:g('i-tapy'), debtpy:g('i-debtpy'), capy:g('i-capy'),
     clpy:g('i-clpy'), nipy2:g('i-nipy2'), shrpy:g('i-shrpy'),
@@ -978,8 +1208,8 @@ function calculate(d){
   r.fcf=(d.fcfInput!==null)?d.fcfInput:(d.ocf-d.capex);
 
   /* ── Market metrics ── */
-  r.mc=(d.mcInput!==null)?d.mcInput:(d.price*d.shr);
-  r.nd=(d.netdebtInput!==null)?d.netdebtInput:(d.debt-d.cash);
+  r.mc=(d.mcInput !== null) ? d.mcInput : (d.price * d.shr);
+  r.nd=(d.netdebtInput !== null) ? d.netdebtInput : (d.debt - d.cash);
   r.ev=r.mc+r.nd; if(r.ev<=0) r.ev=r.mc;
   r.bvps=(d.shr>0)?(d.eq/d.shr):0;
   r.wc=d.ca-d.cl;
@@ -1204,7 +1434,7 @@ function cM(v,good,bad,hi){
   return hi?(v>=good?'var(--teal)':(v>=bad?'var(--gold)':'var(--red)')):(v<=good?'var(--teal)':(v<=bad?'var(--gold)':'var(--red)'));
 }
 function dC(v,good,bad,hi){
-  if(v===null||isNaN(v)) return 'dot-a';
+  if(v===null||isNaN(v)) return 'dot-g';
   return hi?(v>=good?'dot-g':(v>=bad?'dot-a':'dot-r')):(v<=good?'dot-g':(v<=bad?'dot-a':'dot-r'));
 }
 function bdgCls(v){return v>0?'bg':'br';}
@@ -1322,8 +1552,8 @@ function render(d,r){
     +'<div style="margin-bottom:6px"><div class="mcard-value" style="color:var(--gold);font-size:22px">EY: '+fN(r.earningsYield,1,'%')+'</div>'
     +'<div class="mcard-label">Earnings Yield = EBIT / EV</div></div>'
     +'<div><div class="mcard-value" style="color:var(--blue);font-size:22px">ROIC: '+fN(r.magicROIC,1,'%')+'</div>'
-    +'<div class="mcard-label">Return on Invested Capital (NOPAT)</div></div>'
-    +'<div class="mcard-sub" style="margin-top:6px"><small style="color:var(--text3)">Higher EY + higher ROIC → stronger Magic Formula rank.<br>NOPAT = EBIT × (1 − Tax Rate)</small></div>'
+    +'<div class="mcard-label">Return on Capital (EBIT / Net Assets)</div></div>'
+    +'<div class="mcard-sub" style="margin-top:6px"><small style="color:var(--text3)">Higher EY + higher ROIC → stronger Magic Formula rank.<br>Greenblatt uses pre-tax EBIT for both ratios.</small></div>'
     +'</div>';
 
   // DCF per share
@@ -1505,6 +1735,54 @@ function render(d,r){
     +'<li><span class="th-ico">◈</span>Magic Formula: EY='+fN(r.earningsYield,1,'%')+' · ROIC='+fN(r.magicROIC,1,'%')+' · PEG='+fN(r.peg,2)+'</li>'
     +'<li><span class="th-ico tm">◈</span>Data Confidence: '+r.confidence+' · Currency: '+cur+'</li>'
     +'</ul></div>';
+
+  /* CALCULATIONS AUDIT */
+  var audit = [
+    // VALUATION
+    { n: 'P/E Ratio', f: 'Price / EPS (Diluted)', c: fN(d.price, 2) + ' / ' + fN(d.epsd, 2), v: fN(r.pe, 1, 'x'), s: 'Lower is cheaper; <15x often considered value territory.' },
+    { n: 'Forward P/E', f: 'Price / Forward EPS', c: fN(d.price, 2) + ' / ' + fN(d.feps, 2), v: fN(r.fpe, 1, 'x'), s: 'Market expectation for future earnings; > Trailing P/E implies earnings decline.' },
+    { n: 'PEG Ratio', f: 'P/E Ratio / EPS Growth %', c: fN(r.pe, 1) + ' / ' + fN(r.epsGrowth, 1), v: fN(r.peg, 2), s: '<1.0 is undervalued relative to growth (Peter Lynch rule).' },
+    { n: 'P/Sales', f: 'Price / (Revenue / Shares)', c: fN(d.price, 2) + ' / (' + fN(d.rev) + ' / ' + fN(d.shr) + ')', v: fN(r.ps, 1, 'x'), s: '<0.75 is Kenneth Fisher\'s target for "Super Stocks".' },
+    { n: 'P/Book Value', f: 'Price / (Equity / Shares)', c: fN(d.price, 2) + ' / ' + fN(r.bvps, 2), v: fN(r.pb, 1, 'x'), s: '<1.0 means buying assets for less than their accounting value.' },
+    { n: 'EV/EBITDA', f: 'Ent. Value / EBITDA', c: fN(r.ev) + ' / ' + fN(d.ebitda), v: fN(r.evebitda, 1, 'x'), s: 'Acquirer\'s multiple; compares whole company value to cash earnings.' },
+    { n: 'FCF Yield', f: '(Free Cash Flow / Market Cap) * 100', c: '(' + fN(r.fcf) + ' / ' + fN(r.mc) + ') * 100', v: fN(r.fcfYield, 1, '%'), s: 'The actual cash return percentage available to shareholders.' },
+
+    // MARKET & CAPITAL
+    { n: 'Market Cap', f: 'Price * Shares (or Override)', c: (d.mcInput !== null ? 'OVERRIDE: ' + fN(d.mcInput) : fN(d.price, 2) + ' * ' + fN(d.shr)), v: fM(r.mc, cur), s: 'Total market value of equity. Falls back to Auto-Calc if override is empty.' },
+    { n: 'Net Debt', f: 'Total Debt - Cash (or Override)', c: (d.netdebtInput !== null ? 'OVERRIDE: ' + fN(d.netdebtInput) : fN(d.debt) + ' - ' + fN(d.cash)), v: fM(r.nd, cur), s: 'Debt minus cash; negative means net cash position.' },
+    { n: 'Enterprise Value', f: 'Market Cap + Net Debt', c: fN(r.mc) + ' + ' + fN(r.nd), v: fM(r.ev, cur), s: 'Theoretical takeover price (Market Cap + Debt - Cash).' },
+
+    // PROFITABILITY
+    { n: 'Gross Margin', f: '(Gross Profit / Revenue) * 100', c: '(' + fN(r.gp) + ' / ' + fN(d.rev) + ') * 100', v: fN(r.grossMargin, 1, '%'), s: 'Measures pricing power & production efficiency; >40% is high.' },
+    { n: 'EBIT Margin', f: '(EBIT / Revenue) * 100', c: '(' + fN(d.ebit) + ' / ' + fN(d.rev) + ') * 100', v: fN(r.ebitMargin, 1, '%'), s: 'Operating profitability before interest and taxes.' },
+    { n: 'Net Margin', f: '(Net Income / Revenue) * 100', c: '(' + fN(d.ni) + ' / ' + fN(d.rev) + ') * 100', v: fN(r.netMargin, 1, '%'), s: 'Bottom-line efficiency; includes all costs, taxes, and interest.' },
+    { n: 'ROE', f: '(Net Income / Equity) * 100', c: '(' + fN(d.ni) + ' / ' + fN(d.eq) + ') * 100', v: fN(r.roe, 1, '%'), s: 'Return on Shareholder Equity; >15% is generally excellent.' },
+    { n: 'ROIC', f: 'NOPAT / Invested Capital', c: 'EBIT*(1-Tax) / (Equity+Debt-Cash)', v: fN(r.roic, 1, '%'), s: 'Capital allocation quality; should be higher than WACC.' },
+
+    // HEALTH & SOLVENCY
+    { n: 'Current Ratio', f: 'Curr. Assets / Curr. Liab.', c: fN(d.ca) + ' / ' + fN(d.cl), v: fN(r.currentRatio, 2, 'x'), s: 'Short-term liquidity; >1.5x is safe; <1.0x is a red flag.' },
+    { n: 'Quick Ratio', f: '(CA - Inventory) / CL', c: '(' + fN(d.ca) + ' - ' + fN(d.inv) + ') / ' + fN(d.cl), v: fN(r.quickRatio, 2, 'x'), s: '"Acid Test"; measures liquidity without selling inventory.' },
+    { n: 'Debt to Equity', f: 'Total Debt / Equity', c: fN(d.debt) + ' / ' + fN(d.eq), v: fN(r.dEquity, 2, 'x'), s: 'Measures leverage; >2.0x is generally considered high risk.' },
+    { n: 'Interest Coverage', f: 'EBIT / Interest Expense', c: fN(d.ebit) + ' / ' + fN(d.int), v: fN(r.intCov, 1, 'x'), s: 'Safety margin for debt payments; >3x is a baseline for safety.' },
+    { n: 'Net Debt / EBITDA', f: '(Total Debt - Cash) / EBITDA', c: '(' + fN(d.debt) + ' - ' + fN(d.cash) + ') / ' + fN(d.ebitda), v: fN(r.netDebtEbitda, 2, 'x'), s: 'Years of EBITDA needed to pay off debt; <3.0x is healthy.' },
+
+    // MODELS
+    { n: 'Altman Z-Score', f: '1.2X1 + 1.4X2 + 3.3X3 + 0.6X4 + 1.0X5', c: 'Weighted Multi-factor Discriminant', v: fN(r.altmanZ, 2), s: '>2.99 Safe Zone; <1.81 Distress/Bankruptcy risk Zone.' },
+    { n: 'Graham Number', f: '√(22.5 * EPS * BVPS)', c: '√ (22.5 * ' + fN(d.epsd, 2) + ' * ' + fN(r.bvps, 2) + ')', v: fP(r.grahamNum, cur), s: 'Defensive price ceiling; square root of Graham\'s 22.5x multiplier.' }
+  ];
+
+  document.getElementById('audit-content').innerHTML = 
+    '<table class="mtable">' +
+    '<thead><tr><th>Metric</th><th>Formula</th><th>Current Breakdown</th><th>Result</th><th>Significance & Threshold</th></tr></thead>' +
+    '<tbody>' + audit.map(function(a) {
+      return '<tr>' +
+        '<td style="font-weight:600;">' + a.n + '</td>' +
+        '<td class="tm" style="font-size:9px;">' + a.f + '</td>' +
+        '<td style="color:var(--text2); font-size:10px;">' + a.c + '</td>' +
+        '<td class="ta" style="font-weight:600;">' + a.v + '</td>' +
+        '<td style="font-size:10px; color:var(--text3); border-left:1px solid var(--border); padding-left:10px;">' + a.s + '</td>' +
+        '</tr>';
+    }).join('') + '</tbody></table>';
 }
 
 /* ── RADAR CHART ──────────────────────────── */
@@ -1569,7 +1847,7 @@ function renderDCF(r,d){
   if(!r.dcfYrs||!r.dcfYrs.length) return;
   var ctx=document.getElementById('dcfChart').getContext('2d');
   var labs=r.dcfYrs.map(function(y){return 'Y'+y.t;}); labs.push('TV (PV)');
-  var divF=d.currency==='IDR'?1e9:1e3; // IDR: trillions, USD: billions
+  var divF=d.currency==='IDR'?1e6:1e3; // IDR: 1M Millions = 1 Trillion; USD/JPY: 1K Millions = 1 Billion
   var unit=d.currency==='IDR'?'T':'B';
   var fcfV=r.dcfYrs.map(function(y){return +(y.fcf/divF).toFixed(2);}); fcfV.push(+(r.dcfTVPV/divF).toFixed(2));
   var pvV=r.dcfYrs.map(function(y){return +(y.pv/divF).toFixed(2);}); pvV.push(+(r.dcfTVPV/divF).toFixed(2));
@@ -1613,6 +1891,42 @@ function runAnalysis(){
     }catch(e){console.error(e);}
     btn.textContent='⚡  Run Full Analysis'; btn.disabled=false;
   },60);
+}
+
+// Mirror Sync for Net Income PY
+document.addEventListener('input', function(e) {
+  if (e.target.classList.contains('form-input')) {
+    const id = e.target.id;
+    const val = e.target.value;
+
+    if (id === 'i-nipy') {
+      const target = document.getElementById('i-nipy2');
+      if (target) target.value = val;
+    } else if (id === 'i-nipy2') {
+      const target = document.getElementById('i-nipy');
+      if (target) target.value = val;
+    }
+    updateAutoCalcUI();
+  }
+});
+
+function updateAutoCalcUI() {
+  const d = getInputs();
+  const cur = d.currency;
+  
+  const setHint = (elId, value, condition) => {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (el.value === '' && condition) {
+      el.placeholder = 'Auto: ' + fM(value, cur);
+    } else if (el.value === '') {
+      el.placeholder = 'auto-calc';
+    }
+  };
+
+  setHint('i-mc', d.price * d.shr, d.price > 0 && d.shr > 0);
+  setHint('i-netdebt', d.debt - d.cash, d.debt !== 0 || d.cash !== 0);
+  setHint('i-fcf', d.ocf - d.capex, d.ocf !== 0 || d.capex !== 0);
 }
 </script>
 </body>
