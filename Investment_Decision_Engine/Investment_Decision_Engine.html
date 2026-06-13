@@ -256,6 +256,17 @@ select.form-input option{background:var(--bg3);}
 
   <!-- Data Automation -->
   <div class="import-section">
+          <div class="panel-title" style="margin-bottom:6px; font-size:9px; opacity:0.8;">Data Export & Project Save</div>
+          <div style="display:flex; gap:6px;">
+            <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project (CSV)</button>
+            <button class="btn-import" onclick="exportAuditCSV()" style="flex:1; padding:4px;">📊 Export Audit (CSV)</button>
+            <button class="btn-import" onclick="downloadTemplateCSV()" style="flex:1; padding:4px;">📄 Template CSV</button>
+          </div>
+          <div style="margin-top:12px;">
+            <label style="font-size:9px; color:var(--text3);">
+              <input type="checkbox" id="csv-delimiter" /> Use semicolon as delimiter
+            </label>
+          </div>
     <div class="panel-title" style="margin-bottom:6px;">Data Automation</div>
     <div class="header-sub" style="font-size:10px;margin-top:0;margin-bottom:8px;">Upload Yahoo Finance Financials CSVs to auto-populate fields.</div>
     <div class="import-controls">
@@ -782,6 +793,27 @@ function handleFiles(files) {
 }
 
 function parseYahooCSV(text) {
+  // Simple caching – if the same CSV text is parsed again we skip re‑processing
+  if (window.__cachedCSV && window.__cachedCSV.text === text) {
+    console.log('CSV Import: Using cached result (' + window.__cachedCSV.mapped + ' fields).');
+    return window.__cachedCSV.mapped;
+  }
+  // Determine which delimiter to use (default comma). The UI provides a checkbox
+  const delimiter = document.getElementById('csv-delimiter')?.checked ? ';' : ',';
+  // Helper to safely assign a value to a form input (string fields vs numeric)
+  function setValue(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = val;
+  }
+
+  // Helper to safely assign a value to a form input (string fields vs numeric)
+  function setValue(id, val) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    // If the element is a <select>, setting .value will also update the UI.
+    el.value = val;
+  }
   const lines = text.split(/\r?\n/);
   if (lines.length < 2) return;
   
@@ -917,6 +949,10 @@ function parseYahooCSV(text) {
     }
   });
   console.log('CSV Import: Mapped ' + fieldsMapped + ' fields.');
+  // Ensure UI reflects any currency change from the CSV
+  if (document.getElementById('i-currency')) {
+    updateCurrencyLabels();
+  }
   return fieldsMapped;
 }
 
@@ -1202,7 +1238,7 @@ function calculate(d){
   var r={};
 
   /* ── Gross Profit ── */
-  r.gp=(d.cogs>0)?(d.rev-d.cogs):null;
+  r.gp=(d.rev!==null&&!isNaN(d.rev)&&d.cogs!==null&&!isNaN(d.cogs))?(d.rev-d.cogs):null;
 
   /* ── FCF ── */
   r.fcf=(d.fcfInput!==null)?d.fcfInput:(d.ocf-d.capex);
@@ -1210,14 +1246,16 @@ function calculate(d){
   /* ── Market metrics ── */
   r.mc=(d.mcInput !== null) ? d.mcInput : (d.price * d.shr);
   r.nd=(d.netdebtInput !== null) ? d.netdebtInput : (d.debt - d.cash);
-  r.ev=r.mc+r.nd; if(r.ev<=0) r.ev=r.mc;
+  var evRaw = r.mc + r.nd;
+  r.ev = evRaw <= 0 ? r.mc : evRaw;
+  r.evFallback = evRaw <= 0; // true if we fell back to Market Cap only
   r.bvps=(d.shr>0)?(d.eq/d.shr):0;
   r.wc=d.ca-d.cl;
 
   /* ── Valuation ratios ── */
-  r.pe=(d.epsd>0.001&&d.price>0)?Math.min(d.price/d.epsd, 500):null;
-  r.fpe=(d.feps>0.001&&d.price>0)?Math.min(d.price/d.feps, 500):null;
-  r.pb=(r.bvps>0.001&&d.price>0)?Math.min(d.price/r.bvps, 100):null;
+  r.pe=(d.epsd!==null&&!isNaN(d.epsd)&&d.epsd!==0&&d.price>0)?Math.min(d.price/d.epsd, 500):null;
+  r.fpe=(d.feps!==null&&!isNaN(d.feps)&&d.feps!==0&&d.price>0)?Math.min(d.price/d.feps, 500):null;
+  r.pb=(r.bvps!==null&&!isNaN(r.bvps)&&r.bvps!==0&&d.price>0)?Math.min(d.price/r.bvps, 100):null;
   r.ps=(d.rev>0&&r.mc>0&&d.shr>0)?Math.min(d.price/(d.rev/d.shr), 100):null;
   r.evebitda=(r.ev>0&&d.ebitda>0)?Math.min(r.ev/d.ebitda, 200):null;
   r.evrev=(r.ev>0&&d.rev>0)?Math.min(r.ev/d.rev, 50):null;
@@ -1229,33 +1267,33 @@ function calculate(d){
   /* ── Growth ── */
   r.revGrowth=(d.revpy>0)?((d.rev-d.revpy)/d.revpy*100):null;
   r.niGrowth=(d.nipy!==0)?((d.ni-d.nipy)/Math.abs(d.nipy)*100):null;
-  r.epsGrowth=(d.epsdy!==0.001)?((d.epsd-d.epsdy)/Math.abs(d.epsdy)*100):null;
-  r.fcfGrowth=(d.fcfpy!==0)?((r.fcf-d.fcfpy)/Math.abs(d.fcfpy)*100):null;
-  r.gpGrowth=(r.gp!==null&&d.gpy>0)?((r.gp-d.gpy)/d.gpy*100):null;
+  r.epsGrowth=(d.epsdy!==null&&!isNaN(d.epsdy)&&d.epsdy!==0)?((d.epsd-d.epsdy)/Math.abs(d.epsdy)*100):null;
+  r.fcfGrowth=(d.fcfpy!==null&&!isNaN(d.fcfpy)&&d.fcfpy!==0)?((r.fcf-d.fcfpy)/Math.abs(d.fcfpy)*100):null;
+  r.gpGrowth=(r.gp!==null&&d.gpy!==null&&!isNaN(d.gpy)&&d.gpy!==0)?((r.gp-d.gpy)/d.gpy*100):null;
 
   /* ── PEG ── */
-  r.peg=(r.pe!==null&&r.epsGrowth!==null&&r.epsGrowth>0.1)?Math.min(r.pe/r.epsGrowth, 20):null;
+  r.peg=(r.pe!==null&&r.epsGrowth!==null&&r.epsGrowth>0)?Math.min(r.pe/r.epsGrowth, 20):null;
 
   /* ── Profitability ── */
-  r.grossMargin=(r.gp!==null&&d.rev>0)?(r.gp/d.rev*100):null;
-  r.ebitMargin=(d.rev>0)?(d.ebit/d.rev*100):null;
-  r.ebitdaMargin=(d.rev>0)?(d.ebitda/d.rev*100):null;
-  r.netMargin=(d.rev>0)?(d.ni/d.rev*100):null;
-  r.fcfMargin=(d.rev>0)?(r.fcf/d.rev*100):null;
-  r.roe=(d.eq>0)?(d.ni/d.eq*100):null;
-  r.roa=(d.ta>0)?(d.ni/d.ta*100):null;
+  r.grossMargin=(r.gp!==null&&d.rev!==null&&!isNaN(d.rev)&&d.rev!==0)?(r.gp/d.rev*100):null;
+  r.ebitMargin=(d.rev!==null&&!isNaN(d.rev)&&d.rev!==0)?(d.ebit/d.rev*100):null;
+  r.ebitdaMargin=(d.rev!==null&&!isNaN(d.rev)&&d.rev!==0)?(d.ebitda/d.rev*100):null;
+  r.netMargin=(d.rev!==null&&!isNaN(d.rev)&&d.rev!==0)?(d.ni/d.rev*100):null;
+  r.fcfMargin=(d.rev!==null&&!isNaN(d.rev)&&d.rev!==0)?(r.fcf/d.rev*100):null;
+  r.roe=(d.eq!==null&&!isNaN(d.eq)&&d.eq!==0)?(d.ni/d.eq*100):null;
+  r.roa=(d.ta!==null&&!isNaN(d.ta)&&d.ta!==0)?(d.ni/d.ta*100):null;
   var taxR=d.tax/100;
   var nopat=d.ebit*(1-taxR);
   var ic=d.eq+d.debt-d.cash;
-  r.roic=(ic>0)?(nopat/ic*100):null;
+  r.roic=(ic!==null&&!isNaN(ic)&&ic!==0)?(nopat/ic*100):null;
 
   /* ── Liquidity & Leverage ── */
-  r.currentRatio=(d.cl>0)?(d.ca/d.cl):null;
-  r.quickRatio=(d.cl>0)?((d.ca-d.inv)/d.cl):null;
+  r.currentRatio=(d.cl!==null&&!isNaN(d.cl)&&d.cl!==0)?(d.ca/d.cl):null;
+  r.quickRatio=(d.cl!==null&&!isNaN(d.cl)&&d.cl!==0)?((d.ca-d.inv)/d.cl):null;
   r.dEquity=(d.eq!==0)?(d.debt/d.eq):null;
-  r.dAssets=(d.ta>0)?(d.debt/d.ta):null;
-  r.netDebtEbitda=(d.ebitda>0)?(r.nd/d.ebitda):null;
-  r.intCov=(d.int>0)?(d.ebit/d.int):(d.ebit>0?99:null);
+  r.dAssets=(d.ta!==null&&!isNaN(d.ta)&&d.ta!==0)?(d.debt/d.ta):null;
+  r.netDebtEbitda=(d.ebitda!==null&&!isNaN(d.ebitda)&&d.ebitda!==0)?(r.nd/d.ebitda):null;
+  r.intCov=(d.int!==null&&!isNaN(d.int)&&d.int!==0)?(d.ebit/d.int):null;
   r.fcfNI=(d.ni!==0)?(r.fcf/d.ni):null;
 
   /* ── Asset Efficiency ── */
@@ -1748,9 +1786,9 @@ function render(d,r){
     { n: 'FCF Yield', f: '(Free Cash Flow / Market Cap) * 100', c: '(' + fN(r.fcf) + ' / ' + fN(r.mc) + ') * 100', v: fN(r.fcfYield, 1, '%'), s: 'The actual cash return percentage available to shareholders.' },
 
     // MARKET & CAPITAL
-    { n: 'Market Cap', f: 'Price * Shares (or Override)', c: (d.mcInput !== null ? 'OVERRIDE: ' + fN(d.mcInput) : fN(d.price, 2) + ' * ' + fN(d.shr)), v: fM(r.mc, cur), s: 'Total market value of equity. Falls back to Auto-Calc if override is empty.' },
-    { n: 'Net Debt', f: 'Total Debt - Cash (or Override)', c: (d.netdebtInput !== null ? 'OVERRIDE: ' + fN(d.netdebtInput) : fN(d.debt) + ' - ' + fN(d.cash)), v: fM(r.nd, cur), s: 'Debt minus cash; negative means net cash position.' },
-    { n: 'Enterprise Value', f: 'Market Cap + Net Debt', c: fN(r.mc) + ' + ' + fN(r.nd), v: fM(r.ev, cur), s: 'Theoretical takeover price (Market Cap + Debt - Cash).' },
+    { n: 'Market Cap', f: 'Price * Shares (or Override)', c: (d.mcInput !== null ? 'OVERRIDE: ' + fN(d.mcInput) : fN(d.price, 2) + ' * ' + fN(d.shr)), v: fM(r.mc, cur), s: 'Total market value of equity. Uses override if provided, otherwise auto‑calc.' },
+    { n: 'Net Debt', f: 'Total Debt - Cash (or Override)', c: (d.netdebtInput !== null ? 'OVERRIDE: ' + fN(d.netdebtInput) : fN(d.debt) + ' - ' + fN(d.cash)), v: fM(r.nd, cur), s: 'Debt minus cash. Uses override if provided, otherwise auto‑calc.' },
+    { n: 'Enterprise Value', f: 'Market Cap + Net Debt', c: fN(r.mc) + ' + ' + fN(r.nd), v: fM(r.ev, cur), s: 'Theoretical takeover price (Market Cap + Net Debt). If EV ≤ 0, falls back to Market Cap.' },
 
     // PROFITABILITY
     { n: 'Gross Margin', f: '(Gross Profit / Revenue) * 100', c: '(' + fN(r.gp) + ' / ' + fN(d.rev) + ') * 100', v: fN(r.grossMargin, 1, '%'), s: 'Measures pricing power & production efficiency; >40% is high.' },
@@ -1844,8 +1882,22 @@ function renderBar(r){
 
 /* ── DCF CHART ────────────────────────────── */
 function renderDCF(r,d){
-  if(!r.dcfYrs||!r.dcfYrs.length) return;
-  var ctx=document.getElementById('dcfChart').getContext('2d');
+  var chartContainer = document.getElementById('dcfChart');
+  if(!r.dcfYrs||!r.dcfYrs.length){
+    // No DCF data – show a friendly placeholder instead of a blank canvas
+    var parent = chartContainer.parentNode;
+    // Remove any existing canvas content
+    while (chartContainer.firstChild) chartContainer.removeChild(chartContainer.firstChild);
+    // Insert placeholder text
+    var placeholder = document.createElement('div');
+    placeholder.className = 'tm';
+    placeholder.style.textAlign = 'center';
+    placeholder.style.padding = '10px';
+    placeholder.textContent = 'DCF not computed – requires positive Free Cash Flow and WACC > Terminal Growth Rate.';
+    chartContainer.appendChild(placeholder);
+    return;
+  }
+  var ctx=chartContainer.getContext('2d');
   var labs=r.dcfYrs.map(function(y){return 'Y'+y.t;}); labs.push('TV (PV)');
   var divF=d.currency==='IDR'?1e6:1e3; // IDR: 1M Millions = 1 Trillion; USD/JPY: 1K Millions = 1 Billion
   var unit=d.currency==='IDR'?'T':'B';
