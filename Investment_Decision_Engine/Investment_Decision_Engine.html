@@ -466,6 +466,16 @@ select.form-input option{background:var(--bg3);}
 .tg{color:var(--teal);} .ta{color:var(--gold);} .tr{color:var(--red);}
 .tb{color:var(--blue);} .to{color:var(--orange);} .tm{color:var(--text3);}
 .hidden{display:none!important;}
+
+/* ── COLLAPSIBLE DROPDOWN ────────────────── */
+.collapsible-section{border:1px solid var(--border);border-radius:var(--r);margin-top:10px;background:var(--bg4);overflow:hidden;transition:border-color 0.2s;}
+.collapsible-section[open]{border-color:var(--b2);}
+.collapsible-section summary{font-family:var(--mono);font-size:9.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--text2);padding:7px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none;list-style:none;transition:color 0.15s,background 0.15s;}
+.collapsible-section summary::-webkit-details-marker{display:none;}
+.collapsible-section summary::before{content:'▸';font-size:9px;color:var(--gold);transition:transform 0.2s;}
+.collapsible-section[open] summary::before{transform:rotate(90deg);}
+.collapsible-section summary:hover{color:var(--gold);background:rgba(212,168,83,0.05);}
+.collapsible-section .collapse-body{padding:8px 12px 10px;border-top:1px solid var(--border);}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
 /* ── AI INTEGRATION ───────────────────────── */
@@ -757,44 +767,40 @@ window.addEventListener('DOMContentLoaded', loadAISettings);
 
   <!-- Data Automation -->
   <div class="import-section">
-          <div class="panel-title" style="margin-bottom:6px; font-size:9px; opacity:0.8;">Data Export & Project Save</div>
-          <div style="display:flex; gap:6px;">
-            <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project (CSV)</button>
-            <button class="btn-import" onclick="exportAuditCSV()" style="flex:1; padding:4px;">📊 Export Audit (CSV)</button>
-            <button class="btn-import" onclick="downloadTemplateCSV()" style="flex:1; padding:4px;">📄 Template CSV</button>
-          </div>
-          <div style="margin-top:12px;">
-            <label style="font-size:9px; color:var(--text3);">
-              <input type="checkbox" id="csv-delimiter" /> Use semicolon as delimiter
-            </label>
-          </div>
-    <div class="panel-title" style="margin-bottom:6px;">Data Automation</div>
-    <div class="header-sub" style="font-size:10px;margin-top:0;margin-bottom:8px;">Upload Yahoo Finance Financials CSVs to auto-populate fields.</div>
-    <div class="import-controls">
-      <div class="file-input-wrapper">
-        <label for="csv-upload" class="btn-import" style="display:block;">Choose CSV Files...</label>
-        <input type="file" id="csv-upload" accept=".csv" multiple onchange="handleFiles(this.files)" style="display:none;">
-      </div>
-    </div>
-    <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
-
-        <div class="panel-title" style="margin-top:14px; margin-bottom:6px; font-size:9px; opacity:0.8;">AI Assistant</div>
+        <div class="panel-title" style="margin-bottom:6px; font-size:9px; opacity:0.8;">AI Assistant</div>
     <div style="display:flex; gap:6px; flex-wrap: wrap; margin-bottom: 12px;">
       <button class="btn-import" onclick="openAISettings()" style="flex:1; padding:4px;">⚙️ AI Settings</button>
       <button class="btn-import" onclick="openAIAutoFill()" style="flex:1; padding:4px; color:var(--teal); border-color:rgba(62,207,160,0.3);">✨ Auto-Fill</button>
     </div>
-    <div class="panel-title" style="margin-top:14px; margin-bottom:6px; font-size:9px; opacity:0.8;">Data Export & Project Save</div>
-    <div style="display:flex; gap:6px;">
-      <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project (CSV)</button>
-      <button class="btn-import" onclick="exportAuditCSV()" style="flex:1; padding:4px;">📊 Export Audit (CSV)</button>
-    </div>
-    
-    <!-- Google Sheet Sync -->
-    <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
-      <div class="panel-title" style="margin-bottom:6px; font-size:9px; opacity:0.8;">Google Sheet Sync (BETA)</div>
-      <input type="text" id="sheet-url" class="form-input" placeholder="Paste Published CSV URL..." style="font-size:9px; height:24px; padding:2px 8px;">
-      <button class="btn-import" onclick="syncWithGoogleSheet()" style="margin-top:6px; padding:4px;">Sync with Sheet</button>
-    </div>
+    <details class="collapsible-section">
+      <summary>Data Automation</summary>
+      <div class="collapse-body">
+        <div class="header-sub" style="font-size:10px;margin-top:0;margin-bottom:8px;">Upload Yahoo Finance Financials CSVs to auto-populate fields.</div>
+        <div class="import-controls">
+          <div class="file-input-wrapper">
+            <label for="csv-upload" class="btn-import" style="display:block;">Choose CSV Files...</label>
+            <input type="file" id="csv-upload" accept=".csv" multiple onchange="handleFiles(this.files)" style="display:none;">
+          </div>
+        </div>
+        <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
+
+        <div class="fsec" style="margin-top:12px;">Data Export &amp; Project Save</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project</button>
+          <button class="btn-import" onclick="exportAuditCSV()" style="flex:1; padding:4px;">📊 Export Audit</button>
+          <button class="btn-import" onclick="downloadTemplateCSV()" style="flex:1; padding:4px;">📄 Template CSV</button>
+        </div>
+        <div style="margin-top:8px;">
+          <label style="font-size:9px; color:var(--text3);">
+            <input type="checkbox" id="csv-delimiter" /> Use semicolon as delimiter
+          </label>
+        </div>
+
+        <div class="fsec" style="margin-top:12px;">Google Sheet Sync <span style="font-size:8px;opacity:0.6;">(BETA)</span></div>
+        <input type="text" id="sheet-url" class="form-input" placeholder="Paste Published CSV URL..." style="font-size:9px; height:24px; padding:2px 8px;">
+        <button class="btn-import" onclick="syncWithGoogleSheet()" style="margin-top:6px; padding:4px;">Sync with Sheet</button>
+      </div>
+    </details>
   </div>
 
   <div class="panel-header">
