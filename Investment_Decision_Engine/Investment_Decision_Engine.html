@@ -4,7 +4,247 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Investment Decision Engine v1.0</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js">
+/* ── AI INTEGRATION ───────────────────────── */
+function openAISettings() {
+  loadAISettings();
+  document.getElementById('ai-settings-modal').style.display = 'flex';
+}
+function openAIAutoFill() {
+  document.getElementById('ai-autofill-modal').style.display = 'flex';
+  document.getElementById('ai-autofill-text').value = '';
+  document.getElementById('ai-autofill-error').style.display = 'none';
+}
+function closeAIModals() {
+  document.getElementById('ai-settings-modal').style.display = 'none';
+  document.getElementById('ai-autofill-modal').style.display = 'none';
+}
+function saveAISettings() {
+  const provider = document.getElementById('ai-provider').value;
+  const apiKey = document.getElementById('ai-apikey').value.trim();
+  const model = document.getElementById('ai-model').value.trim();
+  localStorage.setItem('ide_ai_provider', provider);
+  localStorage.setItem('ide_ai_apikey', apiKey);
+  localStorage.setItem('ide_ai_model', model);
+  const msg = document.getElementById('ai-settings-msg');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+function loadAISettings() {
+  const provider = localStorage.getItem('ide_ai_provider');
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const model = localStorage.getItem('ide_ai_model');
+  if(provider) document.getElementById('ai-provider').value = provider;
+  if(apiKey) document.getElementById('ai-apikey').value = apiKey;
+  if(model) document.getElementById('ai-model').value = model;
+}
+
+// Call AI Provider wrapper
+async function callAIProvider(systemPrompt, userPrompt, requiresJson = false) {
+  const provider = localStorage.getItem('ide_ai_provider') || 'openai';
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const modelOverride = localStorage.getItem('ide_ai_model');
+  
+  if (!apiKey) throw new Error("API Key is missing. Please configure it in AI Settings.");
+
+  let endpoint, headers, body;
+  let model = modelOverride;
+
+  if (provider === 'openai') {
+    model = model || 'gpt-4o';
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  } else if (provider === 'anthropic') {
+    model = model || 'claude-3-5-sonnet-20240620';
+    endpoint = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerously-allow-browser': 'true'
+    };
+    body = {
+      model: model,
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    };
+  } else if (provider === 'gemini') {
+    model = model || 'gemini-1.5-pro-latest';
+    endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    headers = { 'Content-Type': 'application/json' };
+    body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userPrompt }] }]
+    };
+    if (requiresJson) {
+      body.generationConfig = { responseMimeType: 'application/json' };
+    }
+  } else if (provider === 'openrouter') {
+    model = model || 'meta-llama/llama-3-70b-instruct';
+    endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Investment Decision Engine'
+    };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  }
+
+  const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`API Error (${response.status}): ${errorData}`);
+  }
+  const data = await response.json();
+
+  if (provider === 'openai' || provider === 'openrouter') {
+    return data.choices[0].message.content;
+  } else if (provider === 'anthropic') {
+    return data.content[0].text;
+  } else if (provider === 'gemini') {
+    return data.candidates[0].content.parts[0].text;
+  }
+}
+
+async function runAIAutoFill() {
+  const text = document.getElementById('ai-autofill-text').value.trim();
+  const errEl = document.getElementById('ai-autofill-error');
+  const btn = document.getElementById('btn-run-autofill');
+  
+  if (!text) {
+    errEl.textContent = 'Please paste some text first.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  errEl.style.display = 'none';
+  btn.textContent = 'Extracting...';
+  btn.disabled = true;
+
+  const systemPrompt = `You are an expert financial data extractor. The user will provide unstructured financial text. 
+Extract the key financial metrics and return a STRICT JSON object mapping to the following keys (use numbers only, scale to millions if requested, assume 1M=1,000,000). 
+If a metric is not found, leave it as null.
+Keys:
+"i-name" (string), "i-ticker" (string), "i-sector" (string),
+"i-rev" (Revenue in millions), "i-cogs" (COGS in millions), "i-ebit" (Operating Income in millions), "i-ebitda" (EBITDA in millions),
+"i-int" (Interest Expense in millions), "i-ni" (Net Income in millions),
+"i-epsb" (Basic EPS), "i-epsd" (Diluted EPS), "i-feps" (Forward EPS), "i-dps" (Dividends per share),
+"i-ta" (Total Assets in millions), "i-ca" (Current Assets in millions), "i-cash" (Cash & Equivalents in millions), "i-inv" (Inventory in millions),
+"i-tl" (Total Liabilities in millions), "i-cl" (Current Liabilities in millions), "i-debt" (Total Debt in millions), "i-eq" (Total Equity in millions),
+"i-re" (Retained Earnings in millions), "i-shr" (Shares Outstanding in millions),
+"i-ocf" (Operating Cash Flow in millions), "i-capex" (Capital Expenditures in millions),
+"i-price" (Current Stock Price)
+
+IMPORTANT: Output ONLY valid JSON, no markdown formatting.`;
+
+  try {
+    let result = await callAIProvider(systemPrompt, text, true);
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json/, '').replace(/```$/, '').trim();
+    }
+    const parsed = JSON.parse(result);
+    
+    for (const [key, value] of Object.entries(parsed)) {
+      const el = document.getElementById(key);
+      if (el && value !== null && value !== undefined) {
+        el.value = value;
+      }
+    }
+    updateCurrencyLabels();
+    updateAutoCalcUI();
+    closeAIModals();
+    runAnalysis();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Extract & Fill Data';
+    btn.disabled = false;
+  }
+}
+
+async function generateAIInsights() {
+  const btn = document.getElementById('btn-generate-ai');
+  const content = document.getElementById('ai-insights-content');
+  
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+  content.innerHTML = '<p class="tm">Analyzing financial data and generating insights...</p>';
+  
+  const d = getInputs();
+  const r = calculate(d);
+  
+  const financialData = `
+Company: ${d.name} (${d.ticker})
+Sector: ${d.sector}
+Currency: ${d.currency}
+
+-- Core Metrics --
+Revenue: ${d.rev}M
+Net Income: ${d.ni}M
+EBITDA: ${d.ebitda}M
+Free Cash Flow: ${r.fcf}M
+Current Price: ${d.price}
+
+-- Valuation & Health --
+P/E Ratio: ${r.pe}
+EV/EBITDA: ${r.evebitda}
+Gross Margin: ${r.grossMargin}%
+Net Margin: ${r.netMargin}%
+ROE: ${r.roe}%
+Debt/Equity: ${r.dEquity}
+Current Ratio: ${r.currentRatio}
+
+-- Composite Model Results --
+Overall Score: ${r.composite}/100 (${r.verdict})
+Piotroski F-Score: ${r.pScore}/9
+Altman Z-Score: ${r.altmanZ}
+Graham Number: ${r.grahamNum}
+DCF Intrinsic Value: ${r.dcfPS}
+Magic Formula EY: ${r.earningsYield}% | ROIC: ${r.magicROIC}%
+`;
+
+  const systemPrompt = `You are a top-tier hedge fund analyst. You are provided with quantitative outputs from an internal Investment Decision Engine. 
+Your task is to review this data and provide a concise, professional qualitative analysis. 
+Use Markdown for formatting. Include two main sections:
+1. **Investment Summary**: A synthesis of the company's financial health, valuation, and fundamental quality.
+2. **Devil's Advocate Bear Case**: A rigorous, highly skeptical teardown highlighting the biggest risks, potential metric distortions, or red flags.
+Keep it strictly under 500 words. Be direct and analytical.`;
+
+  try {
+    const result = await callAIProvider(systemPrompt, financialData, false);
+    if (typeof marked !== 'undefined') {
+      content.innerHTML = marked.parse(result);
+    } else {
+      content.innerHTML = `<pre style="white-space:pre-wrap">${result}</pre>`;
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="ai-error" style="display:block">Error generating insights: ${err.message}</div>`;
+  } finally {
+    btn.textContent = '🤖 Generate Analysis';
+    btn.disabled = false;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadAISettings);
+</script>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 /* ── RESET & BASE ─────────────────────────── */
@@ -227,6 +467,267 @@ select.form-input option{background:var(--bg3);}
 .tb{color:var(--blue);} .to{color:var(--orange);} .tm{color:var(--text3);}
 .hidden{display:none!important;}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js">
+/* ── AI INTEGRATION ───────────────────────── */
+function openAISettings() {
+  loadAISettings();
+  document.getElementById('ai-settings-modal').style.display = 'flex';
+}
+function openAIAutoFill() {
+  document.getElementById('ai-autofill-modal').style.display = 'flex';
+  document.getElementById('ai-autofill-text').value = '';
+  document.getElementById('ai-autofill-error').style.display = 'none';
+}
+function closeAIModals() {
+  document.getElementById('ai-settings-modal').style.display = 'none';
+  document.getElementById('ai-autofill-modal').style.display = 'none';
+}
+function saveAISettings() {
+  const provider = document.getElementById('ai-provider').value;
+  const apiKey = document.getElementById('ai-apikey').value.trim();
+  const model = document.getElementById('ai-model').value.trim();
+  localStorage.setItem('ide_ai_provider', provider);
+  localStorage.setItem('ide_ai_apikey', apiKey);
+  localStorage.setItem('ide_ai_model', model);
+  const msg = document.getElementById('ai-settings-msg');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+function loadAISettings() {
+  const provider = localStorage.getItem('ide_ai_provider');
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const model = localStorage.getItem('ide_ai_model');
+  if(provider) document.getElementById('ai-provider').value = provider;
+  if(apiKey) document.getElementById('ai-apikey').value = apiKey;
+  if(model) document.getElementById('ai-model').value = model;
+}
+
+// Call AI Provider wrapper
+async function callAIProvider(systemPrompt, userPrompt, requiresJson = false) {
+  const provider = localStorage.getItem('ide_ai_provider') || 'openai';
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const modelOverride = localStorage.getItem('ide_ai_model');
+  
+  if (!apiKey) throw new Error("API Key is missing. Please configure it in AI Settings.");
+
+  let endpoint, headers, body;
+  let model = modelOverride;
+
+  if (provider === 'openai') {
+    model = model || 'gpt-4o';
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  } else if (provider === 'anthropic') {
+    model = model || 'claude-3-5-sonnet-20240620';
+    endpoint = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerously-allow-browser': 'true'
+    };
+    body = {
+      model: model,
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    };
+  } else if (provider === 'gemini') {
+    model = model || 'gemini-1.5-pro-latest';
+    endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    headers = { 'Content-Type': 'application/json' };
+    body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userPrompt }] }]
+    };
+    if (requiresJson) {
+      body.generationConfig = { responseMimeType: 'application/json' };
+    }
+  } else if (provider === 'openrouter') {
+    model = model || 'meta-llama/llama-3-70b-instruct';
+    endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Investment Decision Engine'
+    };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  }
+
+  const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`API Error (${response.status}): ${errorData}`);
+  }
+  const data = await response.json();
+
+  if (provider === 'openai' || provider === 'openrouter') {
+    return data.choices[0].message.content;
+  } else if (provider === 'anthropic') {
+    return data.content[0].text;
+  } else if (provider === 'gemini') {
+    return data.candidates[0].content.parts[0].text;
+  }
+}
+
+async function runAIAutoFill() {
+  const text = document.getElementById('ai-autofill-text').value.trim();
+  const errEl = document.getElementById('ai-autofill-error');
+  const btn = document.getElementById('btn-run-autofill');
+  
+  if (!text) {
+    errEl.textContent = 'Please paste some text first.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  errEl.style.display = 'none';
+  btn.textContent = 'Extracting...';
+  btn.disabled = true;
+
+  const systemPrompt = `You are an expert financial data extractor. The user will provide unstructured financial text. 
+Extract the key financial metrics and return a STRICT JSON object mapping to the following keys (use numbers only, scale to millions if requested, assume 1M=1,000,000). 
+If a metric is not found, leave it as null.
+Keys:
+"i-name" (string), "i-ticker" (string), "i-sector" (string),
+"i-rev" (Revenue in millions), "i-cogs" (COGS in millions), "i-ebit" (Operating Income in millions), "i-ebitda" (EBITDA in millions),
+"i-int" (Interest Expense in millions), "i-ni" (Net Income in millions),
+"i-epsb" (Basic EPS), "i-epsd" (Diluted EPS), "i-feps" (Forward EPS), "i-dps" (Dividends per share),
+"i-ta" (Total Assets in millions), "i-ca" (Current Assets in millions), "i-cash" (Cash & Equivalents in millions), "i-inv" (Inventory in millions),
+"i-tl" (Total Liabilities in millions), "i-cl" (Current Liabilities in millions), "i-debt" (Total Debt in millions), "i-eq" (Total Equity in millions),
+"i-re" (Retained Earnings in millions), "i-shr" (Shares Outstanding in millions),
+"i-ocf" (Operating Cash Flow in millions), "i-capex" (Capital Expenditures in millions),
+"i-price" (Current Stock Price)
+
+IMPORTANT: Output ONLY valid JSON, no markdown formatting.`;
+
+  try {
+    let result = await callAIProvider(systemPrompt, text, true);
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json/, '').replace(/```$/, '').trim();
+    }
+    const parsed = JSON.parse(result);
+    
+    for (const [key, value] of Object.entries(parsed)) {
+      const el = document.getElementById(key);
+      if (el && value !== null && value !== undefined) {
+        el.value = value;
+      }
+    }
+    updateCurrencyLabels();
+    updateAutoCalcUI();
+    closeAIModals();
+    runAnalysis();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Extract & Fill Data';
+    btn.disabled = false;
+  }
+}
+
+async function generateAIInsights() {
+  const btn = document.getElementById('btn-generate-ai');
+  const content = document.getElementById('ai-insights-content');
+  
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+  content.innerHTML = '<p class="tm">Analyzing financial data and generating insights...</p>';
+  
+  const d = getInputs();
+  const r = calculate(d);
+  
+  const financialData = `
+Company: ${d.name} (${d.ticker})
+Sector: ${d.sector}
+Currency: ${d.currency}
+
+-- Core Metrics --
+Revenue: ${d.rev}M
+Net Income: ${d.ni}M
+EBITDA: ${d.ebitda}M
+Free Cash Flow: ${r.fcf}M
+Current Price: ${d.price}
+
+-- Valuation & Health --
+P/E Ratio: ${r.pe}
+EV/EBITDA: ${r.evebitda}
+Gross Margin: ${r.grossMargin}%
+Net Margin: ${r.netMargin}%
+ROE: ${r.roe}%
+Debt/Equity: ${r.dEquity}
+Current Ratio: ${r.currentRatio}
+
+-- Composite Model Results --
+Overall Score: ${r.composite}/100 (${r.verdict})
+Piotroski F-Score: ${r.pScore}/9
+Altman Z-Score: ${r.altmanZ}
+Graham Number: ${r.grahamNum}
+DCF Intrinsic Value: ${r.dcfPS}
+Magic Formula EY: ${r.earningsYield}% | ROIC: ${r.magicROIC}%
+`;
+
+  const systemPrompt = `You are a top-tier hedge fund analyst. You are provided with quantitative outputs from an internal Investment Decision Engine. 
+Your task is to review this data and provide a concise, professional qualitative analysis. 
+Use Markdown for formatting. Include two main sections:
+1. **Investment Summary**: A synthesis of the company's financial health, valuation, and fundamental quality.
+2. **Devil's Advocate Bear Case**: A rigorous, highly skeptical teardown highlighting the biggest risks, potential metric distortions, or red flags.
+Keep it strictly under 500 words. Be direct and analytical.`;
+
+  try {
+    const result = await callAIProvider(systemPrompt, financialData, false);
+    if (typeof marked !== 'undefined') {
+      content.innerHTML = marked.parse(result);
+    } else {
+      content.innerHTML = `<pre style="white-space:pre-wrap">${result}</pre>`;
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="ai-error" style="display:block">Error generating insights: ${err.message}</div>`;
+  } finally {
+    btn.textContent = '🤖 Generate Analysis';
+    btn.disabled = false;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadAISettings);
+</script>
+<style>
+/* AI Modals and Insights */
+.ai-modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(11,12,14,0.85); z-index:100; align-items:center; justify-content:center; backdrop-filter:blur(4px); }
+.ai-modal { background:var(--bg2); border:1px solid var(--border); border-radius:var(--rl); width:90%; max-width:600px; padding:20px; box-shadow:0 10px 30px rgba(0,0,0,0.5); }
+.ai-modal-header { font-family:var(--serif); font-size:20px; color:var(--text); margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; }
+.ai-modal-close { cursor:pointer; color:var(--text3); font-family:var(--mono); font-size:16px; border:none; background:none; }
+.ai-modal-close:hover { color:var(--text); }
+.ai-textarea { width:100%; height:150px; background:var(--bg4); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-family:var(--mono); font-size:11px; padding:10px; margin-bottom:10px; resize:vertical; outline:none; }
+.ai-textarea:focus { border-color:var(--gold); }
+.ai-btn-primary { background:var(--teal); color:#0B0C0E; font-family:var(--mono); font-size:11px; font-weight:600; padding:8px 16px; border:none; border-radius:var(--r); cursor:pointer; letter-spacing:0.05em; transition:all 0.15s; }
+.ai-btn-primary:hover { opacity:0.9; }
+.ai-btn-primary:disabled { opacity:0.5; cursor:not-allowed; }
+.ai-markdown { font-size:11.5px; line-height:1.6; color:var(--text2); }
+.ai-markdown h1, .ai-markdown h2, .ai-markdown h3 { color:var(--text); font-family:var(--serif); font-weight:400; margin:16px 0 8px; }
+.ai-markdown p { margin-bottom:10px; }
+.ai-markdown ul { padding-left:20px; margin-bottom:10px; }
+.ai-markdown li { margin-bottom:4px; }
+.ai-markdown strong { color:var(--text); font-weight:600; }
+.ai-error { color:var(--red); font-family:var(--mono); font-size:10px; margin-top:8px; display:none; }
+</style>
 </head>
 <body>
 <div class="app">
@@ -277,6 +778,11 @@ select.form-input option{background:var(--bg3);}
     </div>
     <div id="import-status" style="font-family:var(--mono);font-size:9px;color:var(--text3);margin-top:8px;letter-spacing:0.02em;">Ready to import</div>
 
+        <div class="panel-title" style="margin-top:14px; margin-bottom:6px; font-size:9px; opacity:0.8;">AI Assistant</div>
+    <div style="display:flex; gap:6px; flex-wrap: wrap; margin-bottom: 12px;">
+      <button class="btn-import" onclick="openAISettings()" style="flex:1; padding:4px;">⚙️ AI Settings</button>
+      <button class="btn-import" onclick="openAIAutoFill()" style="flex:1; padding:4px; color:var(--teal); border-color:rgba(62,207,160,0.3);">✨ Auto-Fill</button>
+    </div>
     <div class="panel-title" style="margin-top:14px; margin-bottom:6px; font-size:9px; opacity:0.8;">Data Export & Project Save</div>
     <div style="display:flex; gap:6px;">
       <button class="btn-import" onclick="exportProjectCSV()" style="flex:1; padding:4px;">💾 Save Project (CSV)</button>
@@ -520,6 +1026,7 @@ select.form-input option{background:var(--bg3);}
       <button class="output-tab-btn" onclick="switchOT(2)">Health &amp; Risk</button>
       <button class="output-tab-btn" onclick="switchOT(3)">Investment Thesis</button>
       <button class="output-tab-btn" onclick="switchOT(4)">Calculations Audit</button>
+      <button class="output-tab-btn" onclick="switchOT(5)" style="color:var(--teal)">AI Insights</button>
     </div>
 
     <!-- ── OUTPUT TAB 0: DASHBOARD ── -->
@@ -577,6 +1084,19 @@ select.form-input option{background:var(--bg3);}
         <div class="card-title">Full Calculation Audit & Formula Transparency</div>
         <p class="header-sub" style="margin-bottom:15px; max-width: 100%;">Verify every metric produced by the engine. Formulas below use your current inputs.</p>
         <div id="audit-content"></div>
+      </div>
+    </div>
+
+    <!-- ── OUTPUT TAB 5: AI INSIGHTS ── -->
+    <div class="output-tab-content" id="otab-5">
+      <div class="card" style="margin-bottom:12px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+          <div class="card-title" style="margin-bottom:0;">Generative AI Analyst</div>
+          <button class="ai-btn-primary" id="btn-generate-ai" onclick="generateAIInsights()">🤖 Generate Analysis</button>
+        </div>
+        <div id="ai-insights-content" class="ai-markdown">
+          <p class="tm">Click "Generate Analysis" to create a summary and devil's advocate bear case based on the current financial data.</p>
+        </div>
       </div>
     </div>
 
@@ -640,6 +1160,53 @@ select.form-input option{background:var(--bg3);}
     </div>
   </div>
 </footer>
+
+<!-- AI Settings Modal -->
+<div id="ai-settings-modal" class="ai-modal-overlay">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <span>AI Configuration</span>
+      <button class="ai-modal-close" onclick="closeAIModals()">×</button>
+    </div>
+    <div class="form-group">
+      <label class="form-label">AI Provider</label>
+      <select class="form-input" id="ai-provider">
+        <option value="openai">OpenAI (gpt-4o)</option>
+        <option value="gemini">Google Gemini (gemini-1.5-pro)</option>
+        <option value="anthropic">Anthropic (claude-3-5-sonnet)</option>
+        <option value="openrouter">OpenRouter (auto)</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">API Key <small>(Stored locally in browser)</small></label>
+      <input type="password" class="form-input" id="ai-apikey" placeholder="Enter your API key...">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Custom Model ID <small>(Optional override)</small></label>
+      <input type="text" class="form-input" id="ai-model" placeholder="Leave blank for default">
+    </div>
+    <div id="ai-settings-msg" class="tg" style="font-family:var(--mono); font-size:10px; margin-bottom:10px; display:none;">Settings saved successfully.</div>
+    <div style="text-align:right;">
+      <button class="btn-import" onclick="saveAISettings()" style="width:auto; padding:8px 16px;">Save Settings</button>
+    </div>
+  </div>
+</div>
+
+<!-- AI Auto-Fill Modal -->
+<div id="ai-autofill-modal" class="ai-modal-overlay">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <span>Auto-Fill with AI</span>
+      <button class="ai-modal-close" onclick="closeAIModals()">×</button>
+    </div>
+    <p class="form-label" style="margin-bottom:10px;">Paste earnings releases, 10-K snippets, or unstructured financial text below. The AI will extract the data and populate the input fields.</p>
+    <textarea class="ai-textarea" id="ai-autofill-text" placeholder="Paste text here..."></textarea>
+    <div id="ai-autofill-error" class="ai-error"></div>
+    <div style="text-align:right;">
+      <button class="ai-btn-primary" id="btn-run-autofill" onclick="runAIAutoFill()">Extract & Fill Data</button>
+    </div>
+  </div>
+</div>
 
 </div><!-- /app -->
 
@@ -824,7 +1391,7 @@ function parseYahooCSV(text) {
     let inQuotes = false;
     for (let char of line) {
       if (char === '"') inQuotes = !inQuotes;
-      else if (char === ',' && !inQuotes) {
+      else if (char === delimiter && !inQuotes) {
         result.push(cell.trim());
         cell = '';
       } else cell += char;
@@ -953,6 +1520,7 @@ function parseYahooCSV(text) {
   if (document.getElementById('i-currency')) {
     updateCurrencyLabels();
   }
+  window.__cachedCSV = { text: text, mapped: fieldsMapped };
   return fieldsMapped;
 }
 
@@ -1356,7 +1924,7 @@ function calculate(d){
   r.earningsYield=(r.ev>0)?(d.ebit/r.ev*100):null;
   var nwc=Math.max(r.wc,0);
   var netPPE=Math.max(d.ta-d.ca,0);
-  r.magicROIC=((nwc+netPPE)>0)?(nopat/(nwc+netPPE)*100):null;
+  r.magicROIC=((nwc+netPPE)>0)?(d.ebit/(nwc+netPPE)*100):null;
 
   /* ══ DCF MODEL ══ */
   var wacc=d.wacc/100, gr=d.grate/100, tgr=d.tgrate/100;
@@ -1894,7 +2462,8 @@ function renderDCF(r,d){
     placeholder.style.textAlign = 'center';
     placeholder.style.padding = '10px';
     placeholder.textContent = 'DCF not computed – requires positive Free Cash Flow and WACC > Terminal Growth Rate.';
-    chartContainer.appendChild(placeholder);
+    chartContainer.style.display = 'none';
+      parent.appendChild(placeholder);
     return;
   }
   var ctx=chartContainer.getContext('2d');
@@ -1945,41 +2514,247 @@ function runAnalysis(){
   },60);
 }
 
-// Mirror Sync for Net Income PY
-document.addEventListener('input', function(e) {
-  if (e.target.classList.contains('form-input')) {
-    const id = e.target.id;
-    const val = e.target.value;
 
-    if (id === 'i-nipy') {
-      const target = document.getElementById('i-nipy2');
-      if (target) target.value = val;
-    } else if (id === 'i-nipy2') {
-      const target = document.getElementById('i-nipy');
-      if (target) target.value = val;
-    }
-    updateAutoCalcUI();
-  }
-});
 
-function updateAutoCalcUI() {
-  const d = getInputs();
-  const cur = d.currency;
-  
-  const setHint = (elId, value, condition) => {
-    const el = document.getElementById(elId);
-    if (!el) return;
-    if (el.value === '' && condition) {
-      el.placeholder = 'Auto: ' + fM(value, cur);
-    } else if (el.value === '') {
-      el.placeholder = 'auto-calc';
-    }
-  };
-
-  setHint('i-mc', d.price * d.shr, d.price > 0 && d.shr > 0);
-  setHint('i-netdebt', d.debt - d.cash, d.debt !== 0 || d.cash !== 0);
-  setHint('i-fcf', d.ocf - d.capex, d.ocf !== 0 || d.capex !== 0);
+/* ── AI INTEGRATION ───────────────────────── */
+function openAISettings() {
+  loadAISettings();
+  document.getElementById('ai-settings-modal').style.display = 'flex';
 }
+function openAIAutoFill() {
+  document.getElementById('ai-autofill-modal').style.display = 'flex';
+  document.getElementById('ai-autofill-text').value = '';
+  document.getElementById('ai-autofill-error').style.display = 'none';
+}
+function closeAIModals() {
+  document.getElementById('ai-settings-modal').style.display = 'none';
+  document.getElementById('ai-autofill-modal').style.display = 'none';
+}
+function saveAISettings() {
+  const provider = document.getElementById('ai-provider').value;
+  const apiKey = document.getElementById('ai-apikey').value.trim();
+  const model = document.getElementById('ai-model').value.trim();
+  localStorage.setItem('ide_ai_provider', provider);
+  localStorage.setItem('ide_ai_apikey', apiKey);
+  localStorage.setItem('ide_ai_model', model);
+  const msg = document.getElementById('ai-settings-msg');
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+function loadAISettings() {
+  const provider = localStorage.getItem('ide_ai_provider');
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const model = localStorage.getItem('ide_ai_model');
+  if(provider) document.getElementById('ai-provider').value = provider;
+  if(apiKey) document.getElementById('ai-apikey').value = apiKey;
+  if(model) document.getElementById('ai-model').value = model;
+}
+
+// Call AI Provider wrapper
+async function callAIProvider(systemPrompt, userPrompt, requiresJson = false) {
+  const provider = localStorage.getItem('ide_ai_provider') || 'openai';
+  const apiKey = localStorage.getItem('ide_ai_apikey');
+  const modelOverride = localStorage.getItem('ide_ai_model');
+  
+  if (!apiKey) throw new Error("API Key is missing. Please configure it in AI Settings.");
+
+  let endpoint, headers, body;
+  let model = modelOverride;
+
+  if (provider === 'openai') {
+    model = model || 'gpt-4o';
+    endpoint = 'https://api.openai.com/v1/chat/completions';
+    headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${apiKey}` };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  } else if (provider === 'anthropic') {
+    model = model || 'claude-3-5-sonnet-20240620';
+    endpoint = 'https://api.anthropic.com/v1/messages';
+    headers = {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerously-allow-browser': 'true'
+    };
+    body = {
+      model: model,
+      max_tokens: 2000,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userPrompt }]
+    };
+  } else if (provider === 'gemini') {
+    model = model || 'gemini-1.5-pro-latest';
+    endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    headers = { 'Content-Type': 'application/json' };
+    body = {
+      systemInstruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ parts: [{ text: userPrompt }] }]
+    };
+    if (requiresJson) {
+      body.generationConfig = { responseMimeType: 'application/json' };
+    }
+  } else if (provider === 'openrouter') {
+    model = model || 'meta-llama/llama-3-70b-instruct';
+    endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    headers = {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+      'HTTP-Referer': window.location.href,
+      'X-Title': 'Investment Decision Engine'
+    };
+    body = {
+      model: model,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]
+    };
+    if (requiresJson) body.response_format = { type: 'json_object' };
+  }
+
+  const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
+  if (!response.ok) {
+    const errorData = await response.text();
+    throw new Error(`API Error (${response.status}): ${errorData}`);
+  }
+  const data = await response.json();
+
+  if (provider === 'openai' || provider === 'openrouter') {
+    return data.choices[0].message.content;
+  } else if (provider === 'anthropic') {
+    return data.content[0].text;
+  } else if (provider === 'gemini') {
+    return data.candidates[0].content.parts[0].text;
+  }
+}
+
+async function runAIAutoFill() {
+  const text = document.getElementById('ai-autofill-text').value.trim();
+  const errEl = document.getElementById('ai-autofill-error');
+  const btn = document.getElementById('btn-run-autofill');
+  
+  if (!text) {
+    errEl.textContent = 'Please paste some text first.';
+    errEl.style.display = 'block';
+    return;
+  }
+  
+  errEl.style.display = 'none';
+  btn.textContent = 'Extracting...';
+  btn.disabled = true;
+
+  const systemPrompt = `You are an expert financial data extractor. The user will provide unstructured financial text. 
+Extract the key financial metrics and return a STRICT JSON object mapping to the following keys (use numbers only, scale to millions if requested, assume 1M=1,000,000). 
+If a metric is not found, leave it as null.
+Keys:
+"i-name" (string), "i-ticker" (string), "i-sector" (string),
+"i-rev" (Revenue in millions), "i-cogs" (COGS in millions), "i-ebit" (Operating Income in millions), "i-ebitda" (EBITDA in millions),
+"i-int" (Interest Expense in millions), "i-ni" (Net Income in millions),
+"i-epsb" (Basic EPS), "i-epsd" (Diluted EPS), "i-feps" (Forward EPS), "i-dps" (Dividends per share),
+"i-ta" (Total Assets in millions), "i-ca" (Current Assets in millions), "i-cash" (Cash & Equivalents in millions), "i-inv" (Inventory in millions),
+"i-tl" (Total Liabilities in millions), "i-cl" (Current Liabilities in millions), "i-debt" (Total Debt in millions), "i-eq" (Total Equity in millions),
+"i-re" (Retained Earnings in millions), "i-shr" (Shares Outstanding in millions),
+"i-ocf" (Operating Cash Flow in millions), "i-capex" (Capital Expenditures in millions),
+"i-price" (Current Stock Price)
+
+IMPORTANT: Output ONLY valid JSON, no markdown formatting.`;
+
+  try {
+    let result = await callAIProvider(systemPrompt, text, true);
+    if (result.startsWith('```json')) {
+      result = result.replace(/^```json/, '').replace(/```$/, '').trim();
+    }
+    const parsed = JSON.parse(result);
+    
+    for (const [key, value] of Object.entries(parsed)) {
+      const el = document.getElementById(key);
+      if (el && value !== null && value !== undefined) {
+        el.value = value;
+      }
+    }
+    updateCurrencyLabels();
+    updateAutoCalcUI();
+    closeAIModals();
+    runAnalysis();
+  } catch (err) {
+    errEl.textContent = err.message;
+    errEl.style.display = 'block';
+  } finally {
+    btn.textContent = 'Extract & Fill Data';
+    btn.disabled = false;
+  }
+}
+
+async function generateAIInsights() {
+  const btn = document.getElementById('btn-generate-ai');
+  const content = document.getElementById('ai-insights-content');
+  
+  btn.textContent = 'Generating...';
+  btn.disabled = true;
+  content.innerHTML = '<p class="tm">Analyzing financial data and generating insights...</p>';
+  
+  const d = getInputs();
+  const r = calculate(d);
+  
+  const financialData = `
+Company: ${d.name} (${d.ticker})
+Sector: ${d.sector}
+Currency: ${d.currency}
+
+-- Core Metrics --
+Revenue: ${d.rev}M
+Net Income: ${d.ni}M
+EBITDA: ${d.ebitda}M
+Free Cash Flow: ${r.fcf}M
+Current Price: ${d.price}
+
+-- Valuation & Health --
+P/E Ratio: ${r.pe}
+EV/EBITDA: ${r.evebitda}
+Gross Margin: ${r.grossMargin}%
+Net Margin: ${r.netMargin}%
+ROE: ${r.roe}%
+Debt/Equity: ${r.dEquity}
+Current Ratio: ${r.currentRatio}
+
+-- Composite Model Results --
+Overall Score: ${r.composite}/100 (${r.verdict})
+Piotroski F-Score: ${r.pScore}/9
+Altman Z-Score: ${r.altmanZ}
+Graham Number: ${r.grahamNum}
+DCF Intrinsic Value: ${r.dcfPS}
+Magic Formula EY: ${r.earningsYield}% | ROIC: ${r.magicROIC}%
+`;
+
+  const systemPrompt = `You are a top-tier hedge fund analyst. You are provided with quantitative outputs from an internal Investment Decision Engine. 
+Your task is to review this data and provide a concise, professional qualitative analysis. 
+Use Markdown for formatting. Include two main sections:
+1. **Investment Summary**: A synthesis of the company's financial health, valuation, and fundamental quality.
+2. **Devil's Advocate Bear Case**: A rigorous, highly skeptical teardown highlighting the biggest risks, potential metric distortions, or red flags.
+Keep it strictly under 500 words. Be direct and analytical.`;
+
+  try {
+    const result = await callAIProvider(systemPrompt, financialData, false);
+    if (typeof marked !== 'undefined') {
+      content.innerHTML = marked.parse(result);
+    } else {
+      content.innerHTML = `<pre style="white-space:pre-wrap">${result}</pre>`;
+    }
+  } catch (err) {
+    content.innerHTML = `<div class="ai-error" style="display:block">Error generating insights: ${err.message}</div>`;
+  } finally {
+    btn.textContent = '🤖 Generate Analysis';
+    btn.disabled = false;
+  }
+}
+
+window.addEventListener('DOMContentLoaded', loadAISettings);
 </script>
 </body>
 </html>
