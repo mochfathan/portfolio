@@ -10,9 +10,47 @@
 :root{
   --bg:#060608;--s1:#0c0c10;--s2:#121218;--s3:#18181f;
   --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
-  --text:#c8c8d8;--text2:#686880;--text3:#383848;--white:#f0f0f8;
+  --text:#c8c8d8;--text2:#686880;--text3:#383848;
+  --white:#f0f0f8;
+  --nav-bg:rgba(6,6,8,0.88);
+  /* semantic text tiers (dark mode: white at various opacities) */
+  --text-loud:rgba(255,255,255,0.75);  /* strong/emphasis */
+  --text-body:rgba(255,255,255,0.55);  /* body paragraphs */
+  --text-muted:rgba(255,255,255,0.45); /* roles, hero desc */
+  --text-sub:rgba(255,255,255,0.4);    /* card descriptions */
+  --text-faint:rgba(255,255,255,0.3);  /* labels, eyebrows */
+  --text-ghost:rgba(255,255,255,0.2);  /* project numbers, coming soon */
+  --dot-bg:rgba(255,255,255,0.2);      /* bullet dots */
+  /* project colours */
   --amber:#e8b840;--cyan:#00b4d8;--emerald:#10b981;--orange:#f97316;
   --lime:#84cc16;--sky:#38bdf8;--rose:#f43f5e;--indigo:#818cf8;--violet:#a78bfa;
+  /* project tagline colors (60% opacity variants for dark) */
+  --amber-tag:rgba(232,184,64,0.6);--cyan-tag:rgba(0,180,216,0.6);
+  --emerald-tag:rgba(16,185,129,0.6);--orange-tag:rgba(249,115,22,0.6);
+  --lime-tag:rgba(132,204,22,0.6);--sky-tag:rgba(56,189,248,0.6);
+  --rose-tag:rgba(244,63,94,0.6);--indigo-tag:rgba(129,140,248,0.6);
+  --violet-tag:rgba(167,139,250,0.5);
+}
+body.light-theme {
+  --bg:#f8fafc;--s1:#ffffff;--s2:#f1f5f9;--s3:#e2e8f0;
+  --border:rgba(0,0,0,0.06);--border2:rgba(0,0,0,0.12);
+  --text:#334155;--text2:#64748b;--text3:#94a3b8;
+  --white:#0f172a;
+  --nav-bg:rgba(248,250,252,0.88);
+  /* semantic text tiers (light mode: dark slate tones) */
+  --text-loud:#1e293b;
+  --text-body:#475569;
+  --text-muted:#64748b;
+  --text-sub:#64748b;
+  --text-faint:#94a3b8;
+  --text-ghost:#94a3b8;
+  --dot-bg:#94a3b8;
+  /* project tagline colors (full saturation for light bg) */
+  --amber-tag:#b8920e;--cyan-tag:#0891b2;
+  --emerald-tag:#059669;--orange-tag:#c2410c;
+  --lime-tag:#4d7c0f;--sky-tag:#0284c7;
+  --rose-tag:#be123c;--indigo-tag:#4f46e5;
+  --violet-tag:#7c3aed;
 }
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
@@ -20,53 +58,67 @@ body::before{content:'';position:fixed;inset:0;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
   pointer-events:none;z-index:0;opacity:0.4}
 .glow-1{position:fixed;top:-200px;left:-200px;width:600px;height:600px;
-  background:radial-gradient(circle,rgba(232,184,64,0.05) 0%,transparent 70%);pointer-events:none;z-index:0}
+  background:radial-gradient(circle,rgba(232,184,64,0.05) 0%,transparent 70%);
+  pointer-events:none;z-index:0}
 .glow-2{position:fixed;bottom:-200px;right:-200px;width:500px;height:500px;
-  background:radial-gradient(circle,rgba(16,185,129,0.04) 0%,transparent 70%);pointer-events:none;z-index:0}
+  background:radial-gradient(circle,rgba(16,185,129,0.04) 0%,transparent 70%);
+  pointer-events:none;z-index:0}
 .z1{position:relative;z-index:1}
 .wrap{max-width:1120px;margin:0 auto;padding:0 28px}
+
+/* ─── NAV ─── */
 nav{border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;
-  background:rgba(6,6,8,0.88);backdrop-filter:blur(12px);z-index:100}
+  background:var(--nav-bg);backdrop-filter:blur(12px);z-index:100}
 .nav-inner{display:flex;align-items:center;justify-content:space-between;gap:16px}
 .nav-logo{font-weight:800;font-size:15px;color:var(--white);letter-spacing:-0.02em}
 .nav-logo span{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:12px;
-  color:rgba(255,255,255,0.35);margin-left:8px;letter-spacing:0.04em}
+  color:var(--text-faint);margin-left:8px;letter-spacing:0.04em}
 .nav-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-.nav-link{font-size:12px;font-weight:500;color:rgba(255,255,255,0.45);text-decoration:none;
+.nav-link{font-size:12px;font-weight:500;color:var(--text2);text-decoration:none;
   padding:5px 12px;border:1px solid var(--border);border-radius:3px;
   transition:all .2s;letter-spacing:0.01em;white-space:nowrap}
 .nav-link:hover{color:var(--white);border-color:var(--border2)}
-.nav-cta{background:var(--white);color:#060608;border-color:var(--white)}
-.nav-cta:hover{background:rgba(240,240,248,0.88);color:#060608}
+.nav-cta{background:var(--white);color:var(--bg);border-color:var(--white)}
+.nav-cta:hover{opacity:0.88;color:var(--bg)}
+
+/* ─── HERO ─── */
 .hero{padding:90px 0 72px;text-align:center}
-.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.3);
+.hero-eyebrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);
   letter-spacing:0.28em;text-transform:uppercase;margin-bottom:22px;
   display:flex;align-items:center;justify-content:center;gap:12px}
 .hero-eyebrow::before,.hero-eyebrow::after{content:'';width:32px;height:1px;background:var(--border2)}
 .hero-name{font-size:clamp(38px,6vw,66px);font-weight:900;color:var(--white);
   letter-spacing:-0.03em;line-height:1.06;margin-bottom:16px}
-.hero-name .accent{background:linear-gradient(135deg,#e8b840 0%,#f97316 35%,#10b981 65%,#00b4d8 100%);
+.hero-name .accent{
+  background:linear-gradient(135deg,#e8b840 0%,#f97316 35%,#10b981 65%,#00b4d8 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
-.hero-role{font-size:18px;font-weight:500;color:rgba(255,255,255,0.45);margin-bottom:14px;letter-spacing:-0.01em}
-.hero-desc{font-size:15px;color:rgba(255,255,255,0.35);max-width:540px;margin:0 auto 36px;line-height:1.75;font-weight:400}
+.hero-role{font-size:18px;font-weight:500;color:var(--text2);
+  margin-bottom:14px;letter-spacing:-0.01em}
+.hero-desc{font-size:15px;color:var(--text2);max-width:540px;margin:0 auto 36px;
+  line-height:1.75;font-weight:400}
 .hero-badges{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:36px}
-.badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.35);
-  border:1px solid var(--border);padding:5px 12px;border-radius:2px;letter-spacing:0.1em;text-transform:uppercase}
+.badge{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);
+  border:1px solid var(--border);padding:5px 12px;border-radius:2px;letter-spacing:0.1em;
+  text-transform:uppercase}
 .hero-ctas{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
 .cta-primary{font-size:13px;font-weight:700;padding:11px 24px;border-radius:4px;
-  background:var(--white);color:#060608;text-decoration:none;letter-spacing:-0.01em;
+  background:var(--white);color:var(--bg);text-decoration:none;letter-spacing:-0.01em;
   transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.cta-primary:hover{background:rgba(240,240,248,0.88);transform:translateY(-1px)}
+.cta-primary:hover{opacity:0.88;transform:translateY(-1px)}
 .cta-ghost{font-size:13px;font-weight:600;padding:11px 24px;border-radius:4px;
   border:1px solid var(--border2);color:var(--text);text-decoration:none;
   transition:all .2s;display:inline-flex;align-items:center;gap:8px}
-.cta-ghost:hover{border-color:rgba(255,255,255,0.3);color:var(--white)}
-.sec-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25);
+.cta-ghost:hover{border-color:var(--text-faint);color:var(--white)}
+
+/* ─── SECTION HEADERS ─── */
+.sec-label{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);
   letter-spacing:0.24em;text-transform:uppercase;margin-bottom:8px;
   display:flex;align-items:center;gap:10px}
 .sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
 .sec-title{font-size:28px;font-weight:800;color:var(--white);letter-spacing:-0.02em;margin-bottom:8px}
-.sec-sub{font-size:14px;color:rgba(255,255,255,0.35);max-width:480px;line-height:1.65}
+.sec-sub{font-size:14px;color:var(--text-muted);max-width:480px;line-height:1.65}
+
+/* ─── VALUE PROP ─── */
 .value-section{padding:0 0 80px}
 .value-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);
   border:1px solid var(--border);border-radius:6px;overflow:hidden;margin-top:40px}
@@ -75,7 +127,9 @@ nav{border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;
 .value-card:hover{background:var(--s2)}
 .vc-icon{font-size:22px;margin-bottom:14px;display:block}
 .vc-title{font-size:15px;font-weight:700;color:var(--white);margin-bottom:8px;letter-spacing:-0.01em}
-.vc-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7}
+.vc-desc{font-size:13px;color:var(--text-sub);line-height:1.7}
+
+/* ─── PROJECTS ─── */
 .projects-section{padding:0 0 80px}
 .projects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px}
 @media(max-width:720px){.projects-grid{grid-template-columns:1fr}}
@@ -85,74 +139,94 @@ nav{border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;
 .project-card.coming{opacity:0.5;cursor:default}
 .project-card.coming:hover{transform:none;border-color:var(--border)}
 .pc-top{padding:24px 24px 0}
-.pc-number{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);
+.pc-number{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-ghost);
   letter-spacing:0.2em;margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .pc-version{font-family:'JetBrains Mono',monospace;font-size:9px;padding:2px 7px;
   border:1px solid rgba(232,184,64,0.35);border-radius:2px;
-  color:rgba(232,184,64,0.7);background:rgba(232,184,64,0.07);letter-spacing:0.08em;font-weight:600}
-.pc-name{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.02em;margin-bottom:6px;line-height:1.1}
+  color:rgba(232,184,64,0.7);background:rgba(232,184,64,0.07);
+  letter-spacing:0.08em;font-weight:600}
+.pc-name{font-size:22px;font-weight:800;color:var(--white);letter-spacing:-0.02em;
+  margin-bottom:6px;line-height:1.1}
 .pc-tagline{font-size:13px;font-weight:500;margin-bottom:14px}
-.pc-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;margin-bottom:18px}
+.pc-desc{font-size:13px;color:var(--text-sub);line-height:1.7;margin-bottom:18px}
 .pc-stack{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:18px}
 .stack-tag{font-family:'JetBrains Mono',monospace;font-size:10px;padding:3px 8px;
   border-radius:2px;border:1px solid;letter-spacing:0.04em}
 .pc-divider{height:1px;background:var(--border);margin:0 24px}
 .pc-footer{padding:16px 24px;display:flex;align-items:center;justify-content:space-between}
-.pc-target{font-size:11px;color:rgba(255,255,255,0.25);letter-spacing:0.04em}
+.pc-target{font-size:11px;color:var(--text-faint);letter-spacing:0.04em}
 .pc-link{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
   color:var(--white);display:flex;align-items:center;gap:6px;transition:gap .2s}
 .project-card:hover .pc-link{gap:10px}
-.pc-coming{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.2);
+.pc-coming{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-ghost);
   letter-spacing:0.1em;text-transform:uppercase}
+
+/* ── Project accent colours ── */
 .p1 .pc-name,.p1 .pc-link{color:var(--amber)}
 .p1:hover{border-color:rgba(232,184,64,0.22)}
 .p1 .stack-tag{border-color:rgba(232,184,64,0.2);color:rgba(232,184,64,0.7);background:rgba(232,184,64,0.05)}
+
 .p2 .pc-name,.p2 .pc-link{color:var(--cyan)}
 .p2:hover{border-color:rgba(0,180,216,0.22)}
 .p2 .stack-tag{border-color:rgba(0,180,216,0.2);color:rgba(0,180,216,0.7);background:rgba(0,180,216,0.05)}
+
 .p3 .pc-name,.p3 .pc-link{color:var(--emerald)}
 .p3:hover{border-color:rgba(16,185,129,0.22)}
 .p3 .stack-tag{border-color:rgba(16,185,129,0.2);color:rgba(16,185,129,0.7);background:rgba(16,185,129,0.05)}
+
 .p4 .pc-name,.p4 .pc-link{color:var(--orange)}
 .p4:hover{border-color:rgba(249,115,22,0.22)}
 .p4 .stack-tag{border-color:rgba(249,115,22,0.2);color:rgba(249,115,22,0.7);background:rgba(249,115,22,0.05)}
+
 .p5 .pc-name,.p5 .pc-link{color:var(--lime)}
 .p5:hover{border-color:rgba(132,204,22,0.22)}
 .p5 .stack-tag{border-color:rgba(132,204,22,0.2);color:rgba(132,204,22,0.7);background:rgba(132,204,22,0.05)}
+
 .p6 .pc-name,.p6 .pc-link{color:var(--sky)}
 .p6:hover{border-color:rgba(56,189,248,0.22)}
 .p6 .stack-tag{border-color:rgba(56,189,248,0.2);color:rgba(56,189,248,0.7);background:rgba(56,189,248,0.05)}
+
 .p7 .pc-name,.p7 .pc-link{color:var(--rose)}
 .p7:hover{border-color:rgba(244,63,94,0.22)}
 .p7 .stack-tag{border-color:rgba(244,63,94,0.2);color:rgba(244,63,94,0.7);background:rgba(244,63,94,0.05)}
+
 .p8 .pc-name,.p8 .pc-link{color:var(--indigo)}
 .p8:hover{border-color:rgba(129,140,248,0.22)}
 .p8 .stack-tag{border-color:rgba(129,140,248,0.2);color:rgba(129,140,248,0.7);background:rgba(129,140,248,0.05)}
+
 .p9 .pc-name{color:var(--violet)}
 .p9 .stack-tag{border-color:rgba(167,139,250,0.2);color:rgba(167,139,250,0.5);background:rgba(167,139,250,0.04)}
+
+/* ─── SKILLS ─── */
 .skills-section{padding:0 0 80px}
 .skills-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:40px}
 .skill-group{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:20px}
-.sg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.3);
+.sg-title{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-faint);
   letter-spacing:0.18em;text-transform:uppercase;margin-bottom:12px}
 .sg-items{display:flex;flex-direction:column;gap:6px}
-.sg-item{font-size:13px;color:rgba(255,255,255,0.55);line-height:1.4;display:flex;align-items:center;gap:7px}
-.sg-item::before{content:'';width:4px;height:4px;border-radius:50%;background:rgba(255,255,255,0.2);flex-shrink:0}
+.sg-item{font-size:13px;color:var(--text-body);line-height:1.4;
+  display:flex;align-items:center;gap:7px}
+.sg-item::before{content:'';width:4px;height:4px;border-radius:50%;
+  background:var(--dot-bg);flex-shrink:0}
+
+/* ─── ABOUT ─── */
 .about-section{padding:0 0 80px}
 .about-grid{display:grid;grid-template-columns:1fr 280px;gap:40px;margin-top:40px;align-items:start}
 @media(max-width:720px){.about-grid{grid-template-columns:1fr}}
-.about-text p{font-size:15px;color:rgba(255,255,255,0.5);line-height:1.85;margin-bottom:16px}
-.about-text strong{color:rgba(255,255,255,0.75);font-weight:600}
+.about-text p{font-size:15px;color:var(--text-body);line-height:1.85;margin-bottom:16px}
+.about-text strong{color:var(--text-loud);font-weight:600}
 .about-card{background:var(--s1);border:1px solid var(--border);border-radius:6px;padding:22px}
 .ac-avatar{width:52px;height:52px;border-radius:50%;background:var(--s3);
   border:1px solid var(--border2);display:grid;place-items:center;
   font-weight:800;font-size:16px;color:var(--white);margin-bottom:16px}
 .ac-name{font-size:15px;font-weight:700;color:var(--white);margin-bottom:4px;letter-spacing:-0.01em}
-.ac-role{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.55;margin-bottom:16px}
+.ac-role{font-size:12px;color:var(--text-muted);line-height:1.55;margin-bottom:16px}
 .ac-stats{display:flex;flex-direction:column;gap:10px;border-top:1px solid var(--border);padding-top:16px}
 .ac-stat{display:flex;justify-content:space-between;align-items:center}
-.ac-stat-label{font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:0.04em}
+.ac-stat-label{font-size:11px;color:var(--text-faint);letter-spacing:0.04em}
 .ac-stat-val{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--white)}
+
+/* ─── WORK SAMPLES ─── */
 .samples-section{padding:0 0 80px}
 .samples-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:40px}
 @media(max-width:720px){.samples-grid{grid-template-columns:1fr}}
@@ -160,28 +234,35 @@ nav{border-bottom:1px solid var(--border);padding:16px 0;position:sticky;top:0;
   transition:all .25s;text-decoration:none;display:flex;flex-direction:column;gap:10px}
 .sample-card:hover{transform:translateY(-2px);border-color:var(--border2)}
 .sample-icon{font-size:24px;line-height:1}
-.sample-type{font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(255,255,255,0.25);
-  letter-spacing:0.16em;text-transform:uppercase}
+.sample-type{font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--text-faint);letter-spacing:0.16em;text-transform:uppercase}
 .sample-title{font-size:16px;font-weight:700;color:var(--white);letter-spacing:-0.01em}
-.sample-desc{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.75;flex:1}
+.sample-desc{font-size:13px;color:var(--text-sub);line-height:1.75;flex:1}
 .sample-link{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;
-  color:rgba(255,255,255,0.3);display:flex;align-items:center;gap:6px;margin-top:6px;transition:all .2s}
+  color:var(--text-faint);display:flex;align-items:center;gap:6px;
+  margin-top:6px;transition:all .2s}
 .sample-card:hover .sample-link{color:var(--white);gap:10px}
+
+/* ─── FOOTER ─── */
 footer{border-top:1px solid var(--border);padding:28px 0}
 .footer-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
-.footer-left{font-size:12px;color:rgba(255,255,255,0.25);letter-spacing:0.02em}
-.footer-right{font-family:'JetBrains Mono',monospace;font-size:11px;color:rgba(255,255,255,0.2);
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.footer-right a{color:rgba(255,255,255,0.3);text-decoration:none;transition:color .2s}
+.footer-left{font-size:12px;color:var(--text-faint);letter-spacing:0.02em}
+.footer-right{font-family:'JetBrains Mono',monospace;font-size:11px;
+  color:var(--text-ghost);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.footer-right a{color:var(--text-faint);text-decoration:none;transition:color .2s}
 .footer-right a:hover{color:var(--white)}
+
+/* scroll reveal */
 .reveal{opacity:0;transform:translateY(22px);transition:opacity .6s ease,transform .6s ease}
 .reveal.visible{opacity:1;transform:none}
 </style>
 </head>
 <body>
+
 <div class="glow-1"></div>
 <div class="glow-2"></div>
 
+<!-- ─── NAV ─── -->
 <nav>
   <div class="wrap nav-inner">
     <div class="nav-logo">Mochammad Fathan <span>AI + FINANCE PORTFOLIO</span></div>
@@ -190,197 +271,274 @@ footer{border-top:1px solid var(--border);padding:28px 0}
       <a href="#skills" class="nav-link">Stack</a>
       <a href="#about" class="nav-link">About</a>
       <a href="#samples" class="nav-link">Work Samples</a>
-      <a href="https://www.linkedin.com/in/mochfathan/" target="_blank" rel="noopener noreferrer" class="nav-link nav-cta">LinkedIn &rarr;</a>
+      <button id="theme-toggle" class="nav-link" style="background:transparent;cursor:pointer;outline:none;">Dark 🌙</button>
+      <a href="https://www.linkedin.com/in/mochfathan/" target="_blank" rel="noopener noreferrer" class="nav-link nav-cta">LinkedIn →</a>
     </div>
   </div>
 </nav>
 
 <div class="z1">
 
+<!-- ─── HERO ─── -->
 <section class="hero wrap reveal">
-  <div class="hero-eyebrow">Open to Work &middot; Jakarta, Indonesia</div>
+  <div class="hero-eyebrow">Open to Work · Jakarta, Indonesia</div>
   <h1 class="hero-name">Domain Expertise<br><span class="accent">Amplified by AI</span></h1>
-  <div class="hero-role">Finance &amp; Accounting &middot; FX Technical Analyst &middot; AI Integration Specialist</div>
-  <p class="hero-desc">I build AI-powered financial tools at the intersection of domain knowledge and engineering &mdash; each one requiring both the technical implementation <em>and</em> the professional expertise to design meaningful output.</p>
+  <div class="hero-role">Finance & Accounting · FX Technical Analyst · AI Integration Specialist</div>
+  <p class="hero-desc">I build AI-powered financial tools at the intersection of domain knowledge and engineering — each one requiring both the technical implementation <em>and</em> the professional expertise to design meaningful output.</p>
   <div class="hero-badges">
     <span class="badge">Accounting Student</span>
-    <span class="badge">Finance &amp; Tax Intern</span>
-    <span class="badge">OTA S&amp;D Certified</span>
+    <span class="badge">Finance & Tax Intern</span>
+    <span class="badge">OTA S&D Certified</span>
     <span class="badge">Claude API</span>
-    <span class="badge">Python &middot; SQL</span>
+    <span class="badge">Python · SQL</span>
     <span class="badge">Jakarta, Indonesia</span>
   </div>
   <div class="hero-ctas">
-    <a href="#projects" class="cta-primary">View Portfolio &darr;</a>
+    <a href="#projects" class="cta-primary">View Portfolio ↓</a>
     <a href="https://www.linkedin.com/in/mochfathan/" target="_blank" rel="noopener noreferrer" class="cta-ghost">Get in Touch</a>
   </div>
 </section>
 
+<!-- ─── VALUE PROP ─── -->
 <section class="value-section wrap reveal" id="value">
   <div class="sec-label">Why This Portfolio</div>
   <h2 class="sec-title">The Intersection That Matters</h2>
   <p class="sec-sub">Any developer can call an AI API. These tools required accounting certification, tax internship experience, and a trading methodology credential to build correctly.</p>
+
   <div class="value-grid">
     <div class="value-card">
-      <span class="vc-icon">&#127891;</span>
+      <span class="vc-icon">🎓</span>
       <div class="vc-title">Domain-First Design</div>
-      <div class="vc-desc">Each tool was designed from the domain outward &mdash; the financial ratios, Indonesian COA codes, PPh 23 rules, and S&amp;D odds enhancers came first. The AI was the delivery mechanism, not the knowledge source.</div>
+      <div class="vc-desc">Each tool was designed from the domain outward — the financial ratios, Indonesian COA codes, PPh 23 rules, and S&D odds enhancers came first. The AI was the delivery mechanism, not the knowledge source.</div>
     </div>
     <div class="value-card">
-      <span class="vc-icon">&#9889;</span>
+      <span class="vc-icon">⚡</span>
       <div class="vc-title">Production-Grade Output</div>
       <div class="vc-desc">No demo data, no hardcoded responses. Every tool calls live APIs, parses structured output, and renders results a real practitioner could act on. PAJAKPINTAR generates legally accurate journal entries. TRADECRAFT enforces real methodology rules. The Marketing AI Console audits every AI decision.</div>
     </div>
     <div class="value-card">
-      <span class="vc-icon">&#127760;</span>
+      <span class="vc-icon">🌐</span>
       <div class="vc-title">Zero Infrastructure Cost</div>
-      <div class="vc-desc">Every tool runs directly in the browser &mdash; no framework, no build step, no backend server. Hosted free on GitHub Pages. The architecture constraint forced discipline: no bloat, no unnecessary dependencies, maximum portability.</div>
+      <div class="vc-desc">Every tool runs directly in the browser — no framework, no build step, no backend server. Hosted free on GitHub Pages. The architecture constraint forced discipline: no bloat, no unnecessary dependencies, maximum portability.</div>
     </div>
   </div>
 </section>
 
+<!-- ─── PROJECTS ─── -->
 <section class="projects-section wrap reveal" id="projects">
   <div class="sec-label">Portfolio Projects</div>
   <h2 class="sec-title">Eight Tools, Eight Markets</h2>
   <p class="sec-sub">Each project targets a specific buyer segment and encodes knowledge that only someone with professional domain experience could have built correctly.</p>
+
   <div class="projects-grid">
 
+    <!-- P1: FINTELLIGENCE v2 -->
     <a href="fintelligence_v2.html" class="project-card p1">
       <div class="pc-top">
         <div class="pc-number">PROJECT 01 <span class="pc-version">V2.0</span></div>
         <div class="pc-name">FINTELLIGENCE</div>
-        <div class="pc-tagline" style="color:rgba(232,184,64,0.6)">AI Financial Statement Analyzer</div>
-        <div class="pc-desc">Input financial statement data and receive a CFA-level analysis &mdash; liquidity, profitability, leverage, efficiency ratios, risk flags, and prioritised strategic recommendations &mdash; in under 30 seconds.</div>
+        <div class="pc-tagline" style="color:var(--amber-tag)">AI Financial Statement Analyzer</div>
+        <div class="pc-desc">Input financial statement data and receive a CFA-level analysis — liquidity, profitability, leverage, efficiency ratios, risk flags, and prioritised strategic recommendations — in under 30 seconds.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Claude API</span><span class="stack-tag">Financial Ratios</span><span class="stack-tag">Risk Analysis</span><span class="stack-tag">JSON Rendering</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">Financial Ratios</span>
+          <span class="stack-tag">Risk Analysis</span>
+          <span class="stack-tag">JSON Rendering</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">SMEs &middot; CFOs &middot; Accountants</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">SMEs · CFOs · Accountants</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P2: TRADECRAFT -->
     <a href="tradecraft.html" class="project-card p2">
       <div class="pc-top">
         <div class="pc-number">PROJECT 02</div>
         <div class="pc-name">TRADECRAFT</div>
-        <div class="pc-tagline" style="color:rgba(0,180,216,0.6)">FX Trade Journal &amp; S&amp;D Methodology Coach</div>
-        <div class="pc-desc">A systematic trade journal built on the OTA Supply &amp; Demand framework. Scores every setup against six Odds Enhancers in real time. AI coach reviews process quality independently of trade outcome &mdash; the distinction that separates systematic traders.</div>
+        <div class="pc-tagline" style="color:var(--cyan-tag)">FX Trade Journal & S&amp;D Methodology Coach</div>
+        <div class="pc-desc">A systematic trade journal built on the OTA Supply &amp; Demand framework. Scores every setup against six Odds Enhancers in real time. AI coach reviews process quality independently of trade outcome — the distinction that separates systematic traders.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Claude API</span><span class="stack-tag">OTA S&amp;D Framework</span><span class="stack-tag">Live Score Gauge</span><span class="stack-tag">localStorage</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">OTA S&amp;D Framework</span>
+          <span class="stack-tag">Live Score Gauge</span>
+          <span class="stack-tag">localStorage</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Prop Firms &middot; Trading Employers</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Prop Firms · Trading Employers</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P3: PAJAKPINTAR -->
     <a href="pajakpintar.html" class="project-card p3">
       <div class="pc-top">
         <div class="pc-number">PROJECT 03</div>
         <div class="pc-name">PAJAKPINTAR</div>
-        <div class="pc-tagline" style="color:rgba(16,185,129,0.6)">AI Accounting &amp; Tax Document Intelligence &middot; Indonesia</div>
+        <div class="pc-tagline" style="color:var(--emerald-tag)">AI Accounting &amp; Tax Document Intelligence · Indonesia</div>
         <div class="pc-desc">Paste any invoice, receipt, or contract. The tool extracts entities, calculates PPN (11%) and PPh 23 withholding (2%/4%), classifies to Indonesian COA codes, and generates a complete double-entry journal with compliance deadlines. Bilingual ID/EN output.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Claude API</span><span class="stack-tag">Indonesian Tax Law</span><span class="stack-tag">COA Classification</span><span class="stack-tag">Double-Entry Journal</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">Indonesian Tax Law</span>
+          <span class="stack-tag">COA Classification</span>
+          <span class="stack-tag">Double-Entry Journal</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Indonesian SMEs &middot; Tax Firms</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Indonesian SMEs · Tax Firms</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P4: MACRO BRIEF -->
     <a href="macro-briefing.html" class="project-card p4">
       <div class="pc-top">
         <div class="pc-number">PROJECT 04</div>
         <div class="pc-name">MACRO BRIEF</div>
-        <div class="pc-tagline" style="color:rgba(249,115,22,0.6)">Cross-Asset Intelligence Briefing Generator</div>
-        <div class="pc-desc">Input 16 live market data points, generate a structured morning brief applying the Amplify Trading Correlations framework &mdash; regime classification, dollar analysis, yield curve posture, risk sentiment with lead signals, pair-by-pair FX analysis, and session directive.</div>
+        <div class="pc-tagline" style="color:var(--orange-tag)">Cross-Asset Intelligence Briefing Generator</div>
+        <div class="pc-desc">Input 16 live market data points, generate a structured morning brief applying the Amplify Trading Correlations framework — regime classification, dollar analysis, yield curve posture, risk sentiment with lead signals, pair-by-pair FX analysis, and session directive.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Claude API</span><span class="stack-tag">LMP/TMP Framework</span><span class="stack-tag">Gold/DXY Diagnostic</span><span class="stack-tag">Cross-Asset Analysis</span><span class="stack-tag">+ Framework Guide</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">LMP/TMP Framework</span>
+          <span class="stack-tag">Gold/DXY Diagnostic</span>
+          <span class="stack-tag">Cross-Asset Analysis</span>
+          <span class="stack-tag">+ Framework Guide</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Asset Managers &middot; Independent Traders</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Asset Managers · Independent Traders</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P5: BUY vs RENT — Dynamic Wealth Optimizer -->
     <a href="buy-vs-rent-simulator.html" class="project-card p5">
       <div class="pc-top">
         <div class="pc-number">PROJECT 05</div>
         <div class="pc-name">BUY vs RENT</div>
-        <div class="pc-tagline" style="color:rgba(132,204,22,0.6)">Dynamic Wealth Optimizer</div>
-        <div class="pc-desc">A full-spectrum wealth optimisation engine that models both the buyer and renter path to a live verdict. Incorporates income tax, mortgage amortisation, property appreciation, investment allocation, emergency fund, dividend reinvestment, inflation-adjusted purchasing power, relocation scenarios, and a sensitivity dashboard &mdash; with stress analysis tracking months under financial pressure for each path.</div>
+        <div class="pc-tagline" style="color:var(--lime-tag)">Dynamic Wealth Optimizer</div>
+        <div class="pc-desc">A full-spectrum wealth optimisation engine that models both the buyer and renter path to a live verdict. Incorporates income tax, mortgage amortisation, property appreciation, investment allocation, emergency fund, dividend reinvestment, inflation-adjusted purchasing power, relocation scenarios, and a sensitivity dashboard — with stress analysis tracking months under financial pressure for each path.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Wealth Simulation</span><span class="stack-tag">Mortgage Amortisation</span><span class="stack-tag">Inflation Modelling</span><span class="stack-tag">Stress Analysis</span><span class="stack-tag">Chart.js</span>
+          <span class="stack-tag">Wealth Simulation</span>
+          <span class="stack-tag">Mortgage Amortisation</span>
+          <span class="stack-tag">Inflation Modelling</span>
+          <span class="stack-tag">Stress Analysis</span>
+          <span class="stack-tag">Chart.js</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Property Buyers &middot; Financial Planners</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Property Buyers · Financial Planners</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P6: PORTFOLIO ANALYZER — Two-Stock CAPM -->
     <a href="portfolio_analyzer.html" class="project-card p6">
       <div class="pc-top">
         <div class="pc-number">PROJECT 06</div>
         <div class="pc-name">PORTFOLIO ANALYZER</div>
-        <div class="pc-tagline" style="color:rgba(56,189,248,0.6)">Two-Stock CAPM &amp; Efficient Frontier Tool</div>
-        <div class="pc-desc">Input two equities &mdash; ticker, beta, volatility, and dividend yield &mdash; to compute CAPM-derived expected returns, portfolio sigma via covariance matrix, Sharpe and Treynor ratios, and diversification benefit in basis points. R&sup2; decomposition isolates systematic vs idiosyncratic risk per stock, with a live efficient frontier allocation curve on the &sigma;/E(R) plane.</div>
+        <div class="pc-tagline" style="color:var(--sky-tag)">Two-Stock CAPM & Efficient Frontier Tool</div>
+        <div class="pc-desc">Input two equities — ticker, beta, volatility, and dividend yield — to compute CAPM-derived expected returns, portfolio sigma via covariance matrix, Sharpe and Treynor ratios, and diversification benefit in basis points. R² decomposition isolates systematic vs idiosyncratic risk per stock, with a live efficient frontier allocation curve on the σ/E(R) plane.</div>
         <div class="pc-stack">
-          <span class="stack-tag">CAPM</span><span class="stack-tag">Efficient Frontier</span><span class="stack-tag">Sharpe / Treynor</span><span class="stack-tag">Risk Decomposition</span><span class="stack-tag">Chart.js</span>
+          <span class="stack-tag">CAPM</span>
+          <span class="stack-tag">Efficient Frontier</span>
+          <span class="stack-tag">Sharpe / Treynor</span>
+          <span class="stack-tag">Risk Decomposition</span>
+          <span class="stack-tag">Chart.js</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Finance Students &middot; CFA Candidates &middot; Quant Learners</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Finance Students · CFA Candidates · Quant Learners</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P7: INVESTMENT DECISION ENGINE -->
     <a href="Investment_Decision_Engine/Investment_Decision_Engine.html" class="project-card p7">
       <div class="pc-top">
         <div class="pc-number">PROJECT 07</div>
         <div class="pc-name">INVESTMENT ENGINE</div>
-        <div class="pc-tagline" style="color:rgba(244,63,94,0.6)">Multi-Factor Equity Scoring &amp; Decision Engine</div>
-        <div class="pc-desc">Enter company fundamentals to receive a composite investment score across five dimensions &mdash; Valuation, Profitability, Growth, Financial Health, and Cash Flow Quality. Implements Graham Number, Piotroski F-Score (9-signal grid), Altman Z-Score, Greenblatt Magic Formula, PEG Ratio, and DCF Intrinsic Value. Yahoo Finance CSV import, Google Sheet sync, and multi-currency output across six markets.</div>
+        <div class="pc-tagline" style="color:var(--rose-tag)">Multi-Factor Equity Scoring & Decision Engine</div>
+        <div class="pc-desc">Enter company fundamentals to receive a composite investment score across five dimensions — Valuation, Profitability, Growth, Financial Health, and Cash Flow Quality. Implements Graham Number, Piotroski F-Score (9-signal grid), Altman Z-Score, Greenblatt Magic Formula, PEG Ratio, and DCF Intrinsic Value. Yahoo Finance CSV import, Google Sheet sync, and multi-currency support across six markets.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Graham Number</span><span class="stack-tag">Piotroski F-Score</span><span class="stack-tag">Altman Z-Score</span><span class="stack-tag">DCF / Greenblatt</span><span class="stack-tag">Chart.js</span>
+          <span class="stack-tag">Graham Number</span>
+          <span class="stack-tag">Piotroski F-Score</span>
+          <span class="stack-tag">Altman Z-Score</span>
+          <span class="stack-tag">DCF / Greenblatt</span>
+          <span class="stack-tag">Chart.js</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Value Investors &middot; Equity Analysts &middot; CFA Candidates</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Value Investors · Equity Analysts · CFA Candidates</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P8: MARKETING AI WORKFLOW CONSOLE -->
     <a href="marketing_ai_workflow_console_v1/" class="project-card p8">
       <div class="pc-top">
         <div class="pc-number">PROJECT 08</div>
         <div class="pc-name">MARKETING AI WORKFLOW</div>
-        <div class="pc-tagline" style="color:rgba(129,140,248,0.6)">Lead-to-Campaign AI Automation Console</div>
-        <div class="pc-desc">An 8-step AI workflow console that takes a raw sales lead from intake through AI qualification, email drafting, creative brief generation, task routing, SOP execution, and audit logging &mdash; all in one governed interface. Provider-agnostic: connects to Claude, OpenAI, or a custom endpoint. Runs in simulation mode with no API key required. Human-in-the-loop approval controls on every AI output.</div>
+        <div class="pc-tagline" style="color:var(--indigo-tag)">Lead-to-Campaign AI Automation Console</div>
+        <div class="pc-desc">An 8-step AI workflow console that takes a raw sales lead from intake through AI qualification, email drafting, creative brief generation, task routing, SOP execution, and audit logging — all in one governed interface. Provider-agnostic: connects to Claude, OpenAI, or a custom endpoint. Runs in simulation mode with no API key required. Human-in-the-loop approval controls on every AI output.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Claude API</span><span class="stack-tag">OpenAI API</span><span class="stack-tag">Multi-Provider</span><span class="stack-tag">Lead Qualification</span><span class="stack-tag">Audit Log</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">OpenAI API</span>
+          <span class="stack-tag">Multi-Provider</span>
+          <span class="stack-tag">Lead Qualification</span>
+          <span class="stack-tag">Audit Log</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Marketing Agencies &middot; Growth Teams &middot; AI Consultants</span><span class="pc-link">Open Tool &rarr;</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Marketing Agencies · Growth Teams · AI Consultants</span>
+        <span class="pc-link">Open Tool →</span>
+      </div>
     </a>
 
+    <!-- P9: AXIOM — Coming Soon -->
     <div class="project-card p9 coming" style="grid-column:1/-1">
       <div class="pc-top">
-        <div class="pc-number">PROJECT 09 &middot; IN DEVELOPMENT</div>
+        <div class="pc-number">PROJECT 09 · IN DEVELOPMENT</div>
         <div class="pc-name">AXIOM</div>
-        <div class="pc-tagline" style="color:rgba(167,139,250,0.5)">Gamified Polymath Learning Curriculum</div>
-        <div class="pc-desc">A locally-hosted, AI-powered learning system covering five knowledge domains &mdash; Finance &amp; Accounting, Data Analysis, FX Trading &amp; Technical Analysis, Macro Economics, and Mathematics &amp; Physics &mdash; with gamification mechanics, XP progression, and adaptive AI tutoring.</div>
+        <div class="pc-tagline" style="color:var(--violet-tag)">Gamified Polymath Learning Curriculum</div>
+        <div class="pc-desc">A locally-hosted, AI-powered learning system covering five knowledge domains — Finance &amp; Accounting, Data Analysis, FX Trading &amp; Technical Analysis, Macro Economics, and Mathematics &amp; Physics — with gamification mechanics, XP progression, and adaptive AI tutoring.</div>
         <div class="pc-stack">
-          <span class="stack-tag">Python / Flask</span><span class="stack-tag">SQLite</span><span class="stack-tag">Claude API</span><span class="stack-tag">Gamification Engine</span><span class="stack-tag">Streamlit Cloud</span>
+          <span class="stack-tag">Python / Flask</span>
+          <span class="stack-tag">SQLite</span>
+          <span class="stack-tag">Claude API</span>
+          <span class="stack-tag">Gamification Engine</span>
+          <span class="stack-tag">Streamlit Cloud</span>
         </div>
       </div>
       <div class="pc-divider"></div>
-      <div class="pc-footer"><span class="pc-target">Corporate Training &middot; EdTech &middot; Self-Directed Learners</span><span class="pc-coming">Coming Soon</span></div>
+      <div class="pc-footer">
+        <span class="pc-target">Corporate Training · EdTech · Self-Directed Learners</span>
+        <span class="pc-coming">Coming Soon</span>
+      </div>
     </div>
 
   </div>
 </section>
 
+<!-- ─── SKILLS ─── -->
 <section class="skills-section wrap reveal" id="skills">
   <div class="sec-label">Technical Stack</div>
-  <h2 class="sec-title">Tools &amp; Technologies</h2>
+  <h2 class="sec-title">Tools & Technologies</h2>
   <p class="sec-sub">A zero-cost, production-capable stack built on free tiers, open-source libraries, and API integrations.</p>
+
   <div class="skills-grid">
     <div class="skill-group">
-      <div class="sg-title">AI &amp; APIs</div>
+      <div class="sg-title">AI & APIs</div>
       <div class="sg-items">
         <div class="sg-item">Anthropic Claude API</div>
         <div class="sg-item">OpenAI API</div>
@@ -402,11 +560,11 @@ footer{border-top:1px solid var(--border);padding:28px 0}
       </div>
     </div>
     <div class="skill-group">
-      <div class="sg-title">Python &amp; Data</div>
+      <div class="sg-title">Python & Data</div>
       <div class="sg-items">
         <div class="sg-item">Python (Anaconda)</div>
         <div class="sg-item">pandas / numpy / scipy</div>
-        <div class="sg-item">yfinance &middot; matplotlib</div>
+        <div class="sg-item">yfinance · matplotlib</div>
         <div class="sg-item">scikit-learn</div>
         <div class="sg-item">Jupyter / JupyterLab</div>
         <div class="sg-item">Streamlit</div>
@@ -419,7 +577,7 @@ footer{border-top:1px solid var(--border);padding:28px 0}
         <div class="sg-item">Indonesian Tax Law (PPN, PPh)</div>
         <div class="sg-item">Double-Entry Bookkeeping</div>
         <div class="sg-item">FX Technical Analysis (Cert.)</div>
-        <div class="sg-item">OTA S&amp;D Methodology</div>
+        <div class="sg-item">OTA S&D Methodology</div>
         <div class="sg-item">Cross-Asset Macro Framework</div>
       </div>
     </div>
@@ -439,67 +597,88 @@ footer{border-top:1px solid var(--border);padding:28px 0}
         <div class="sg-item">SQL (in progress)</div>
         <div class="sg-item">Power BI (in progress)</div>
         <div class="sg-item">Pine Script v5</div>
-        <div class="sg-item">CQF &mdash; Planned</div>
+        <div class="sg-item">CQF — Planned</div>
         <div class="sg-item">Indonesian Data Analyst Track</div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ─── ABOUT ─── -->
 <section class="about-section wrap reveal" id="about">
   <div class="sec-label">Background</div>
   <h2 class="sec-title">About Me</h2>
+
   <div class="about-grid">
     <div class="about-text">
       <p>I am an accounting student based in Jakarta with internship experience in <strong>finance and tax</strong> at IDC Indonesia. My technical interests span FX trading (using the Supply &amp; Demand methodology), quantitative research, and building AI-augmented financial tools.</p>
       <p>The projects in this portfolio represent a deliberate strategy: rather than competing with thousands of generic AI developers, I build tools that require both engineering capability and professional domain expertise. PAJAKPINTAR knows Indonesian PPN and PPh 23 law because I learned it during my internship. TRADECRAFT enforces Supply and Demand methodology because I hold the certification. INVESTMENT ENGINE implements Graham, Piotroski, and Greenblatt models because I study them as part of my finance curriculum.</p>
-      <p>My career trajectory targets data analyst, quantitative analyst, or AI integration specialist roles in Indonesian fintech, banking, or consulting &mdash; sectors where domain expertise has historically been the barrier to AI adoption. I am building the portfolio now to demonstrate that the barrier has been crossed.</p>
+      <p>My career trajectory targets data analyst, quantitative analyst, or AI integration specialist roles in Indonesian fintech, banking, or consulting — sectors where domain expertise has historically been the barrier to AI adoption. I am building the portfolio now to demonstrate that the barrier has been crossed.</p>
       <p>I am currently developing SQL proficiency targeting the Indonesian data analyst job market alongside this AI portfolio work.</p>
     </div>
+
     <div>
       <div class="about-card">
         <div class="ac-avatar">MF</div>
         <div class="ac-name">Mochammad Fathan</div>
-        <div class="ac-role">Finance &amp; Accounting Student &middot; Jakarta, Indonesia<br>Finance &amp; Tax Intern &middot; AI Integrator</div>
+        <div class="ac-role">Finance & Accounting Student · Jakarta, Indonesia<br>Finance & Tax Intern · AI Integrator</div>
         <div class="ac-stats">
-          <div class="ac-stat"><span class="ac-stat-label">Portfolio Tools</span><span class="ac-stat-val">8 Live + 1 Dev</span></div>
-          <div class="ac-stat"><span class="ac-stat-label">API Integrations</span><span class="ac-stat-val">8 Active</span></div>
-          <div class="ac-stat"><span class="ac-stat-label">Infrastructure Cost</span><span class="ac-stat-val">$0 / month</span></div>
-          <div class="ac-stat"><span class="ac-stat-label">Location</span><span class="ac-stat-val">Jakarta, ID</span></div>
-          <div class="ac-stat"><span class="ac-stat-label">Open to</span><span class="ac-stat-val">Full-time &middot; Freelance</span></div>
+          <div class="ac-stat">
+            <span class="ac-stat-label">Portfolio Tools</span>
+            <span class="ac-stat-val">8 Live + 1 Dev</span>
+          </div>
+          <div class="ac-stat">
+            <span class="ac-stat-label">API Integrations</span>
+            <span class="ac-stat-val">8 Active</span>
+          </div>
+          <div class="ac-stat">
+            <span class="ac-stat-label">Infrastructure Cost</span>
+            <span class="ac-stat-val">$0 / month</span>
+          </div>
+          <div class="ac-stat">
+            <span class="ac-stat-label">Location</span>
+            <span class="ac-stat-val">Jakarta, ID</span>
+          </div>
+          <div class="ac-stat">
+            <span class="ac-stat-label">Open to</span>
+            <span class="ac-stat-val">Full-time · Freelance</span>
+          </div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
+<!-- ─── WORK SAMPLES ─── -->
 <section class="samples-section wrap reveal" id="samples">
   <div class="sec-label">AI Work Samples</div>
   <h2 class="sec-title">Portfolio Documents</h2>
-  <p class="sec-sub">Downloadable work samples demonstrating AI evaluation methodology and structured data annotation &mdash; aligned with professional AI services competency standards.</p>
+  <p class="sec-sub">Downloadable work samples demonstrating AI evaluation methodology and structured data annotation — aligned with professional AI services competency standards.</p>
+
   <div class="samples-grid">
     <a href="AI_Data_Annotation_Sample_MFathan.pdf" class="sample-card" target="_blank" rel="noopener noreferrer">
-      <div class="sample-icon">&#128203;</div>
-      <div class="sample-type">PDF Document &middot; AI Data Work</div>
+      <div class="sample-icon">📋</div>
+      <div class="sample-type">PDF Document · AI Data Work</div>
       <div class="sample-title">AI Data Annotation Sample</div>
-      <div class="sample-desc">A structured sample dataset demonstrating multi-label annotation methodology across domain-specific text. Covers category taxonomy design, edge-case handling, and annotation consistency &mdash; produced as a professional work sample for AI services evaluation.</div>
-      <div class="sample-link">Download PDF &rarr;</div>
+      <div class="sample-desc">A structured sample dataset demonstrating multi-label annotation methodology across domain-specific text. Covers category taxonomy design, edge-case handling, and annotation consistency — produced as a professional work sample for AI services evaluation.</div>
+      <div class="sample-link">Download PDF →</div>
     </a>
+
     <a href="AI_Response_Evaluation_Sample_MFathan.pdf" class="sample-card" target="_blank" rel="noopener noreferrer">
-      <div class="sample-icon">&#128269;</div>
-      <div class="sample-type">PDF Document &middot; AI Evaluation Work</div>
+      <div class="sample-icon">🔍</div>
+      <div class="sample-type">PDF Document · AI Evaluation Work</div>
       <div class="sample-title">AI Response Evaluation Sample</div>
       <div class="sample-desc">A structured evaluation of AI-generated responses against a multi-dimensional rubric: accuracy, coherence, completeness, and domain compliance. Methodology draws on assessor training from aviation competency evaluation under ICAO-aligned certification standards.</div>
-      <div class="sample-link">Download PDF &rarr;</div>
+      <div class="sample-link">Download PDF →</div>
     </a>
   </div>
 </section>
 
-</div>
+</div><!-- /z1 -->
 
 <footer>
   <div class="wrap footer-inner">
-    <div class="footer-left">&copy; 2026 Mochammad Fathan &middot; Built with Anthropic Claude API &middot; Hosted on GitHub Pages</div>
+    <div class="footer-left">© 2026 Mochammad Fathan · Built with Anthropic Claude API · Hosted on GitHub Pages</div>
     <div class="footer-right">
       <a href="fintelligence_v2.html">FINTELLIGENCE</a>
       <a href="tradecraft.html">TRADECRAFT</a>
@@ -514,12 +693,15 @@ footer{border-top:1px solid var(--border);padding:28px 0}
 </footer>
 
 <script>
+// Scroll reveal
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
   });
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Smooth nav links
 document.querySelectorAll('a[href^="#"]').forEach(a => {
   a.addEventListener('click', e => {
     e.preventDefault();
@@ -527,6 +709,28 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 });
+
+// Theme management
+const themeToggle = document.getElementById('theme-toggle');
+function setTheme(t) {
+  if (t === 'light') {
+    document.body.classList.add('light-theme');
+    themeToggle.innerHTML = 'Light ☀️';
+    localStorage.setItem('theme', 'light');
+  } else {
+    document.body.classList.remove('light-theme');
+    themeToggle.innerHTML = 'Dark 🌙';
+    localStorage.setItem('theme', 'dark');
+  }
+}
+if (themeToggle) {
+  themeToggle.addEventListener('click', () => {
+    const current = localStorage.getItem('theme') || 'dark';
+    setTheme(current === 'dark' ? 'light' : 'dark');
+  });
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  setTheme(savedTheme);
+}
 </script>
 </body>
 </html>
